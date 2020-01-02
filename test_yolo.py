@@ -35,7 +35,7 @@ def parse_args():
 if __name__ == '__main__':
     # cap = FileVideoStream('v0Forbid.mp4').start()
     cap = cv2.VideoCapture('test1.mp4')
-    
+    # cap = cv2.VideoCapture(0)
     frame_index = 0
 
 
@@ -90,9 +90,10 @@ if __name__ == '__main__':
             x = x.as_in_context(ctx)
             box_ids, scores, bboxes = net(x)
             ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
+            
             cv2.imshow('image', orig_img[...,::-1])
 
-            count += 30
+            count += 10
             cap.set(1, count)
         else:
             cap.release()
