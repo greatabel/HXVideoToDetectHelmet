@@ -1,0 +1,4 @@
+gluoncv
+imutils
+mxnet
+opencv-python

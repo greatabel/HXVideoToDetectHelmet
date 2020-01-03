@@ -34,8 +34,8 @@ def parse_args():
 
 if __name__ == '__main__':
     # cap = FileVideoStream('v0Forbid.mp4').start()
-    cap = cv2.VideoCapture('test1.mp4')
-    # cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture('test1.mp4')
+    cap = cv2.VideoCapture(0)
     frame_index = 0
 
 
@@ -93,7 +93,7 @@ if __name__ == '__main__':
             
             cv2.imshow('image', orig_img[...,::-1])
 
-            count += 10
+            count += 8
             cap.set(1, count)
         else:
             cap.release()
