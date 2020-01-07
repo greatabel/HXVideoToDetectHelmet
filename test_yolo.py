@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument('--threshold', type=float, default=0.4,
                         help='confidence threshold for object detection')
 
-    parser.add_argument('--gpu', action='store_false', default=False,
+    parser.add_argument('--gpu', type=bool, default=False,
                         help='use gpu or cpu.')
     
     args = parser.parse_args()
@@ -34,8 +34,8 @@ def parse_args():
 
 if __name__ == '__main__':
     # cap = FileVideoStream('v0Forbid.mp4').start()
-    # cap = cv2.VideoCapture('test1.mp4')
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture('test1.mp4')
+    # cap = cv2.VideoCapture(0)
     frame_index = 0
 
 
