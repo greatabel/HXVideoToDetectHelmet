@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument('--threshold', type=float, default=0.4,
                         help='confidence threshold for object detection')
 
-    parser.add_argument('--gpu', action='store_false',
+    parser.add_argument('--gpu', action='store_false', default=False,
                         help='use gpu or cpu.')
     
     args = parser.parse_args()
@@ -34,16 +34,17 @@ def parse_args():
 
 if __name__ == '__main__':
     # cap = FileVideoStream('v0Forbid.mp4').start()
-    cap = cv2.VideoCapture('test1.mp4')
-    # cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture('test1.mp4')
+    cap = cv2.VideoCapture(0)
     frame_index = 0
 
 
     args = parse_args()
-    # if args.gpu:
-    #     ctx = mx.gpu()
-    # else:
-    #     ctx = mx.cpu()
+    print('是否使用GPU:', args.gpu)
+    if args.gpu:
+        ctx = mx.gpu()
+    else:
+        ctx = mx.cpu()
     ctx = mx.cpu()
 
     net = model_zoo.get_model(args.network, pretrained=False)
