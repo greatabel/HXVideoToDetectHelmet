@@ -5,6 +5,13 @@ Created on Sat Aug 31 22:23:35 2019
 @author: czz
 """
 
+'''
+当你使用gpu: rtx3000 nvidia-driver-435时候：
+先配置装好nvidia驱动，然后装好对应的cuda，然后
+pip3 uninstall mxnet
+pip3 install mxnet-cu101
+
+'''
 from gluoncv import model_zoo, data, utils
 #from matplotlib import pyplot as plt
 import mxnet as mx
