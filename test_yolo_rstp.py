@@ -34,9 +34,11 @@ def parse_args():
 
 if __name__ == '__main__':
     # cap = FileVideoStream('v0Forbid.mp4').start()
-    # cap = cv2.VideoCapture('test1.mp4')
-    cap = cv2.VideoCapture("rtsp://admin:admin123@10.248.10.133:554/cam/realmonitor?channel=3&subtype=1")
-
+    cap = cv2.VideoCapture('test1.mp4')
+    # cap = cv2.VideoCapture("rtsp://admin:admin123@10.248.10.133:554/cam/realmonitor?channel=3&subtype=0")
+    # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
+    # cap.set(3, 640)
+    # cap.set(4, 480)
     # cap = cv2.VideoCapture(0)
     frame_index = 0
 
@@ -89,15 +91,19 @@ if __name__ == '__main__':
             new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
 
             # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
-            x, orig_img = data.transforms.presets.yolo.transform_test(new_frame, short=args.short)
+            # x, orig_img = data.transforms.presets.yolo.transform_test(new_frame, short=args.short)
+            x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
+            # print('Shape of pre-processed image:', x.shape)
             x = x.as_in_context(ctx)
             box_ids, scores, bboxes = net(x)
             ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
-            
+            # print('box_ids=', box_ids, 'scores=', scores, 'bboxes=', bboxes)
+            # 让窗口可以调整
+            cv2.namedWindow("image", cv2.WINDOW_NORMAL)
             cv2.imshow('image', orig_img[...,::-1])
 
-            count += 2
-            cap.set(1, count)
+            # count += 8
+            # cap.set(1, count)
         else:
             cap.release()
 
