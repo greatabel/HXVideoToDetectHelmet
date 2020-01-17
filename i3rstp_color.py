@@ -14,7 +14,7 @@ from imutils.video import FileVideoStream
 import numpy as np
 from matplotlib import pyplot as plt
 import webcolors
-
+from sklearn.cluster import KMeans
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train YOLO networks with random input shape.')
@@ -68,70 +68,12 @@ def closest_colour(requested_colour):
         min_colours[(rd + gd + bd)] = name
     return min_colours[min(min_colours.keys())]
 
-def origin_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.5,
-                 class_names=None, colors=None,
-                 absolute_coordinates=True, scale=1.0):
+# https://stackoverflow.com/questions/43216772/how-to-check-rgb-colors-against-a-color-range
+# TARGET_COLORS = {"red": (255, 0, 0), "yellow": (255, 255, 0), "green": (0, 255, 0)}
 
-    
+# def color_difference (color1, color2):
+#     return sum([abs(component1-component2) for component1, component2 in zip(color1, color2)])
 
-    if labels is not None and not len(bboxes) == len(labels):
-        raise ValueError('The length of labels and bboxes mismatch, {} vs {}'
-                         .format(len(labels), len(bboxes)))
-    if scores is not None and not len(bboxes) == len(scores):
-        raise ValueError('The length of scores and bboxes mismatch, {} vs {}'
-                         .format(len(scores), len(bboxes)))
-
-    if isinstance(img, mx.nd.NDArray):
-        img = img.asnumpy()
-    if isinstance(bboxes, mx.nd.NDArray):
-        bboxes = bboxes.asnumpy()
-    if isinstance(labels, mx.nd.NDArray):
-        labels = labels.asnumpy()
-    if isinstance(scores, mx.nd.NDArray):
-        scores = scores.asnumpy()
-    if len(bboxes) < 1:
-        return img
-
-    if not absolute_coordinates:
-        # convert to absolute coordinates using image shape
-        height = img.shape[0]
-        width = img.shape[1]
-        bboxes[:, (0, 2)] *= width
-        bboxes[:, (1, 3)] *= height
-    else:
-        bboxes *= scale
-
-
-    # use random colors if None is provided
-    if colors is None:
-        colors = dict()
-    for i, bbox in enumerate(bboxes):
-        if scores is not None and scores.flat[i] < thresh:
-            continue
-        if labels is not None and labels.flat[i] < 0:
-            continue
-        cls_id = int(labels.flat[i]) if labels is not None else -1
-        if cls_id not in colors:
-            if class_names is not None:
-                colors[cls_id] = plt.get_cmap('hsv')(cls_id / len(class_names))
-            else:
-                colors[cls_id] = (random.random(), random.random(), random.random())
-        xmin, ymin, xmax, ymax = [int(x) for x in bbox]
-        bcolor = [x * 255 for x in colors[cls_id]]
-        cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
-
-        if class_names is not None and cls_id < len(class_names):
-            class_name = class_names[cls_id]
-        else:
-            class_name = str(cls_id) if cls_id >= 0 else ''
-        score = '{:d}%'.format(int(scores.flat[i]*100)) if scores is not None else ''
-        if class_name or score:
-            y = ymin - 15 if ymin - 15 > 15 else ymin + 15
-            cv2.putText(img, '{:s} {:s}'.format(class_name, score),
-                        (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
-                        bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
-
-    return img
 
 #  fork from : https://gluon-cv.mxnet.io/_modules/gluoncv/utils/viz/bbox.html
 def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.5,
@@ -220,24 +162,43 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
         xmin, ymin, xmax, ymax = [int(x) for x in bbox]
         # ---- 裁减到识别区域
         
-        crop_img = img[ymin:ymax, xmin+int((xmax-xmin)/2):xmax]
+        crop_img = img[ymin:ymax-int(int((ymax-ymin)/2)), xmin+int((xmax-xmin)/4):xmax-int((xmax-xmin)/4)]
+        # crop_img = img[ymin:ymax, xmin:xmax]
 
 
-        mydata = np.reshape(crop_img, (-1,3))
-        # print(data.shape)
+
+        # print('crop_img.shape=', crop_img.shape)
+        # mydata = np.reshape(crop_img, (-1,3))
+
         colorname = ''
         dominant_color = None
-        if mydata.shape[0] > 0:
-            mydata = np.float32(mydata)
+        # if mydata.shape[0] > 0:
+        #     mydata = np.float32(mydata)
 
-            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-            flags = cv2.KMEANS_RANDOM_CENTERS
-            compactness,mylabels,centers = cv2.kmeans(mydata,1,None,criteria,10,flags)
-            colorname = closest_colour(centers[0].astype(np.int32))
-            dominant_color = centers[0].astype(np.int32)
-            print('Dominant color is: bgr({})'.format(dominant_color))
-            print('Dominant color is: bgr({})'.format(colorname))
+        #     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+        #     flags = cv2.KMEANS_RANDOM_CENTERS
+        #     compactness,mylabels,centers = cv2.kmeans(mydata,1,None,criteria,10,flags)
+        #     colorname = closest_colour(centers[0].astype(np.int32))
+        #     dominant_color = centers[0].astype(np.int32)
+        #     print('Dominant color is: bgr({})'.format(dominant_color))
+        #     print('Dominant color is: bgr({})'.format(colorname))
 
+        #reshaping to a list of pixels
+        crop_img = crop_img.reshape((crop_img.shape[0] * crop_img.shape[1], 3))
+        if len(crop_img) > 0:
+            
+            #using k-means to cluster pixels
+            kmeans = KMeans(n_clusters = 1)
+            kmeans.fit(crop_img)
+            dominant_color = kmeans.cluster_centers_.astype(np.int32)[0]
+            colorname = closest_colour(dominant_color)
+            print(dominant_color, colorname)
+
+            # differences = [[color_difference(dominant_color, target_value), target_name] for target_name, target_value in TARGET_COLORS.items()]
+            # differences.sort()  # sorted by the first element of inner lists
+            # my_color_name = differences[0][1]
+
+            # print(my_color_name)
             # 因为centers传出的是bgr，需要改变顺序为 rgb
             # t = cv2.cvtColor(centers[0], cv2.COLOR_BGR2RGB).astype(np.int32)[0][0]
             # print('# color is: bgr({})'.format(t))
@@ -261,7 +222,8 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
         # print(dominant_color, type(dominant_color))
 
         # # ----
-        bcolor = [x * 255 for x in colors[cls_id]]
+        # bcolor = [x * 255 for x in colors[cls_id]]
+        bcolor = (255, 255, 255) 
         
 
         # cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
@@ -276,18 +238,27 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             #天蓝色
             bcolor = (12, 203, 232)
         elif class_name == 'hat':
-            if colorname in ('olivedrab', 'yellow', 'sienna'):               
+            if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
+             'darkgoldenrod','greenyellow','khaki','darkkhaki'):               
                 # 黄色
                 bcolor = (255,255,0)
-            elif colorname in ('saddlebrown', 'red'):
+            elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
                 # 红色
                 bcolor = (255, 0, 0)
-            elif colorname == 'darkolivegreen':
-                if dominant_color is not None:
-                    if (dominant_color[0] > 100 and dominant_color[1] > 70) or \
-                       (dominant_color[0] < 100 and dominant_color[2] < 50):
-                        bcolor = bcolor = (255,255,0)
-
+            # elif colorname == 'darkolivegreen':
+            #     if dominant_color is not None:
+            #         if (dominant_color[0] > 100 and dominant_color[1] > 70) or \
+            #            (dominant_color[0] < 100 and dominant_color[2] < 50):
+            #            # seem as yellow
+            #             bcolor = (255,255,0)
+            # elif colorname == 'darkslategray':
+            #     if dominant_color is not None:
+            #         if (dominant_color[0] < 65 and dominant_color[1] <= 50):
+            #             # as yellow
+            #             bcolor = (255,255,0)
+            #         if (dominant_color[0] > 80 and dominant_color[1] >= 50):
+            #             # as red
+            #             bcolor = (255,0,0)                                 
         cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
 
         if class_name or score:

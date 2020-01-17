@@ -1,5 +1,6 @@
 gluoncv
 imutils
 mxnet
+sklearn
 opencv-python
 webcolors
