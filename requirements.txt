@@ -1,5 +1,5 @@
-colorthief
 gluoncv
 imutils
 mxnet
 opencv-python
+webcolors

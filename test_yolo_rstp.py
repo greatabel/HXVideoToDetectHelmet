@@ -34,8 +34,8 @@ def parse_args():
 
 if __name__ == '__main__':
     # cap = FileVideoStream('v0Forbid.mp4').start()
-    cap = cv2.VideoCapture('test1.mp4')
-    # cap = cv2.VideoCapture("rtsp://admin:admin123@10.248.10.133:554/cam/realmonitor?channel=3&subtype=0")
+    # cap = cv2.VideoCapture('test1.mp4')
+    cap = cv2.VideoCapture("rtsp://admin:admin123@10.248.10.133:554/cam/realmonitor?channel=3&subtype=0")
     # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
     # cap.set(3, 640)
     # cap.set(4, 480)
