@@ -239,7 +239,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             bcolor = (12, 203, 232)
         elif class_name == 'hat':
             if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
-             'darkgoldenrod','greenyellow','khaki','darkkhaki'):               
+             'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
                 # 黄色
                 bcolor = (255,255,0)
             elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
