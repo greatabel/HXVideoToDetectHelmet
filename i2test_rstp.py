@@ -24,6 +24,7 @@ def image_get(q, window_name):
         cv2.waitKey(1)
 
 
+
 def run_single_camera():
     user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.133:554"
 
