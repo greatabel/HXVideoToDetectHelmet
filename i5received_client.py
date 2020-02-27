@@ -1,12 +1,7 @@
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_gui/py_video_display/py_video_display.html
 
 import cv2
-cap = cv2.VideoCapture("http://0.0.0.0:5000/video_feed")
-#cap = cv2.VideoCapture("test2.dav")
-#cap = cv2.VideoCapture(0)
-
-# cap.set(cv2.CAP_PROP_FPS,5)
-#cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("http://0.0.0.0:5000/video_feed0")
 
 count = 0
 
