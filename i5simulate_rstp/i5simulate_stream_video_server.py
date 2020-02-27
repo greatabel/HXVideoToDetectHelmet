@@ -24,12 +24,23 @@ def gen(camera):
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
-@app.route('/video_feed')
+@app.route('/video_feed0')
 def video_feed():
     """Video streaming route. Put this in the src attribute of an img tag."""
-    return Response(gen(Camera()),
+    return Response(gen(Camera('combine')),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/video_feed1')
+def video_feed1():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(gen(Camera('red')),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/video_feed2')
+def video_feed2():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(gen(Camera('yellow')),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, threaded=True)
