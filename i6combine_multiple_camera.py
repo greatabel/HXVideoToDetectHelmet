@@ -11,6 +11,20 @@ def show_video(video_url, queue):
     import cv2
     import numpy as np
     import urllib.request
+    
+    from i4cpu_video_mock import forked_version_cv_plot_bbox
+    from gluoncv import model_zoo, data, utils
+    #from matplotlib import pyplot as plt
+    import mxnet as mx
+    import cv2
+    import argparse
+    from imutils import paths
+    from imutils.video import FileVideoStream
+
+    import numpy as np
+    from matplotlib import pyplot as plt
+    import webcolors
+    from sklearn.cluster import KMeans  
     print('show_video')
     stream = urllib.request.urlopen(video_url)
     total_bytes = b''
@@ -29,6 +43,7 @@ def show_video(video_url, queue):
             # cv2.imshow('Window name',cv2.flip(img, -1)) # display image while receiving data
 
             cv2.imshow('frame',img)
+
             print('simulate detect', video_url)
 
             if cv2.waitKey(1) ==27: # if user hit esc            
