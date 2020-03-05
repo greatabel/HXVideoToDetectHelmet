@@ -11,7 +11,7 @@ def show_video(video_url, queue):
     import cv2
     import numpy as np
     import urllib.request
-    
+
     from i4cpu_video_mock import forked_version_cv_plot_bbox
     from gluoncv import model_zoo, data, utils
     #from matplotlib import pyplot as plt
@@ -23,8 +23,40 @@ def show_video(video_url, queue):
 
     import numpy as np
     from matplotlib import pyplot as plt
-    import webcolors
-    from sklearn.cluster import KMeans  
+    # import webcolors
+    from sklearn.cluster import KMeans
+
+    def fork_image_get(frame):
+        frame_index = 0
+        ctx = mx.cpu()
+        net = model_zoo.get_model('yolo3_mobilenet0.25_voc', pretrained=False)
+        
+        classes = ['hat', 'person']
+        for param in net.collect_params().values():
+            if param._data is not None:
+                continue
+            param.initialize()
+        net.reset_class(classes)
+        net.collect_params().reset_ctx(ctx)
+        net.load_parameters('mobilenet0.25.params',ctx=ctx)
+        print('use mobile0.25 to extract feature')
+
+        # while True:
+        count = 0
+        # Image pre-processing
+        new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
+
+        # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
+        # x, orig_img = data.transforms.presets.yolo.transform_test(new_frame, short=args.short)
+        x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
+        # print('Shape of pre-processed image:', x.shape)
+        x = x.as_in_context(ctx)
+        box_ids, scores, bboxes = net(x)
+        x = forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
+                            class_names=net.classes,thresh=0.4)
+        cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+        cv2.imshow('image', orig_img[...,::-1])
+
     print('show_video')
     stream = urllib.request.urlopen(video_url)
     total_bytes = b''
@@ -41,10 +73,11 @@ def show_video(video_url, queue):
 
             # print(type(img))
             # cv2.imshow('Window name',cv2.flip(img, -1)) # display image while receiving data
+            print('network is detecting:', video_url) 
+            fork_image_get(img)
+            # cv2.imshow('frame',img)
 
-            cv2.imshow('frame',img)
 
-            print('simulate detect', video_url)
 
             if cv2.waitKey(1) ==27: # if user hit esc            
                 break

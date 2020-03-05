@@ -59,8 +59,10 @@ def image_put(q, user, pwd, ip, channel=3):
 #     plt.savefig(int_name + '.png')
 
 def closest_colour(requested_colour):
+    # import webcolors
     min_colours = {}
-    for key, name in webcolors.css3_hex_to_names.items():
+    # print('#'*10, webcolors.CSS3_HEX_TO_NAMES)
+    for key, name in webcolors.CSS3_HEX_TO_NAMES.items():
         r_c, g_c, b_c = webcolors.hex_to_rgb(key)
         rd = (r_c - requested_colour[0]) ** 2
         gd = (g_c - requested_colour[1]) ** 2
@@ -79,6 +81,7 @@ def closest_colour(requested_colour):
 def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.5,
                  class_names=None, colors=None,
                  absolute_coordinates=True, scale=1.0):
+    print('forked_version_cv_plot_bbox')
     """Visualize bounding boxes with OpenCV.
 
     Parameters
@@ -192,7 +195,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             kmeans.fit(crop_img)
             dominant_color = kmeans.cluster_centers_.astype(np.int32)[0]
             colorname = closest_colour(dominant_color)
-            print(dominant_color, colorname)
+            print('dominant_color=', dominant_color, colorname)
 
             # differences = [[color_difference(dominant_color, target_value), target_name] for target_name, target_value in TARGET_COLORS.items()]
             # differences.sort()  # sorted by the first element of inner lists
