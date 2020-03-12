@@ -2,7 +2,11 @@ import multiprocessing
 
 import random
 import time
+from termcolor import colored
 
+# 为了测试模拟的多摄像头接口，将来有真实摄像头，需要替换掉
+import warnings
+warnings.simplefilter("ignore", DeprecationWarning)
 
 
 pre_video_url = 'http://0.0.0.0:5000/video_feed'
@@ -68,8 +72,10 @@ def show_video(video_url, queue):
             jpg = total_bytes[a:b+2] # actual image
             total_bytes= total_bytes[b+2:] # other informations
             
+            # 为了测试模拟的多摄像头接口，将来有真实摄像头，需要替换掉
             # decode to colored image ( another option is cv2.IMREAD_GRAYSCALE )
             img = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
+
 
             # print(type(img))
             # cv2.imshow('Window name',cv2.flip(img, -1)) # display image while receiving data
@@ -103,9 +109,15 @@ class consumer(multiprocessing.Process):
             else :
                 time.sleep(0.5)
                 itemObj = self.queue.get()
-
-                print ('Process调用程序 : 消息 [ %s %s %s ] 通知到相应人员 from by %s \n'\
-                       % (itemObj['video_url'], itemObj['event'], itemObj['color'] , self.name))
+                if itemObj['color'] == 'red':
+                    print(colored('Process调用程序 : 消息 [ {} {} {} ] 通知到相应人员 from by %s \n' \
+                        .format(itemObj['video_url'], itemObj['event'], itemObj['color'] , self.name), 'red'))
+                elif itemObj['color'] == 'blue':
+                    print(colored('Process调用程序 : 消息 [ {} {} {}  ] 通知到相应人员 from by %s \n' \
+                        .format(itemObj['video_url'], itemObj['event'], itemObj['color'] , self.name), 'blue'))
+                else:
+                    print(colored('Process调用程序 : 消息 [ {} {} {} ] 通知到相应人员 from by %s \n' \
+                        .format(itemObj['video_url'], itemObj['event'], itemObj['color'] , self.name), 'cyan'))
                 time.sleep(1)
 
 if __name__ == '__main__':

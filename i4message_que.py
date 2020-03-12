@@ -38,7 +38,7 @@ class consumer(multiprocessing.Process):
                 item = self.queue.get()
 
                 print ('Process调用程序 : 消息%s # %d 通知到相应人员 from by %s \n'\
-                       % (item['name'], item['id'], self.name))
+                       % (item['name'],item['id'], self.name))
                 time.sleep(1)
 
 if __name__ == '__main__':
