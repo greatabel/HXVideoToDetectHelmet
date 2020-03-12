@@ -12,7 +12,7 @@ def show_video(video_url, queue):
     import numpy as np
     import urllib.request
 
-    from i4cpu_video_mock import forked_version_cv_plot_bbox
+    from i4cpu_video_mock import forked_version_cv_plot_bbox_multiple
     from gluoncv import model_zoo, data, utils
     #from matplotlib import pyplot as plt
     import mxnet as mx
@@ -52,7 +52,7 @@ def show_video(video_url, queue):
         # print('Shape of pre-processed image:', x.shape)
         x = x.as_in_context(ctx)
         box_ids, scores, bboxes = net(x)
-        x = forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
+        x = forked_version_cv_plot_bbox_multiple(orig_img, bboxes[0], scores[0], box_ids[0], 
                             class_names=net.classes,thresh=0.4)
         cv2.namedWindow("image", cv2.WINDOW_NORMAL)
         cv2.imshow('image', orig_img[...,::-1])
