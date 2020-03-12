@@ -276,7 +276,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
 # 为了CPU版本多摄像头进行fork的版本
 def forked_version_cv_plot_bbox_multiple(img, bboxes, scores=None, labels=None, thresh=0.5,
                  class_names=None, colors=None,
-                 absolute_coordinates=True, scale=1.0):
+                 absolute_coordinates=True, scale=1.0, video_url=None, queue=None):
     print('forked_version_cv_plot_bbox_multiple')
     """Visualize bounding boxes with OpenCV.
 
@@ -407,14 +407,26 @@ def forked_version_cv_plot_bbox_multiple(img, bboxes, scores=None, labels=None, 
         if class_name == 'person':
             #天蓝色
             bcolor = (12, 203, 232)
+
+            # 处理消息队列传递
+            itemObj = { 'video_url': video_url, 'event': 'person', 'color': None}
+            queue.put(itemObj)
+
         elif class_name == 'hat':
             if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
              'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
                 # 黄色
                 bcolor = (255,255,0)
+                # 处理消息队列传递
+                itemObj = { 'video_url': video_url, 'event': 'hat', 'color': 'yellow'}
+                queue.put(itemObj)
+
             elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
                 # 红色
                 bcolor = (255, 0, 0)
+                # 处理消息队列传递
+                itemObj = { 'video_url': video_url, 'event': 'hat', 'color': 'red'}
+                queue.put(itemObj)
                                
         cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
 
@@ -426,7 +438,7 @@ def forked_version_cv_plot_bbox_multiple(img, bboxes, scores=None, labels=None, 
 
     return img
 
-    
+
 def image_get(q, window_name):
     frame_index = 0
 

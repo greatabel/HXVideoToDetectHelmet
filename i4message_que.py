@@ -14,7 +14,8 @@ class producer(multiprocessing.Process):
         for i in range(15):
 
             item = random.randint(0, 256)
-            self.queue.put(item) 
+            itemObj = { 'name': 'abel' + str(item), 'id': item}
+            self.queue.put(itemObj) 
             print ("模拟摄像头检测 Process Producer : 消息 %d 添加到 queue %s"\
                    % (item,self.name))
             time.sleep(1)
@@ -36,8 +37,8 @@ class consumer(multiprocessing.Process):
                 time.sleep(0.5)
                 item = self.queue.get()
 
-                print ('Process调用程序 : 消息 %d 通知到相应人员 from by %s \n'\
-                       % (item, self.name))
+                print ('Process调用程序 : 消息%s # %d 通知到相应人员 from by %s \n'\
+                       % (item['name'], item['id'], self.name))
                 time.sleep(1)
 
 if __name__ == '__main__':
@@ -46,6 +47,7 @@ if __name__ == '__main__':
         process_consumer = consumer(queue)
 
         process_producer.start()
+        time.sleep(1)
         process_consumer.start()
 
         process_producer.join()

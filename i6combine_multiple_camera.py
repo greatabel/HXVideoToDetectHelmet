@@ -53,7 +53,7 @@ def show_video(video_url, queue):
         x = x.as_in_context(ctx)
         box_ids, scores, bboxes = net(x)
         x = forked_version_cv_plot_bbox_multiple(orig_img, bboxes[0], scores[0], box_ids[0], 
-                            class_names=net.classes,thresh=0.4)
+                            class_names=net.classes, thresh=0.4, video_url=video_url, queue=queue)
         cv2.namedWindow("image", cv2.WINDOW_NORMAL)
         cv2.imshow('image', orig_img[...,::-1])
 
@@ -97,14 +97,15 @@ class consumer(multiprocessing.Process):
 
         while True:
             if (self.queue.empty()):
-                print("队列已空")
-                break
+                # print("队列已空")
+                # break
+                ''
             else :
                 time.sleep(0.5)
-                item = self.queue.get()
+                itemObj = self.queue.get()
 
-                print ('Process调用程序 : 消息 %d 通知到相应人员 from by %s \n'\
-                       % (item, self.name))
+                print ('Process调用程序 : 消息 [ %s %s %s ] 通知到相应人员 from by %s \n'\
+                       % (itemObj['video_url'], itemObj['event'], itemObj['color'] , self.name))
                 time.sleep(1)
 
 if __name__ == '__main__':
@@ -125,6 +126,7 @@ if __name__ == '__main__':
         # for p in producers:
         #     p.start()
         # process_producer.start()
+
         process_consumer.start()
         for p in producers:
             p.join()
