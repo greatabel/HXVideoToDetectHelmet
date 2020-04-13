@@ -400,7 +400,7 @@ def image_get(q, window_name):
 
 
 def run_single_camera():
-    user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.133:554"
+    user_name, user_pwd, camera_ip = "admin", "admin123", "192.168.0.180:554"
 
     mp.set_start_method(method='spawn')  # init
     queue = mp.Queue(maxsize=2)
@@ -410,9 +410,28 @@ def run_single_camera():
     [process.start() for process in processes]
     [process.join() for process in processes]
 
+def run_multi_camera():
+    # user_name, user_pwd = "admin", "password"
+    user_name, user_pwd, camera_ip = "admin", "admin123", "192.168.0.180:554"
 
+    chanels = [1, 3]
+
+    mp.set_start_method(method='spawn')  # init
+    queues = [mp.Queue(maxsize=4) for _ in chanels]
+
+    processes = []
+    for queue, ch in zip(queues, chanels):
+        processes.append(mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip, ch)))
+        processes.append(mp.Process(target=image_get, args=(queue, camera_ip)))
+
+    for process in processes:
+        process.daemon = True
+        process.start()
+    for process in processes:
+        process.join()
+        
 
 if __name__ == '__main__':
-    run_single_camera()
+    run_multi_camera()
 
     pass
