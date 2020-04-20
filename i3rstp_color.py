@@ -412,7 +412,7 @@ def run_single_camera():
 
 def run_multi_camera():
     # user_name, user_pwd = "admin", "password"
-    user_name, user_pwd, camera_ip = "admin", "admin123", "192.168.0.180:554"
+    user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 
     chanels = [1, 3]
 
