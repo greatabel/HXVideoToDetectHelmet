@@ -5,9 +5,33 @@ import cv2
 import datetime
 import numpy as np
 
+
+# 计算最近几帧的平均像素变化个数
+def calculate_diff(diff_image, diff_recent_frame):
+    count_diff_func = 0
+    for i_func in range(resize_length):
+        for j_func in range(resize_height):
+            if diff_image[i_func, j_func] == 255:
+                count_diff_func += 1
+    for count_func in range(0, len(diff_recent_frame)):
+        if diff_recent_frame[count_func] < 0:
+            diff_recent_frame[count_func] = count_diff_func
+    sum_recent = 0
+    for count_func in range(0, len(diff_recent_frame)):
+        sum_recent += diff_recent_frame[count_func]
+    average = sum_recent / len(diff_recent_frame)
+    print("average = %d" % average)
+    if count_diff_func > average * 1.3:
+        print("detected with rapid change!")
+        exit(0)
+    diff_recent_frame.pop(0)
+    diff_recent_frame.append(count_diff_func)
+    return count_diff_func
+
+
 if __name__ == '__main__':
     # 获取视频
-    videoCapture = cv2.VideoCapture('video/rain.mp4')
+    videoCapture = cv2.VideoCapture('video/test.mp4')
 
     # 获得码率及尺寸
     fps = videoCapture.get(cv2.CAP_PROP_FPS)
@@ -21,24 +45,24 @@ if __name__ == '__main__':
     interval = 0.1  # 采样间隔（单位：秒）
     resize_height = 600  # 调整大小后的图像高
     threshold = 5  # 图像二值化的阀值
-    area = 0.2  # 前后取样点最大容忍差异面积
+    area = 0.9  # 前后取样点最大容忍差异面积
     height = 0.4  # 二次对比时截取图像的高度
-    area_warn = 0.2  # 二次对比时最大容忍差异面积
+    area_warn = 0.9  # 二次对比时最大容忍差异面积
+    warn_rate = 0.3  # 新增差异面积趋势变化判定，如果有瞬间变化过大则预警
     # 图像膨胀相关参数
     kernel = np.ones((5, 5), np.uint8)
-    is_dilate = True
 
     # 读帧
     success, frame = videoCapture.read()
     # 对第一张图像进行处理
     # 获取图像长宽
     x_origin, y_origin = frame.shape[0:2]
-    print('x_origin, y_origin=', x_origin, y_origin)
+    print(x_origin, y_origin)
     # 选择需要作检测的区域
     frame_detect = frame[int(detect_area[2] * x_origin): int(detect_area[3] * x_origin), int(
         detect_area[0] * y_origin):int(detect_area[1] * y_origin)]
     x, y = frame_detect.shape[0:2]
-    print('x, y =', x, y)
+    print(x, y)
     # 计算缩小后图像的面积和宽度
     resize_length = int(x / (y / resize_height))
     resize_area = resize_height * resize_length
@@ -50,9 +74,11 @@ if __name__ == '__main__':
     warn_frame = []
     # 警戒等级：每次检测到出现问题的帧时为2，接下来检测时如果没有问题则依次减一，当此信号为0时清空warn_frame
     warn_rank = 0
+    # 记录最近几帧的像素差异个数
+    diff_recent = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
 
     count = 0
-    while count < 3000:
+    while count < 1800:
         count += 1
         if count % int(fps * interval) == 0 and count > 1 and count > 70:  # 跳过第一次循环
             try:
@@ -63,18 +89,14 @@ if __name__ == '__main__':
                 # 将图像与原图作差，并作二值化处理
                 ret, diff = cv2.threshold(cv2.absdiff(frame_gray_last, frame_gray), threshold, 255, cv2.THRESH_BINARY)
                 ###
-                print('count=', count)
+                print(count)
                 cv2.imshow("diff", diff)
                 cv2.imshow("orig", frame_detect)
                 cv2.waitKey(1000)
                 cv2.destroyAllWindows()
                 ###
                 # 统计出现差异的像素个数
-                count_diff = 0
-                for i in range(resize_length):
-                    for j in range(resize_height):
-                        if diff[i, j] == 255:
-                            count_diff += 1
+                count_diff = calculate_diff(diff, diff_recent)
                 if float(count_diff) / float(resize_area) > area:  # 判断两次采样差异是否超过设置的最大容忍差异面积
                     warn_rank = 2  # 设置警戒等级
                     if len(warn_frame) >= 1:  # 判断存储问题帧的列表是否有元素
@@ -120,3 +142,29 @@ if __name__ == '__main__':
     end_time = datetime.datetime.now()
     print((end_time - start_time))
     videoCapture.release()
+
+
+# 下面这一部分暂时没有用上，主要用途是烟雾的图形学处理
+def smoke_detect(diff_image, kernel_input):
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    ori_diff = cv2.GaussianBlur(clahe.apply(diff_image), (7, 7), 0)
+    # 对图像进行sobel边缘检测
+    x_func = cv2.Sobel(ori_diff, cv2.CV_16S, 1, 0)
+    y_func = cv2.Sobel(ori_diff, cv2.CV_16S, 0, 1)
+    absX = cv2.convertScaleAbs(x_func)
+    absY = cv2.convertScaleAbs(y_func)
+    ori_sobel = cv2.addWeighted(absX, 0.5, absY, 0.5, 0)
+    # 对图像二值化处理
+    ret_func, diff_func = cv2.threshold(ori_sobel, threshold, 255, cv2.THRESH_BINARY)
+
+    # 对图像进行形态学闭运算，并进行中值滤波
+    img_median = cv2.medianBlur(cv2.morphologyEx(diff, cv2.MORPH_OPEN, kernel_input), 5)
+    # 寻找最大区域并填充
+    contours, hierarchy = cv2.findContours(img_median, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(img_median, contours, -1, 255, -1)
+    ###
+    cv2.imshow("diff", img_median)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    ###
+    return diff_func
