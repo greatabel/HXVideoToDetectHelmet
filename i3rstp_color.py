@@ -413,7 +413,7 @@ def image_get(q, window_name):
 
 
 def run_single_camera():
-    user_name, user_pwd, camera_ip = "admin", "admin123", "192.168.0.180:554"
+    user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 
     mp.set_start_method(method='spawn')  # init
     queue = mp.Queue(maxsize=2)
