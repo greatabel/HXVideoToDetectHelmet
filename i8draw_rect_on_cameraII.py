@@ -9,7 +9,7 @@ video_urls = [
     "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0",
     "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0"
 ]
-
+saved_config_filename = 'i8url_rect_dict.json'
 url_rect_dict = {}
 
 rect = (0,0,0,0)
@@ -81,14 +81,14 @@ cap.release()
 cv2.destroyAllWindows()
 
 # This saves your dict
-with open('i8url_rect_dict.json', 'w') as f:
+with open(saved_config_filename, 'w') as f:
     # passing an indent parameter makes the json pretty-printed
     json.dump(url_rect_dict, f, indent=2) 
 
 
 # url_rect_dict = {}
 # # This loads your dict
-# with open('i8url_rect_dict.json', 'r') as f:
+# with open(saved_config_filename, 'r') as f:
 #     url_rect_dict = json.load(f)
 
 print(url_rect_dict) 
