@@ -1,5 +1,10 @@
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_gui/py_video_display/py_video_display.html
 # https://stackoverflow.com/questions/33853802/mouse-click-events-on-a-live-stream-with-opencv-and-python
+
+from gluoncv import model_zoo, data, utils
+#from matplotlib import pyplot as plt
+import mxnet as mx
+
 import cv2
 import numpy as np
 import json
@@ -47,6 +52,9 @@ for video_url in video_urls:
     #cap = cv2.VideoCapture("test2.dav")
     #cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
+
+
+
     # cap.set(3, 1920)
     # cap.set(4, 1080)
     # cap.set(cv2.CAP_PROP_FPS,5)
@@ -59,15 +67,26 @@ for video_url in video_urls:
     while(cap.isOpened() and video_flag): 
 
         (grabbed, frame) = cap.read()
+        # print('frame', type(frame))
+        
+        new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
 
-        cv2.namedWindow('frame')
+        x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
+        frameI = orig_img
+        # print('frameI', type(frameI))
+        cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
+        
+
+        # cv2.namedWindow('frame')
         cv2.setMouseCallback('frame', on_mouse)    
 
         #drawing rectangle
         if startPoint == True and endPoint == True:
-            cv2.rectangle(frame, (rect[0], rect[1]), (rect[2], rect[3]), (255, 0, 255), 2)
+            cv2.rectangle(frameI, (rect[0], rect[1]), (rect[2], rect[3]), (255, 0, 255), 2)
+            # cv2.rectangle(frame, (rect[0], rect[1]), (rect[2], rect[3]), (255, 0, 255), 2)
             print(' 正方形位置:', (rect[0], rect[1]), (rect[2], rect[3]))
-        cv2.imshow('frame',frame)
+        # cv2.imshow('frame',frame)
+        cv2.imshow('frame', frameI[...,::-1])
 
         key = cv2.waitKey(waitTime) 
         # escape 键
