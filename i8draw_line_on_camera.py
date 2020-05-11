@@ -19,12 +19,16 @@ while(True):
     # Our operations on the frame come here
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+    else:
+        cv2.line(img=frame, pt1=(10, 10), pt2=(100, 10), color=(255, 0, 0), thickness=5, lineType=8, shift=0)
+
     # Display the resulting frame
     # cv2.imshow('frame',gray)
     cv2.imshow('frame',frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
+    
     # count += 38
     # cap.set(1, count)
 

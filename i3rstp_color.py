@@ -15,6 +15,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import webcolors
 from sklearn.cluster import KMeans
+import os
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train YOLO networks with random input shape.')
@@ -242,9 +243,21 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
              'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
                 # 黄色
                 bcolor = (255,255,0)
+                # 警告音 
+                duration = 0.5  # seconds
+                freq = 660  # Hz
+                os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+                print('#'*10)
+
             elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
                 # 红色
                 bcolor = (255, 0, 0)
+                # 警告音 
+                duration = 1  # seconds
+                freq = 440  # Hz
+                os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+                print('#'*20)
+
             # elif colorname == 'darkolivegreen':
             #     if dominant_color is not None:
             #         if (dominant_color[0] > 100 and dominant_color[1] > 70) or \
@@ -400,7 +413,7 @@ def image_get(q, window_name):
 
 
 def run_single_camera():
-    user_name, user_pwd, camera_ip = "admin", "admin123", "192.168.0.180:554"
+    user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 
     mp.set_start_method(method='spawn')  # init
     queue = mp.Queue(maxsize=2)
