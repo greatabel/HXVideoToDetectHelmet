@@ -90,8 +90,13 @@ if __name__ == '__main__':
                 ret, diff = cv2.threshold(cv2.absdiff(frame_gray_last, frame_gray), threshold, 255, cv2.THRESH_BINARY)
                 ###
                 print(count)
+
+                
+
                 cv2.imshow("diff", diff)
                 cv2.imshow("orig", frame_detect)
+                cv2.moveWindow("orig", 40,30)
+                cv2.moveWindow("diff", 800,30)
                 cv2.waitKey(1000)
                 cv2.destroyAllWindows()
                 ###
