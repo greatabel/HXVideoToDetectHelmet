@@ -4,18 +4,17 @@ import cv2
 import numpy as np
 
 
+video_urls = [
+    "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0",
+    "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0"
+]
+
 rect = (0,0,0,0)
 startPoint = False
 endPoint = False
 
-cap = cv2.VideoCapture("rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0")
-#cap = cv2.VideoCapture("test2.dav")
-#cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
-# cap.set(3, 1920)
-# cap.set(4, 1080)
-# cap.set(cv2.CAP_PROP_FPS,5)
-#cap = cv2.VideoCapture(0)
+
+print('设置好当前摄像头的检测区域后，按 escape 键，程序将保存设置，进入下一个摄像头设置！')
 
 def on_mouse(event,x,y,flags,params):
 
@@ -36,28 +35,43 @@ def on_mouse(event,x,y,flags,params):
             rect = (rect[0], rect[1], x, y)
             endPoint = True
 
-waitTime = 50
 
-#Reading the first frame
-(grabbed, frame) = cap.read()
+for video_url in video_urls:
+    video_flag = True
+    rect = (0, 0, 0, 0)
 
-while(cap.isOpened()):
+    cap = cv2.VideoCapture(video_url)
+    #cap = cv2.VideoCapture("test2.dav")
+    #cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
+    # cap.set(3, 1920)
+    # cap.set(4, 1080)
+    # cap.set(cv2.CAP_PROP_FPS,5)
+    #cap = cv2.VideoCapture(0)
+    waitTime = 50
 
+    #Reading the first frame
     (grabbed, frame) = cap.read()
 
-    cv2.namedWindow('frame')
-    cv2.setMouseCallback('frame', on_mouse)    
+    while(cap.isOpened() and video_flag): 
 
-    #drawing rectangle
-    if startPoint == True and endPoint == True:
-        cv2.rectangle(frame, (rect[0], rect[1]), (rect[2], rect[3]), (255, 0, 255), 2)
-        print(' 正方形位置:', (rect[0], rect[1]), (rect[2], rect[3]))
-    cv2.imshow('frame',frame)
+        (grabbed, frame) = cap.read()
 
-    key = cv2.waitKey(waitTime) 
+        cv2.namedWindow('frame')
+        cv2.setMouseCallback('frame', on_mouse)    
 
-    if key == 27:
-        break
+        #drawing rectangle
+        if startPoint == True and endPoint == True:
+            cv2.rectangle(frame, (rect[0], rect[1]), (rect[2], rect[3]), (255, 0, 255), 2)
+            print(' 正方形位置:', (rect[0], rect[1]), (rect[2], rect[3]))
+        cv2.imshow('frame',frame)
+
+        key = cv2.waitKey(waitTime) 
+        # escape 键
+        if key == 27:
+            # break
+            print('setting ', video_url, ' square:', (rect[0], rect[1]), (rect[2], rect[3]))
+            video_flag = False
 
 cap.release()
 cv2.destroyAllWindows()
