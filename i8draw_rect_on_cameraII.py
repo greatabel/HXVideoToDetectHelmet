@@ -2,12 +2,15 @@
 # https://stackoverflow.com/questions/33853802/mouse-click-events-on-a-live-stream-with-opencv-and-python
 import cv2
 import numpy as np
+import json
 
 
 video_urls = [
     "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0",
     "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0"
 ]
+
+url_rect_dict = {}
 
 rect = (0,0,0,0)
 startPoint = False
@@ -71,7 +74,21 @@ for video_url in video_urls:
         if key == 27:
             # break
             print('setting ', video_url, ' square:', (rect[0], rect[1]), (rect[2], rect[3]))
+            url_rect_dict[video_url] = (rect[0], rect[1]), (rect[2], rect[3])
             video_flag = False
 
 cap.release()
 cv2.destroyAllWindows()
+
+# This saves your dict
+with open('i8url_rect_dict.json', 'w') as f:
+    # passing an indent parameter makes the json pretty-printed
+    json.dump(url_rect_dict, f, indent=2) 
+
+
+# url_rect_dict = {}
+# # This loads your dict
+# with open('i8url_rect_dict.json', 'r') as f:
+#     url_rect_dict = json.load(f)
+
+print(url_rect_dict) 
