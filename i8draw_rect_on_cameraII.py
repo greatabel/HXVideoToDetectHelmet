@@ -21,7 +21,7 @@ rect = (0,0,0,0)
 startPoint = False
 endPoint = False
 
-
+print('选择区域时，请保持左上 --> 右下 的方式绘制对角线 ')
 print('设置好当前摄像头的检测区域后，按 escape 键，程序将保存设置，进入下一个摄像头设置！')
 
 def on_mouse(event,x,y,flags,params):
@@ -68,7 +68,7 @@ for video_url in video_urls:
 
         (grabbed, frame) = cap.read()
         # print('frame', type(frame))
-        
+
         new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
 
         x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
@@ -93,7 +93,20 @@ for video_url in video_urls:
         if key == 27:
             # break
             print('setting ', video_url, ' square:', (rect[0], rect[1]), (rect[2], rect[3]))
-            url_rect_dict[video_url] = (rect[0], rect[1]), (rect[2], rect[3])
+            results = [rect[0], rect[1], rect[2], rect[3]]
+            print(type(results), 'results', results, results[0])
+            # 如果点击者先右后左的话 保证左侧的点在前，右侧的点在后
+            if results[0] > results[2]:                
+                print('左右位置互换')
+                results =  [results[2], results[3], results[0], results[1]]
+                print(results)
+            # 如果由下向上的话, 保存成另外2个对角点，方便后续与目标方框比较包含关系
+            if results[1] > results[3]:
+                print('对角线互换')
+                results = [results[0], results[3], results[2], results[1]]
+                print(results)
+
+            url_rect_dict[video_url] = results
             video_flag = False
 
 cap.release()
@@ -109,5 +122,5 @@ with open(saved_config_filename, 'w') as f:
 # # This loads your dict
 # with open(saved_config_filename, 'r') as f:
 #     url_rect_dict = json.load(f)
-
+print('完成设置不同摄像头检测区域：')
 print(url_rect_dict) 
