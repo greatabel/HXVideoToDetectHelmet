@@ -6,33 +6,100 @@ import datetime
 import numpy as np
 
 
-# 计算最近几帧的平均像素变化个数
-def calculate_diff(diff_image, diff_recent_frame):
-    count_diff_func = 0
-    for i_func in range(resize_length):
-        for j_func in range(resize_height):
-            if diff_image[i_func, j_func] == 255:
-                count_diff_func += 1
-    for count_func in range(0, len(diff_recent_frame)):
-        if diff_recent_frame[count_func] < 0:
-            diff_recent_frame[count_func] = count_diff_func
-    sum_recent = 0
-    for count_func in range(0, len(diff_recent_frame)):
-        sum_recent += diff_recent_frame[count_func]
-    average = sum_recent / len(diff_recent_frame)
-    print("average = %d" % average)
-    if count_diff_func > average * 1.3:
-        print("detected with rapid change!")
-        exit(0)
-    diff_recent_frame.pop(0)
-    diff_recent_frame.append(count_diff_func)
-    return count_diff_func
+class smoke_detect:
+    def __init__(self):
+        # 所需参数
+        self.detect_area = [0.1, 0.9, 0.1, 0.9]  # 截取的图像区域，范围为0~1，长宽
+        self.interval = 0.1  # 采样间隔（单位：秒）
+        self.resize_height = 600  # 调整大小后的图像高
+        self.__threshold = 5  # 图像二值化的阀值
+        self.__warn_rate = 0.3  # 差异面积趋势变化判定，如果有瞬间变化过大则预警
+        self.__kernel = np.ones((5, 5), np.uint8)      # 图像膨胀相关参数
+        # 记录最近几帧的像素差异个数
+        self.__diff_recent = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+        # 其他参数（无需调整）
+        self.resize_length = -1
+        # 形态学处理后标志区域的长宽、中心位置
+        self.__rectangle = []
+
+    # 计算并返回最近几帧的像素差异平均值
+    def __average_recent(self):
+        sum_recent = 0
+        for count_average in range(0, len(self.__diff_recent)):
+            sum_recent += self.__diff_recent[count_average]
+        return sum_recent / len(self.__diff_recent)
+
+    def set_resize_length(self, length_input):
+        self.resize_length = length_input
+
+    def calculate_diff(self, diff_image):
+        count_diff = 0
+        # 计算当前图像的差异像素个数
+        for length in range(self.resize_length):
+            for height in range(self.resize_height):
+                if diff_image[length, height] == 255:
+                    count_diff += 1
+        # 如果需要，初始化记录最近几帧像素差异的列表
+        for count_init in range(0, len(self.__diff_recent)):
+            if self.__diff_recent[count_init] < 0:
+                self.__diff_recent[count_init] = count_diff
+        # 计算比较平均值，如有异常，输出侦测到烟雾信号
+        average = self.__average_recent()
+        if count_diff > average * self.__warn_rate:
+            print("detected with rapid change!")
+            exit(0)
+        # 删除当前图像的差异像素个数列表的最老一项，加入当前帧的信息
+        self.__diff_recent.pop(0)
+        self.__diff_recent.append(count_diff)
+
+    def detect_function(self, detect_input, detect_input_last):
+        # 缩小图像
+        frame_resize = cv2.resize(detect_input, (self.resize_height, self.resize_length), interpolation=cv2.INTER_CUBIC)
+        # 将彩色图转换为灰度图
+        frame_gray = cv2.cvtColor(frame_resize, cv2.COLOR_RGB2GRAY)
+        # 将图像与上一帧的图像作差，并作二值化处理
+        ret, diff = cv2.threshold(cv2.absdiff(detect_input_last, frame_gray), self.__threshold, 255, cv2.THRESH_BINARY)
+        # 直方图图像增强
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        diff_clahe = cv2.GaussianBlur(clahe.apply(diff), (7, 7), 0)
+        # 对图像进行sobel边缘检测
+        x_func = cv2.Sobel(diff_clahe, cv2.CV_16S, 1, 0)
+        y_func = cv2.Sobel(diff_clahe, cv2.CV_16S, 0, 1)
+        absX = cv2.convertScaleAbs(x_func)
+        absY = cv2.convertScaleAbs(y_func)
+        diff_sobel = cv2.addWeighted(absX, 0.5, absY, 0.5, 0)
+        # 对边缘检测后的图像作二值化处理
+        ret_threshold, diff_threshold = cv2.threshold(diff_sobel, self.__threshold, 255, cv2.THRESH_BINARY)
+        # 对图像进行形态学闭运算，并进行中值滤波
+        diff_median = cv2.medianBlur(cv2.morphologyEx(diff_threshold, cv2.MORPH_OPEN, self.__kernel), 5)
+        # 寻找最大区域并填充
+        contours, hierarchy = cv2.findContours(diff_median, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnt = contours[np.argmax([cv2.contourArea(cnt) for cnt in contours])]
+        rect = cv2.minAreaRect(cnt)
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+        # 记录矩形区域的长宽中心位置
+        if len(self.__rectangle) > 5:
+            self.__rectangle.pop(0)
+        self.__rectangle.append([rect[1], rect[0]])
+        print(self.__rectangle)
+        # 显示模块
+        diff_color = cv2.merge([diff_median, diff_median, diff_median])
+        cv2.drawContours(diff_color, [box], 0, [255, 255, 0], 2)
+        ###
+        cv2.imshow("diff_out", diff_color)
+        cv2.moveWindow("diff_out", 40,10)
+        cv2.waitKey(1000)
+        cv2.destroyAllWindows()
+        ###
 
 
 if __name__ == '__main__':
+    # 初始化烟雾检测主函数
+    detect = smoke_detect()
+
     # 获取视频
     videoCapture = cv2.VideoCapture('video/test.mp4')
-
     # 获得码率及尺寸
     fps = videoCapture.get(cv2.CAP_PROP_FPS)
     size = (int(videoCapture.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -40,136 +107,39 @@ if __name__ == '__main__':
     fNUMS = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
     start_time = datetime.datetime.now()  # 记录开始时间
 
-    # 需要的参数
-    detect_area = [0.1, 0.9, 0.1, 0.9]  # 截取的图像区域，范围为0~1，长宽
-    interval = 0.1  # 采样间隔（单位：秒）
-    resize_height = 600  # 调整大小后的图像高
-    threshold = 5  # 图像二值化的阀值
-    area = 0.9  # 前后取样点最大容忍差异面积
-    height = 0.4  # 二次对比时截取图像的高度
-    area_warn = 0.9  # 二次对比时最大容忍差异面积
-    warn_rate = 0.3  # 新增差异面积趋势变化判定，如果有瞬间变化过大则预警
-    # 图像膨胀相关参数
-    kernel = np.ones((5, 5), np.uint8)
-
     # 读帧
     success, frame = videoCapture.read()
     # 对第一张图像进行处理
     # 获取图像长宽
     x_origin, y_origin = frame.shape[0:2]
-    print(x_origin, y_origin)
+
     # 选择需要作检测的区域
-    frame_detect = frame[int(detect_area[2] * x_origin): int(detect_area[3] * x_origin), int(
-        detect_area[0] * y_origin):int(detect_area[1] * y_origin)]
+    frame_detect = frame[int(detect.detect_area[2] * x_origin): int(detect.detect_area[3] * x_origin), int(
+        detect.detect_area[0] * y_origin) : int(detect.detect_area[1] * y_origin)]
     x, y = frame_detect.shape[0:2]
-    print(x, y)
-    # 计算缩小后图像的面积和宽度
-    resize_length = int(x / (y / resize_height))
-    resize_area = resize_height * resize_length
+    # 记录缩小后图像的长度
+    detect.set_resize_length(int(x / (y / detect.resize_height)))
     # 将彩色图转换为灰度图并存储到frame_gray_last中
-    frame_gray_last = cv2.cvtColor(cv2.resize(frame_detect, (resize_height, resize_length),
-                                              interpolation=cv2.INTER_CUBIC),
-                                   cv2.COLOR_RGB2GRAY)
-    # 出现问题帧存储于此
-    warn_frame = []
-    # 警戒等级：每次检测到出现问题的帧时为2，接下来检测时如果没有问题则依次减一，当此信号为0时清空warn_frame
-    warn_rank = 0
-    # 记录最近几帧的像素差异个数
-    diff_recent = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+    frame_gray_last = cv2.cvtColor(cv2.resize(frame_detect, (detect.resize_height, detect.resize_length),
+                                              interpolation=cv2.INTER_CUBIC), cv2.COLOR_RGB2GRAY)
 
     count = 0
     while count < 1800:
-        count += 1
-        if count % int(fps * interval) == 0 and count > 1 and count > 70:  # 跳过第一次循环
-            try:
-                # 缩小图像
-                frame_resize = cv2.resize(frame_detect, (resize_height, resize_length), interpolation=cv2.INTER_CUBIC)
-                # 将彩色图转换为灰度图
-                frame_gray = cv2.cvtColor(frame_resize, cv2.COLOR_RGB2GRAY)
-                # 将图像与原图作差，并作二值化处理
-                ret, diff = cv2.threshold(cv2.absdiff(frame_gray_last, frame_gray), threshold, 255, cv2.THRESH_BINARY)
-                ###
-                print(count)
-
-                
-
-                cv2.imshow("diff", diff)
-                cv2.imshow("orig", frame_detect)
-                cv2.moveWindow("orig", 40,30)
-                cv2.moveWindow("diff", 800,30)
-                cv2.waitKey(1000)
-                cv2.destroyAllWindows()
-                ###
-                # 统计出现差异的像素个数
-                count_diff = calculate_diff(diff, diff_recent)
-                if float(count_diff) / float(resize_area) > area:  # 判断两次采样差异是否超过设置的最大容忍差异面积
-                    warn_rank = 2  # 设置警戒等级
-                    if len(warn_frame) >= 1:  # 判断存储问题帧的列表是否有元素
-                        # 进入二次对比过程
-                        # 对两幅差异图像进行作差二值化处理
-                        ret, diff_warn = cv2.threshold(cv2.absdiff(warn_frame[0], diff),
-                                                       threshold, 255, cv2.THRESH_BINARY)
-                        # 将图像截取上半部分，由于烟雾是向上走的，所以预期这里会出现较大差异
-                        cropped_diff = diff_warn[0: int(height * resize_height), :]
-                        # 对出现差异的像素点进行计数
-                        count_warn = 0
-                        for i in range(int(height * resize_height)):
-                            for j in range(resize_length):
-                                if diff[i, j] == 255:
-                                    count_warn += 1
-                        if float(count_diff) / (height * resize_length * resize_height) > area_warn:
-                            # 输出报警信号
-                            print("detected with area %.2f%%" % (
-                                    100 * float(count_diff) / (height * resize_length * resize_height)))
-                            end_time = datetime.datetime.now()
-                            print((end_time - start_time))
-                            videoCapture.release()
-                            exit(1)
-                    else:
-                        # 如果存储问题帧的列表为空，则添加列表
-                        warn_frame.append(diff)
-                elif warn_rank > 0:
-                    # 降低警戒等级
-                    warn_rank -= 1
-                    if warn_rank == 0:
-                        # 警戒度为0，清空warn_frame
-                        warn_frame.pop()
-                else:
-                    # 警戒度为0时，更新前次采样帧
-                    frame_gray_last = frame_gray
-            except Exception as e:
-                print(e)
+        try:
+            count += 1
+            if count % int(fps * detect.interval) == 0 and count > 1 and count > 70:  # 跳过第一次循环
+                # 烟雾检测主函数
+                detect.detect_function(frame_detect, frame_gray_last)
+            success, frame = videoCapture.read()  # 获取下一帧
+            if frame is None:
                 break
-        success, frame = videoCapture.read()  # 获取下一帧
-        # 截取下一帧的检测区域
-        frame_detect = frame[int(detect_area[2] * x_origin): int(detect_area[3] * x_origin), int(
-            detect_area[0] * y_origin):int(detect_area[1] * y_origin)]
+            # 截取下一帧的检测区域
+            frame_gray_last = cv2.cvtColor(cv2.resize(frame_detect, (detect.resize_height, detect.resize_length),
+                                                      interpolation=cv2.INTER_CUBIC), cv2.COLOR_RGB2GRAY)
+            frame_detect = frame[int(detect.detect_area[2] * x_origin): int(detect.detect_area[3] * x_origin), int(
+                detect.detect_area[0] * y_origin): int(detect.detect_area[1] * y_origin)]
+        except Exception as e:
+            exit(0)
     end_time = datetime.datetime.now()
     print((end_time - start_time))
     videoCapture.release()
-
-
-# 下面这一部分暂时没有用上，主要用途是烟雾的图形学处理
-def smoke_detect(diff_image, kernel_input):
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    ori_diff = cv2.GaussianBlur(clahe.apply(diff_image), (7, 7), 0)
-    # 对图像进行sobel边缘检测
-    x_func = cv2.Sobel(ori_diff, cv2.CV_16S, 1, 0)
-    y_func = cv2.Sobel(ori_diff, cv2.CV_16S, 0, 1)
-    absX = cv2.convertScaleAbs(x_func)
-    absY = cv2.convertScaleAbs(y_func)
-    ori_sobel = cv2.addWeighted(absX, 0.5, absY, 0.5, 0)
-    # 对图像二值化处理
-    ret_func, diff_func = cv2.threshold(ori_sobel, threshold, 255, cv2.THRESH_BINARY)
-
-    # 对图像进行形态学闭运算，并进行中值滤波
-    img_median = cv2.medianBlur(cv2.morphologyEx(diff, cv2.MORPH_OPEN, kernel_input), 5)
-    # 寻找最大区域并填充
-    contours, hierarchy = cv2.findContours(img_median, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(img_median, contours, -1, 255, -1)
-    ###
-    cv2.imshow("diff", img_median)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    ###
-    return diff_func
