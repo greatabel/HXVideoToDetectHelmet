@@ -37,7 +37,7 @@ class RTSPVideoWriterObject(object):
                 self.save_frame()
 
         # Press Q on keyboard to stop recording
-        key = cv2.waitKey(1)
+        key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             self.capture.release()
             self.output_video.release()
