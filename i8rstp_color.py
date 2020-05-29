@@ -422,11 +422,14 @@ def image_get(q, ip, rect):
 
 def run_single_camera():
     user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
+    ch = 1
+
+    full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (user_name, user_pwd, camera_ip, ch)
 
     mp.set_start_method(method='spawn')  # init
     queue = mp.Queue(maxsize=2)
-    processes = [mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip)),
-                 mp.Process(target=image_get, args=(queue, camera_ip))]
+    processes = [mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip, ch)),
+                 mp.Process(target=image_get, args=(queue, camera_ip, url_rect_dict[full_vedio_url]))]
 
     [process.start() for process in processes]
     [process.join() for process in processes]
@@ -470,6 +473,7 @@ if __name__ == '__main__':
     saved_config_filename = 'i8url_rect_dict.json'
     url_rect_dict = load_rect_config()
     print(url_rect_dict)
-    run_multi_camera()
+    # run_multi_camera()
+    run_single_camera()
 
     pass

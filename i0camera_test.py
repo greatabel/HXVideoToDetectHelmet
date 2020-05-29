@@ -1,7 +1,17 @@
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_gui/py_video_display/py_video_display.html
 
+# 119.100.21.43  8000 8001 8002  waiwang
+# http://10.249.181.12 admin yxgl123456
+
+# nvr 192.168.200.12
+#
+#
 import cv2
-cap = cv2.VideoCapture("rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0")
+cap = cv2.VideoCapture("rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0")
+# cap = cv2.VideoCapture("rtsp://admin:yxgl123456@10.249.181.12:8002/cam/realmonitor?channel=3&subtype=0")
+# cap = cv2.VideoCapture("rtsp://admin:yxgl123456@192.168.200.150:554//Streaming/Channels/1")
+# cap = cv2.VideoCapture("rtsp://admin:yxgl123456@192.168.200.150:554/Streaming/Channels/101?starttime=20200520t063812z&endtime=20200520t064816z")
+
 #cap = cv2.VideoCapture("test2.dav")
 #cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
