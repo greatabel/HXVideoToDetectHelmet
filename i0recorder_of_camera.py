@@ -15,8 +15,8 @@ class RTSPVideoWriterObject(object):
         self.frame_height = int(self.capture.get(4))
 
         # Set up codec and output video settings
-        self.codec = cv2.VideoWriter_fourcc(*'mp4v')
-        self.output_video = cv2.VideoWriter('i0output.mp4', self.codec, 30, (self.frame_width, self.frame_height))
+        self.codec = cv2.VideoWriter_fourcc(*"H264")
+        self.output_video = cv2.VideoWriter('i0output.avi', self.codec, 30, (self.frame_width, self.frame_height))
 
         # Start the thread to read frames from the video stream
         self.thread = Thread(target=self.update, args=())
