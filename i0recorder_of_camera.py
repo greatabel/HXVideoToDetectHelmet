@@ -1,6 +1,3 @@
-# https://stackoverflow.com/questions/59556761/how-to-start-and-stop-saving-video-frames-according-to-a-trigger-with-opencv-vid
-
-
 from threading import Thread
 import cv2
 
@@ -8,14 +5,13 @@ class RTSPVideoWriterObject(object):
     def __init__(self, src=0):
         # Create a VideoCapture object
         self.capture = cv2.VideoCapture(src)
-        self.record = True
 
         # Default resolutions of the frame are obtained (system dependent)
         self.frame_width = int(self.capture.get(3))
         self.frame_height = int(self.capture.get(4))
 
         # Set up codec and output video settings
-        self.codec = cv2.VideoWriter_fourcc(*"H264")
+        self.codec = cv2.VideoWriter_fourcc('M','J','P','G')
         self.output_video = cv2.VideoWriter('i0output.avi', self.codec, 30, (self.frame_width, self.frame_height))
 
         # Start the thread to read frames from the video stream
@@ -33,24 +29,14 @@ class RTSPVideoWriterObject(object):
         # Display frames in main program
         if self.status:
             cv2.imshow('frame', self.frame)
-            if self.record:
-                self.save_frame()
 
         # Press Q on keyboard to stop recording
-        key = cv2.waitKey(1) & 0xFF
+        key = cv2.waitKey(1)
         if key == ord('q'):
             self.capture.release()
             self.output_video.release()
             cv2.destroyAllWindows()
             exit(1)
-        # Press spacebar to start/stop recording
-        elif key == 32:
-            if self.record:
-                self.record = False
-                print('Stop recording')
-            else:
-                self.record = True
-                print('Start recording')
 
     def save_frame(self):
         # Save obtained frame into video output file
@@ -62,5 +48,6 @@ if __name__ == '__main__':
     while True:
         try:
             video_stream_widget.show_frame()
+            video_stream_widget.save_frame()
         except AttributeError:
             pass
