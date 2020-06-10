@@ -43,6 +43,7 @@ class RTSPVideoWriterObject(object):
         self.output_video.write(self.frame)
 
 if __name__ == '__main__':
+    # 修改此处视频地址即可
     rtsp_stream_link = 'rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0'
     video_stream_widget = RTSPVideoWriterObject(rtsp_stream_link)
     while True:

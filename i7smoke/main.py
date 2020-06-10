@@ -6,51 +6,21 @@ import datetime
 import numpy as np
 
 
-class smoke_detect:
+class fall_detection:
     def __init__(self):
         # 所需参数
         self.detect_area = [0.1, 0.9, 0.1, 0.9]  # 截取的图像区域，范围为0~1，长宽
         self.interval = 0.1  # 采样间隔（单位：秒）
         self.resize_height = 600  # 调整大小后的图像高
         self.__threshold = 5  # 图像二值化的阀值
-        self.__warn_rate = 0.3  # 差异面积趋势变化判定，如果有瞬间变化过大则预警
-        self.__kernel = np.ones((5, 5), np.uint8)      # 图像膨胀相关参数
-        # 记录最近几帧的像素差异个数
-        self.__diff_recent = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+        self.__kernel = np.ones((5, 5), np.uint8)  # 图像膨胀相关参数
         # 其他参数（无需调整）
         self.resize_length = -1
-        # 形态学处理后标志区域的长宽、中心位置
+        # 形态学处理后标志区域的长宽、中心位置、角度信息
         self.__rectangle = []
-
-    # 计算并返回最近几帧的像素差异平均值
-    def __average_recent(self):
-        sum_recent = 0
-        for count_average in range(0, len(self.__diff_recent)):
-            sum_recent += self.__diff_recent[count_average]
-        return sum_recent / len(self.__diff_recent)
 
     def set_resize_length(self, length_input):
         self.resize_length = length_input
-
-    def calculate_diff(self, diff_image):
-        count_diff = 0
-        # 计算当前图像的差异像素个数
-        for length in range(self.resize_length):
-            for height in range(self.resize_height):
-                if diff_image[length, height] == 255:
-                    count_diff += 1
-        # 如果需要，初始化记录最近几帧像素差异的列表
-        for count_init in range(0, len(self.__diff_recent)):
-            if self.__diff_recent[count_init] < 0:
-                self.__diff_recent[count_init] = count_diff
-        # 计算比较平均值，如有异常，输出侦测到烟雾信号
-        average = self.__average_recent()
-        if count_diff > average * self.__warn_rate:
-            print("detected with rapid change!")
-            exit(0)
-        # 删除当前图像的差异像素个数列表的最老一项，加入当前帧的信息
-        self.__diff_recent.pop(0)
-        self.__diff_recent.append(count_diff)
 
     def detect_function(self, detect_input, detect_input_last):
         # 缩小图像
@@ -81,22 +51,35 @@ class smoke_detect:
         # 记录矩形区域的长宽中心位置
         if len(self.__rectangle) > 5:
             self.__rectangle.pop(0)
-        self.__rectangle.append([rect[1], rect[0]])
+        self.__rectangle.append([rect[1], rect[0], rect[2]])
         print(self.__rectangle)
+        # 调用警告判决函数
+        self.rectangle_detect()
         # 显示模块
         diff_color = cv2.merge([diff_median, diff_median, diff_median])
         cv2.drawContours(diff_color, [box], 0, [255, 255, 0], 2)
         ###
         cv2.imshow("diff_out", diff_color)
-        cv2.moveWindow("diff_out", 40,10)
         cv2.waitKey(1000)
         cv2.destroyAllWindows()
         ###
 
+    # 对矩形的位置进行判断，输出警告标志位
+    def rectangle_detect(self):
+        warn_rate = 0
+        for count_rectangle in range(0, len(self.__rectangle)):
+            if 45 > self.__rectangle[2] > -45 and self.__rectangle[0][0] / self.__rectangle[0][1] < 0.6:
+                continue
+            else:
+                warn_rate += 1
+        if warn_rate > 3:
+            print("fall warn!")
+            exit(0)
+
 
 if __name__ == '__main__':
-    # 初始化烟雾检测主函数
-    detect = smoke_detect()
+    # 初始化姿态检测主函数
+    detect = fall_detection()
 
     # 获取视频
     videoCapture = cv2.VideoCapture('video/test.mp4')
@@ -115,7 +98,7 @@ if __name__ == '__main__':
 
     # 选择需要作检测的区域
     frame_detect = frame[int(detect.detect_area[2] * x_origin): int(detect.detect_area[3] * x_origin), int(
-        detect.detect_area[0] * y_origin) : int(detect.detect_area[1] * y_origin)]
+        detect.detect_area[0] * y_origin): int(detect.detect_area[1] * y_origin)]
     x, y = frame_detect.shape[0:2]
     # 记录缩小后图像的长度
     detect.set_resize_length(int(x / (y / detect.resize_height)))
