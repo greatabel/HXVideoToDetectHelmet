@@ -1,12 +1,14 @@
 import cv2
 # 海康
 #rtsp://admin:hik12345+@10.248.204.200:554
+#rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101
 # 大华
 #rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0
 #rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0
+input_str = 'rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101'
 import urllib
 
-input_str = 'rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0'
+
 
 def deal_specialchar_in_url(istr):
 	s = istr.find('//')
@@ -20,7 +22,7 @@ def deal_specialchar_in_url(istr):
 	return result
 
 addr = deal_specialchar_in_url(input_str)
-
+print('adr', addr)
 
 # adr = urllib.parse.quote_plus("admin")+ ":" + urllib.parse.quote_plus("hik12345+")
 # print(adr)

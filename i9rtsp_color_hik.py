@@ -462,6 +462,8 @@ def run_multi_camera():
     rtsps = [('admin', 'admin123','10.248.10.100:554',1), 
              ('admin', 'admin123','10.248.10.100:554',3),
              ('admin', 'admin123','10.248.10.100:554',1), 
+             ('admin', 'admin123','10.248.10.100:554',3),
+             ('admin', 'admin123','10.248.10.100:554',1), 
             ]
 
     mp.set_start_method(method='spawn')  # init
@@ -474,7 +476,11 @@ def run_multi_camera():
         camera_ip = rtsp[2]
         ch        = rtsp[3]
         processes.append(mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip, ch)))
+        # 大华的情况 ：
         full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (user_name, user_pwd, camera_ip, ch)
+        # 网络摄像头是海康:
+        full_vedio_url = "rtsp://%s:%s@%s//Streaming/Channels/%d" % (user, pwd, ip, channel)
+        
         rect = url_rect_dict[full_vedio_url]
         # print(full_vedio_url, type(rect), rect, rect[0], rect[1])
         processes.append(mp.Process(target=image_get, args=(queue, camera_ip, url_rect_dict[full_vedio_url])))
