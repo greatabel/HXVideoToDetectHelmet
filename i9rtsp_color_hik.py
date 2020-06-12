@@ -21,6 +21,7 @@ import urllib
 
 
 def deal_specialchar_in_url(istr):
+    # encode处理 rtsp地址中特殊字符，比如加号 ，否则连不上
     s = istr.find('//')
     e = istr.find('@')
     # print(s, e)
@@ -31,7 +32,7 @@ def deal_specialchar_in_url(istr):
     # print(result)
     return result
 
-    
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Train YOLO networks with random input shape.')
     parser.add_argument('--network', type=str, default='yolo3_darknet53_voc',
@@ -51,7 +52,9 @@ def parse_args():
 
 
 def image_put(q, user, pwd, ip, channel=3):
-    cap = cv2.VideoCapture("rtsp://%s:%s@%s//Streaming/Channels/%d" % (user, pwd, ip, channel))
+    istr = "rtsp://%s:%s@%s//Streaming/Channels/%d" % (user, pwd, ip, channel)
+    pstr = deal_specialchar_in_url(istr)
+    cap = cv2.VideoCapture(pstr)
     if cap.isOpened():
         print('HIKVISION')
     else:
@@ -453,15 +456,23 @@ def run_single_camera():
 def run_multi_camera():
 
     # user_name, user_pwd = "admin", "password"
-    user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
+    # user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 
-    chanels = [1, 3]
+    # chanels = [1, 3]
+    rtsps = [('admin', 'admin123','10.248.10.100:554',1), 
+             ('admin', 'admin123','10.248.10.100:554',3),
+             ('admin', 'admin123','10.248.10.100:554',1), 
+            ]
 
     mp.set_start_method(method='spawn')  # init
-    queues = [mp.Queue(maxsize=4) for _ in chanels]
+    queues = [mp.Queue(maxsize=4) for _ in rtsps]
 
     processes = []
-    for queue, ch in zip(queues, chanels):
+    for queue, rtsp in zip(queues, rtsps):
+        user_name = rtsp[0]
+        user_pwd =  rtsp[1]
+        camera_ip = rtsp[2]
+        ch        = rtsp[3]
         processes.append(mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip, ch)))
         full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (user_name, user_pwd, camera_ip, ch)
         rect = url_rect_dict[full_vedio_url]
@@ -490,7 +501,7 @@ if __name__ == '__main__':
     saved_config_filename = 'i8url_rect_dict.json'
     url_rect_dict = load_rect_config()
     print(url_rect_dict)
-    # run_multi_camera()
-    run_single_camera()
+    run_multi_camera()
+    # run_single_camera()
 
     pass
