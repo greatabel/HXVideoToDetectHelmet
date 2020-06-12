@@ -12,7 +12,16 @@ import cv2
 # cap = cv2.VideoCapture("rtsp://admin:yxgl123456@10.249.181.12:8002/cam/realmonitor?channel=3&subtype=0")
 # cap = cv2.VideoCapture("rtsp://admin:yxgl123456@192.168.200.150:554//Streaming/Channels/1")
 # cap = cv2.VideoCapture("rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101")
-cap = cv2.VideoCapture("rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/tracks/1701?starttime=20200602t063812z&endtime=20200602t064016z")
+# cap = cv2.VideoCapture("rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/tracks/1701?starttime=20200602t063812z&endtime=20200602t064016z")
+# cap = cv2.VideoCapture("rtsp://admin:hik12345+@10.248.204.200:554/Streaming/Channels/D2")
+# cap = cv2.VideoCapture("rtsp://admin:hik12345+@10.248.204.200:554/h264/ch33/main/av_stream")
+# cap = cv2.VideoCapture("rtsp://admin:hik12345+@10.248.204.200:554/Streaming/Channels/201")
+import urllib
+adr = urllib.parse.quote_plus("admin")+ ":" + urllib.parse.quote_plus("hik12345+")
+print(adr)
+# cap = cv2.VideoCapture("rtsp://admin:hik12345%2B@10.248.204.201:554")
+cap = cv2.VideoCapture("rtsp://"+adr + "@10.248.204.201:554")
+
 # cap = cv2.VideoCapture("rtsp://admin:yxgl123456@192.168.200.150:554/Streaming/Channels/101?starttime=20200520t063812z&endtime=20200520t064816z")
 
 #cap = cv2.VideoCapture("test2.dav")
@@ -28,15 +37,17 @@ count = 0
 while(True):
     # Capture frame-by-frame
     ret, frame = cap.read()
+    # print(frame, type(frame),'#', ret)
+    if frame is not None:
 
-    # Our operations on the frame come here
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # Our operations on the frame come here
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # Display the resulting frame
-    # cv2.imshow('frame',gray)
-    cv2.imshow('frame',frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        # Display the resulting frame
+        # cv2.imshow('frame',gray)
+        cv2.imshow('frame',frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
     # count += 38
     # cap.set(1, count)

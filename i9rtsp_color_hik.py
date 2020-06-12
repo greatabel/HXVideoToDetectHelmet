@@ -16,7 +16,22 @@ from matplotlib import pyplot as plt
 import webcolors
 from sklearn.cluster import KMeans
 import os
+import urllib
 
+
+
+def deal_specialchar_in_url(istr):
+    s = istr.find('//')
+    e = istr.find('@')
+    # print(s, e)
+    subs = istr[s+2: e]
+    name, ps = subs.split(':')
+    encoded_name_ps = urllib.parse.quote_plus(name)+ ":" + urllib.parse.quote_plus(ps)
+    result = 'rtsp://' + encoded_name_ps + istr[e:]
+    # print(result)
+    return result
+
+    
 def parse_args():
     parser = argparse.ArgumentParser(description='Train YOLO networks with random input shape.')
     parser.add_argument('--network', type=str, default='yolo3_darknet53_voc',
@@ -436,6 +451,7 @@ def run_single_camera():
     
 
 def run_multi_camera():
+
     # user_name, user_pwd = "admin", "password"
     user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 
