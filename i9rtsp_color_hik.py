@@ -339,6 +339,7 @@ def image_get(q, ip, rect):
     else:
         net.load_parameters('mobilenet0.25.params',ctx=ctx)
         print('use mobile0.25 to extract feature')
+        print('#'*20)
 
     # cv2.namedWindow(ip, flags=cv2.WINDOW_FREERATIO)
     while True:
@@ -459,11 +460,10 @@ def run_multi_camera():
     # user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 
     # chanels = [1, 3]
-    rtsps = [('admin', 'admin123','10.248.10.100:554',1), 
-             ('admin', 'admin123','10.248.10.100:554',3),
-             ('admin', 'admin123','10.248.10.100:554',1), 
-             ('admin', 'admin123','10.248.10.100:554',3),
-             ('admin', 'admin123','10.248.10.100:554',1), 
+    rtsps = [('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
+             ('admin', 'huaxin12345','10.248.10.43:554',101, 'hik'),
+             ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
+             ('admin', 'huaxin12345','10.248.10.43:554',102, 'hik'),
             ]
 
     mp.set_start_method(method='spawn')  # init
@@ -475,12 +475,15 @@ def run_multi_camera():
         user_pwd =  rtsp[1]
         camera_ip = rtsp[2]
         ch        = rtsp[3]
+        camera_corp = rtsp[4]
         processes.append(mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip, ch)))
         # 大华的情况 ：
-        full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (user_name, user_pwd, camera_ip, ch)
+        if camera_corp == 'dahua':
+            full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (user_name, user_pwd, camera_ip, ch)
         # 网络摄像头是海康:
-        full_vedio_url = "rtsp://%s:%s@%s//Streaming/Channels/%d" % (user, pwd, ip, channel)
-        
+        elif camera_corp == 'hik':
+            full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%d" % (user_name, user_pwd, camera_ip, ch)
+
         rect = url_rect_dict[full_vedio_url]
         # print(full_vedio_url, type(rect), rect, rect[0], rect[1])
         processes.append(mp.Process(target=image_get, args=(queue, camera_ip, url_rect_dict[full_vedio_url])))
@@ -509,5 +512,6 @@ if __name__ == '__main__':
     print(url_rect_dict)
     run_multi_camera()
     # run_single_camera()
+    # python3 i9rtsp_color_hik.py --gpu=True --network=yolo3_mobilenet0.25_voc
 
     pass

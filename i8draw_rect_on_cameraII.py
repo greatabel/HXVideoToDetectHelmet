@@ -8,11 +8,26 @@ import mxnet as mx
 import cv2
 import numpy as np
 import json
+import urllib
+
+
+def deal_specialchar_in_url(istr):
+    s = istr.find('//')
+    e = istr.find('@')
+    # print(s, e)
+    subs = istr[s+2: e]
+    name, ps = subs.split(':')
+    encoded_name_ps = urllib.parse.quote_plus(name)+ ":" + urllib.parse.quote_plus(ps)
+    result = 'rtsp://' + encoded_name_ps + istr[e:]
+    # print(result)
+    return result
+
 
 
 video_urls = [
-    "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0",
-    "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0"
+    "rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/101",
+    "rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/102",
+    "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0"
 ]
 saved_config_filename = 'i8url_rect_dict.json'
 url_rect_dict = {}
@@ -47,8 +62,8 @@ def on_mouse(event,x,y,flags,params):
 for video_url in video_urls:
     video_flag = True
     rect = (0, 0, 0, 0)
-
-    cap = cv2.VideoCapture(video_url)
+    addr = deal_specialchar_in_url(video_url)
+    cap = cv2.VideoCapture(addr)
     #cap = cv2.VideoCapture("test2.dav")
     #cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))

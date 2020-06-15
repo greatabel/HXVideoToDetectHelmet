@@ -3,11 +3,12 @@ import cv2
 #rtsp://admin:hik12345+@10.248.204.200:554
 #rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101
 # 大华
-#rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0
+input_str = 'rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0'
 #rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0
 # input_str = 'rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101'
 
-input_str = 'rtsp://admin:huaxin12345@10.248.10.43:554:554/Streaming/Channels/101'
+# input_str = 'rtsp://admin:huaxin12345@10.248.10.43:554:554/Streaming/Channels/101'
+
 # input_str = 'rtsp://admin:huaxin12345@10.248.10.43:554:554/Streaming/Channels/102'
 import urllib
 

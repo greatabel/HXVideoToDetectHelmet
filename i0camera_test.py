@@ -21,7 +21,7 @@ import urllib
 adr = urllib.parse.quote_plus("admin")+ ":" + urllib.parse.quote_plus("huaxin12345")
 print(adr)
 # cap = cv2.VideoCapture("rtsp://admin:hik12345%2B@10.248.204.201:554")
-cap = cv2.VideoCapture("rtsp://"+adr + "@10.248.10.43:554")
+cap = cv2.VideoCapture("rtsp://"+adr + "@10.248.10.43:554/Streaming/Channels/101")
 
 # cap = cv2.VideoCapture("rtsp://admin:yxgl123456@192.168.200.150:554/Streaming/Channels/101?starttime=20200520t063812z&endtime=20200520t064816z")
 
