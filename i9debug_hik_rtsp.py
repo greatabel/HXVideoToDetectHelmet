@@ -5,7 +5,10 @@ import cv2
 # 大华
 #rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0
 #rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0
-input_str = 'rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101'
+# input_str = 'rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101'
+
+input_str = 'rtsp://admin:huaxin12345@10.248.10.43:554:554/Streaming/Channels/101'
+# input_str = 'rtsp://admin:huaxin12345@10.248.10.43:554:554/Streaming/Channels/102'
 import urllib
 
 
