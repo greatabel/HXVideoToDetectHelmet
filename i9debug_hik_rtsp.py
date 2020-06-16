@@ -1,9 +1,50 @@
 import cv2
 # 海康
-#rtsp://admin:hik12345+@10.248.204.200:554
+# 12345
+# yxgl$666
+# yxgl123456
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.182:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.183:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.184:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.185:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.186:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.187:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.188:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.189:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.190:554'
+
+# camera is error 
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.191:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.192:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.193:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.194:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.197:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.198:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.202:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.205:554'
+
+# camear is error(error while decoding MB 58 3, bytestream -34)
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.203:554'
+
+# cameara is not online
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.200:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.201:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.206:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.207:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.208:554'
+
+
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.195:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.196:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.199:554'
+# input_str= 'rtsp://admin:yxgl$666@192.168.200.204:554'
+
+input_str= 'rtsp://admin:yxgl$666@192.168.200.205:554'
+
+
 #rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101
 # 大华
-input_str = 'rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0'
+# input_str = 'rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0'
 #rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0
 # input_str = 'rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101'
 
