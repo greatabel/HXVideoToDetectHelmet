@@ -24,10 +24,22 @@ def deal_specialchar_in_url(istr):
 
 
 
+# video_urls = [
+#     "rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/101",
+#     "rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/102",
+#     "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0"
+# ]
+
 video_urls = [
-    "rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/101",
-    "rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/102",
-    "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0"
+    "rtsp://admin:yxgl$666@192.168.200.182:554/Streaming/Channels/1",
+    "rtsp://admin:yxgl$666@192.168.200.183:554/Streaming/Channels/1",
+    "rtsp://admin:yxgl$666@192.168.200.190:554/Streaming/Channels/1",
+
+    "rtsp://admin:yxgl$666@192.168.200.204:554/Streaming/Channels/1",
+    "rtsp://admin:12345@192.168.200.76:554/Streaming/Channels/1",
+    "rtsp://admin:12345@192.168.200.91:554/Streaming/Channels/1",   
+    "rtsp://admin:12345@192.168.200.95:554/Streaming/Channels/1",
+    "rtsp://admin:12345@192.168.200.97:554/Streaming/Channels/1"
 ]
 saved_config_filename = 'i8url_rect_dict.json'
 url_rect_dict = {}
@@ -121,7 +133,7 @@ for video_url in video_urls:
                 results = [results[0], results[3], results[2], results[1]]
                 print(results)
 
-            url_rect_dict[video_url] = results
+            url_rect_dict[addr] = results
             video_flag = False
 
 cap.release()

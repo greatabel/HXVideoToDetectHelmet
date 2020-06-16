@@ -460,10 +460,33 @@ def run_multi_camera():
     # user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 
     # chanels = [1, 3]
-    rtsps = [('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-             ('admin', 'huaxin12345','10.248.10.43:554',101, 'hik'),
-             ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-             ('admin', 'huaxin12345','10.248.10.43:554',102, 'hik'),
+
+    # video_urls = [
+    # "rtsp://admin:yxgl$666@192.168.200.182:554",
+    # "rtsp://admin:yxgl$666@192.168.200.183:554",
+    # "rtsp://admin:yxgl$666@192.168.200.190:554",
+    # "rtsp://admin:yxgl$666@192.168.200.204:554",
+
+    # "rtsp://admin:12345@192.168.200.76:554",
+    # "rtsp://admin:12345@192.168.200.91:554",   
+    # "rtsp://admin:12345@192.168.200.95:554",
+    # "rtsp://admin:12345@192.168.200.97:554"
+    # ]
+
+    # rtsps = [('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
+    #          ('admin', 'huaxin12345','10.248.10.43:554',101, 'hik'),
+    #          ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
+    #          ('admin', 'huaxin12345','10.248.10.43:554',102, 'hik'),
+    #         ]
+    rtsps = [('admin', 'yxgl$666','192.168.200.182:554',1, 'hik'), 
+            ('admin', 'yxgl$666','192.168.200.183:554',1, 'hik'), 
+            ('admin', 'yxgl$666','192.168.200.190:554',1, 'hik'), 
+            ('admin', 'yxgl$666','192.168.200.204:554',1, 'hik'), 
+            ('admin', '12345','192.168.200.76:554',1, 'hik'), 
+            ('admin', '12345','192.168.200.91:554',1, 'hik'), 
+            ('admin', '12345','192.168.200.95:554',1, 'hik'), 
+            ('admin', '12345','192.168.200.97:554',1, 'hik'), 
+
             ]
 
     mp.set_start_method(method='spawn')  # init
@@ -483,7 +506,7 @@ def run_multi_camera():
         # 网络摄像头是海康:
         elif camera_corp == 'hik':
             full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%d" % (user_name, user_pwd, camera_ip, ch)
-
+        full_vedio_url = deal_specialchar_in_url(full_vedio_url)
         rect = url_rect_dict[full_vedio_url]
         # print(full_vedio_url, type(rect), rect, rect[0], rect[1])
         processes.append(mp.Process(target=image_get, args=(queue, camera_ip, url_rect_dict[full_vedio_url])))

@@ -5,15 +5,18 @@ import cv2
 # yxgl!123456
 # yxgl123456
 
-
+# 库房
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.182:554'
+# 电气室
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.183:554'
+# 电气室
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.184:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.185:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.186:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.187:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.188:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.189:554'
+# 下料口
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.190:554'
 
 # camera is error 
@@ -36,10 +39,11 @@ import cv2
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.207:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.208:554'
 
-
+# 下料口
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.195:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.196:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.199:554'
+# 水浠下楼梯
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.204:554'
 
 
@@ -144,7 +148,7 @@ import cv2
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.112:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.113:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.114:554'
-input_str= 'rtsp://admin:yxgl$666@192.168.200.114:554'
+input_str= 'rtsp://admin:yxgl$666@192.168.200.114:554/Streaming/Channels/1'
 
 
 #rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101
