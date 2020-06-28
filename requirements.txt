@@ -2,6 +2,7 @@ termcolor
 gluoncv
 imutils
 mxnet
+# mxnet-cu102
 sklearn
 opencv-python
-webcolors
+webcolors==1.10

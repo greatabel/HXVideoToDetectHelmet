@@ -35,7 +35,7 @@ def parse_args():
     return args
 
 
-def image_put(q, user, pwd, ip, channel=3):
+def image_put(q, user, pwd, ip, channel=1):
     cap = cv2.VideoCapture("rtsp://%s:%s@%s//Streaming/Channels/%d" % (user, pwd, ip, channel))
     if cap.isOpened():
         print('HIKVISION')
@@ -61,7 +61,9 @@ def image_put(q, user, pwd, ip, channel=3):
 
 def closest_colour(requested_colour):
     min_colours = {}
-    for key, name in webcolors.css3_hex_to_names.items():
+    # 这里要小心兼容性，阳新骨料是小写 可以的
+    # for key, name in webcolors.css3_hex_to_names.items():
+    for key, name in webcolors.CSS3_HEX_TO_NAMES.items():
         r_c, g_c, b_c = webcolors.hex_to_rgb(key)
         rd = (r_c - requested_colour[0]) ** 2
         gd = (g_c - requested_colour[1]) ** 2
@@ -290,6 +292,7 @@ def image_get(q, window_name):
     print('是否使用GPU:', args.gpu)
     if args.gpu:
         ctx = mx.gpu()
+        print('here gpu')
     else:
         ctx = mx.cpu()
     # ctx = mx.cpu()
@@ -414,7 +417,7 @@ def image_get(q, window_name):
 
 def run_single_camera():
     # user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
-    user_name, user_pwd, camera_ip = "admin", "yxgl123456", "192.168.200.159:554"
+    user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 # admin:yxgl123456@192.168.200.153:554
     mp.set_start_method(method='spawn')  # init
     queue = mp.Queue(maxsize=2)
