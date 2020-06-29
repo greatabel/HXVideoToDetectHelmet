@@ -24,11 +24,21 @@ def deal_specialchar_in_url(istr):
 
 
 
-video_urls = [
-    "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0",
-    "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0"
+# video_urls = [
+#     "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0",
+#     "rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=3&subtype=0"
     
  
+# ]
+
+
+video_urls = [
+    "rtsp://admin:yxgl$666@192.168.200.210:554/Streaming/Channels/1",
+    "rtsp://admin:yxgl$666@192.168.200.211:554/Streaming/Channels/1",
+    "rtsp://admin:yxgl$666@192.168.200.232:554/Streaming/Channels/1",
+
+    "rtsp://admin:yxgl$666@192.168.200.233:554/Streaming/Channels/1",
+
 ]
 
 # video_urls = [
