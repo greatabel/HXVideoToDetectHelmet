@@ -490,15 +490,23 @@ def run_multi_camera():
 
     #         ]
 
+    rtsps = [('admin', 'yxgl$666','192.168.200.210:554',1, 'hik'), 
+            ('admin', 'yxgl$666','192.168.200.211:554',1, 'hik'), 
+            ('admin', 'yxgl$666','192.168.200.232:554',1, 'hik'), 
+            ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'), 
+
+
+            ]
+
     # 本地测试
-    rtsps = [
-        ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-        ('admin', 'admin123','10.248.10.100:554',3, 'dahua'),
-        ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-        ('admin', 'admin123','10.248.10.100:554',3, 'dahua'),
-        ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-        # ('admin', 'admin123','10.248.10.100:554',3, 'dahua'), 
-    ]
+    # rtsps = [
+    #     ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
+    #     ('admin', 'admin123','10.248.10.100:554',3, 'dahua'),
+    #     ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
+    #     ('admin', 'admin123','10.248.10.100:554',3, 'dahua'),
+    #     ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
+    #     # ('admin', 'admin123','10.248.10.100:554',3, 'dahua'), 
+    # ]
 
     mp.set_start_method(method='spawn')  # init
     queues = [mp.Queue(maxsize=4) for _ in rtsps]

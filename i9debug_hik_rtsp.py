@@ -148,7 +148,7 @@ import cv2
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.112:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.113:554'
 # input_str= 'rtsp://admin:yxgl$666@192.168.200.114:554'
-input_str= 'rtsp://admin:yxgl$666@192.168.200.114:554/Streaming/Channels/1'
+input_str= 'rtsp://admin:yxgl$666@192.168.200.210:554/Streaming/Channels/1'
 
 
 #rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101
