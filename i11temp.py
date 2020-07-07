@@ -19,15 +19,46 @@ def image_get(q, window_name):
     cv2.namedWindow(window_name, flags=cv2.WINDOW_FREERATIO)
     while True:
         frame = q.get()
-        cv2.imshow(window_name, frame)
+        # cv2.imshow(window_name, frame)
         cv2.waitKey(1)
 
 def run_multi_camera():
     # user_name, user_pwd = "admin", "password"
     user_name, user_pwd = "admin", "admin123"
     camera_ip_l = [
-        "10.248.10.100:554",  # ipv4
-        "10.248.10.100:554"
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        ["10.248.10.100:554", 1],  # ipv4
+        ["10.248.10.100:554", 3],
+        
         # 把你的摄像头的地址放到这里，如果是ipv6，那么需要加一个中括号。
     ]
 
@@ -36,8 +67,9 @@ def run_multi_camera():
 
     processes = []
     for queue, camera_ip in zip(queues, camera_ip_l):
-        processes.append(mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip)))
-        processes.append(mp.Process(target=image_get, args=(queue, camera_ip)))
+        print(camera_ip, camera_ip[0], '#', camera_ip[1])
+        processes.append(mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip[0], camera_ip[1])))
+        processes.append(mp.Process(target=image_get, args=(queue, camera_ip[0])))
 
     for process in processes:
         process.daemon = True
