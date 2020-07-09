@@ -3,6 +3,9 @@ import cv2
 import time
 import multiprocessing as mp
 
+#https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
+
+
 def image_put(q, name, pwd, ip, channel=1):
     cap = cv2.VideoCapture("rtsp://%s:%s@%s//Streaming/Channels/%d" % (name, pwd, ip, channel))
     if cap.isOpened():
@@ -15,12 +18,20 @@ def image_put(q, name, pwd, ip, channel=1):
         q.put(cap.read()[1])
         q.get() if q.qsize() > 1 else time.sleep(0.01)
 
-def image_get(q, window_name):
+def image_get(quelist, window_name):
     cv2.namedWindow(window_name, flags=cv2.WINDOW_FREERATIO)
     while True:
-        frame = q.get()
-        cv2.imshow(window_name, frame)
-        cv2.waitKey(1)
+        for q in quelist:
+            frame = q.get()
+            cv2.imshow(window_name, frame)
+            cv2.waitKey(1)
+
+
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
 
 def run_multi_camera():
     # user_name, user_pwd = "admin", "password"
@@ -100,10 +111,12 @@ def run_multi_camera():
 
 
     # -------------------- start ai processes
-
-    for i in range(0, 2):
+    num_of_ai_process = 2
+    chunk_queues = list(chunks(queues, int(len(queues)/num_of_ai_process)))
+    print(chunk_queues)
+    for i in range(0, num_of_ai_process):
         print('ai process', i)
-        processes.append(mp.Process(target=image_get, args=(queues[i], str(i))))
+        processes.append(mp.Process(target=image_get, args=(chunk_queues[i], str(i))))
     # -------------------- end   ai processes
 
     for process in processes:
