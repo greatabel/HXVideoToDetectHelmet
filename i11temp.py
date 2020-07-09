@@ -16,7 +16,7 @@ def image_put(q, name, pwd, ip, channel=1):
         q.get() if q.qsize() > 1 else time.sleep(0.01)
 
 def image_get(q, window_name):
-    cv2.namedWindow(window_name, flags=cv2.WINDOW_FREERATIO)
+    # cv2.namedWindow(window_name, flags=cv2.WINDOW_FREERATIO)
     while True:
         frame = q.get()
         # cv2.imshow(window_name, frame)
