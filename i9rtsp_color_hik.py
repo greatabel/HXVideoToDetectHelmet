@@ -23,7 +23,7 @@ import urllib
 def deal_specialchar_in_url(istr):
     # encode处理 rtsp地址中特殊字符，比如加号 ，否则连不上
     s = istr.find('//')
-    e = istr.find('@')
+    e = istr.rfind('@')
     # print(s, e)
     subs = istr[s+2: e]
     name, ps = subs.split(':')
@@ -490,10 +490,11 @@ def run_multi_camera():
 
     #         ]
 
-    rtsps = [('admin', 'yxgl$666','192.168.200.210:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.211:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.232:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'), 
+    rtsps = [
+            ('admin', 'huaxin12345','10.248.10.43:554',1, 'hik'), 
+            ('admin', 'huaxin12345','10.248.10.43:554',1, 'hik'), 
+            ('admin', 'huaxin12345','10.248.10.43:554',1, 'hik'), 
+            # ('admin', 'huaxin12345','192.168.200.233:554',1, 'hik'), 
 
 
             ]
@@ -526,9 +527,10 @@ def run_multi_camera():
         elif camera_corp == 'hik':
             full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%d" % (user_name, user_pwd, camera_ip, ch)
         full_vedio_url = deal_specialchar_in_url(full_vedio_url)
-        rect = url_rect_dict[full_vedio_url]
+        # rect = url_rect_dict[full_vedio_url]
+        rect = url_rect_dict.get(full_vedio_url, None)
         # print(full_vedio_url, type(rect), rect, rect[0], rect[1])
-        processes.append(mp.Process(target=image_get, args=(queue, camera_ip, url_rect_dict[full_vedio_url])))
+        processes.append(mp.Process(target=image_get, args=(queue, camera_ip, rect)))
 
     for process in processes:
         process.daemon = True
