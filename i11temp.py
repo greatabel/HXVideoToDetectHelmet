@@ -14,9 +14,18 @@ def image_put(q, name, pwd, ip, channel=1):
         cap = cv2.VideoCapture("rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (name, pwd, ip, channel))
         print('DaHua')
 
+    # 通过timeF控制多少帧数真正读取1帧到队列中
+    timeF = 15
+    count = 1 
     while True:
-        q.put(cap.read()[1])
-        q.get() if q.qsize() > 1 else time.sleep(0.01)
+        res, frame = cap.read()
+        if count % timeF == 0:
+            # print('pick=', count)
+            q.put(cap.read()[1])
+            q.get() if q.qsize() > 1 else time.sleep(0.01)
+        count += 1
+        # print('count=', count)
+
 
 def image_get(quelist, window_name):
     cv2.namedWindow(window_name, flags=cv2.WINDOW_FREERATIO)
