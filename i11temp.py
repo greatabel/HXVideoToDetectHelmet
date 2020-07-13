@@ -3,6 +3,9 @@ import cv2
 import time
 import multiprocessing as mp
 
+from gluoncv import model_zoo, data, utils
+import mxnet as mx
+import i11process_frame
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
@@ -34,6 +37,110 @@ def image_get(quelist, window_name):
             frame = q.get()
             cv2.imshow(window_name, frame)
             cv2.waitKey(1)
+
+def image_get_v0(quelist, window_name, rect):
+
+    args = i11process_frame.parse_args()
+    print('是否使用GPU:', args.gpu)
+    if args.gpu:
+        ctx = mx.gpu()
+    else:
+        ctx = mx.cpu()
+    # ctx = mx.cpu()
+
+    net = model_zoo.get_model(args.network, pretrained=False)
+    
+    classes = ['hat', 'person']
+    for param in net.collect_params().values():
+        if param._data is not None:
+            continue
+        param.initialize()
+    net.reset_class(classes)
+    net.collect_params().reset_ctx(ctx)
+
+    if args.network == 'yolo3_darknet53_voc':
+        net.load_parameters('darknet.params',ctx=ctx)
+        print('use darknet to extract feature')
+    elif args.network == 'yolo3_mobilenet1.0_voc':
+        net.load_parameters('mobilenet1.0.params',ctx=ctx)
+        print('use mobile1.0 to extract feature')
+    else:
+        net.load_parameters('mobilenet0.25.params',ctx=ctx)
+        print('use mobile0.25 to extract feature')
+        print('#'*20)
+
+    # cv2.namedWindow(ip, flags=cv2.WINDOW_FREERATIO)
+    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+    while True:
+        for q in quelist:
+
+            frame = q.get()
+            # cv2.imshow(ip, frame)
+            # cv2.waitKey(1)
+
+            
+
+                
+            # frame = '1.jpg'
+            # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
+            # x = x.as_in_context(ctx)
+            # box_ids, scores, bboxes = net(x)
+            # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
+            # cv2.imshow('image', orig_img[...,::-1])
+            # cv2.waitKey(0)
+            # cv2.imwrite(frame.split('.')[0] + '_result.jpg', orig_img[...,::-1])
+            # cv2.destroyAllWindows()
+
+
+                
+
+
+
+            # Image pre-processing
+            new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
+
+            # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
+            # x, orig_img = data.transforms.presets.yolo.transform_test(new_frame, short=args.short)
+            x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
+            # print('Shape of pre-processed image:', x.shape)
+            x = x.as_in_context(ctx)
+            box_ids, scores, bboxes = net(x)
+
+            # render_as_image(bboxes)
+            # ---
+            # if isinstance(bboxes[0], mx.nd.NDArray):
+
+            #     bboxes_a = bboxes[0].asnumpy()
+            # for i, bbox in enumerate(bboxes_a):
+            #     xmin, ymin, xmax, ymax = [int(x) for x in bbox]
+            #     print(xmin, ymin, xmax, ymax)
+            #     if xmin > -1 :
+            #         cv2.rectangle(orig_img, (xmin, ymin), (xmax, ymax), 122, 2)
+
+
+
+            # for idx in range(len(bboxes.asnumpy())):
+            #     x, y, w, h = cv2.boundingRect(bboxes.asnumpy()[idx])
+            #     mask[y:y+h, x:x+w] = 0
+            #     print("Box {0}: ({1},{2}), ({3},{4}), ({5},{6}), ({7},{8})".format(idx,x,y,x+w,y,x+w,y+h,x,y+h))
+            #     cv2.drawContours(mask, bboxes.asnumpy(), idx, (255, 255, 255), -1)
+            #     r = float(cv2.countNonZero(mask[y:y+h, x:x+w])) / (w * h)
+
+            #----
+
+
+            # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
+            x = i11process_frame.forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
+                                            class_names=net.classes,thresh=args.threshold, hx_rect=rect)
+            # x = origin_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
+            #                                 class_names=net.classes,thresh=args.threshold)
+
+            # print('#'*10, type(bboxes), bboxes.shape)
+            # 让窗口可以调整
+            
+            cv2.imshow('image', orig_img[...,::-1])
+            if cv2.waitKey(1) == 27:
+                    break
 
 
 def chunks(lst, n):
@@ -125,7 +232,7 @@ def run_multi_camera():
     print(chunk_queues)
     for i in range(0, num_of_ai_process):
         print('ai process', i)
-        processes.append(mp.Process(target=image_get, args=(chunk_queues[i], str(i))))
+        processes.append(mp.Process(target=image_get_v0, args=(chunk_queues[i], str(i), None)))
     # -------------------- end   ai processes
 
     for process in processes:
@@ -138,4 +245,5 @@ def run_multi_camera():
 
 if __name__ == '__main__':
     print('here')
+    # python3 i11temp.py --gpu=True --network=yolo3_mobilenet0.25_voc
     run_multi_camera() 

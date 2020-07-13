@@ -6,7 +6,7 @@ import time
 from gluoncv import model_zoo, data, utils
 #from matplotlib import pyplot as plt
 import mxnet as mx
-import cv2
+
 import argparse
 from imutils import paths
 from imutils.video import FileVideoStream
@@ -33,6 +33,7 @@ def deal_specialchar_in_url(istr):
     return result
 
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Train YOLO networks with random input shape.')
     parser.add_argument('--network', type=str, default='yolo3_darknet53_voc',
@@ -51,32 +52,6 @@ def parse_args():
     return args
 
 
-def image_put(q, user, pwd, ip, channel=3):
-    istr = "rtsp://%s:%s@%s//Streaming/Channels/%d" % (user, pwd, ip, channel)
-    pstr = deal_specialchar_in_url(istr)
-    cap = cv2.VideoCapture(pstr)
-    if cap.isOpened():
-        print('HIKVISION')
-    else:
-        cap = cv2.VideoCapture("rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (user, pwd, ip, channel))
-        print('DaHua')
-
-    while True:
-        q.put(cap.read()[1])
-        q.get() if q.qsize() > 1 else time.sleep(0.01)
-
-
-# def render_as_image(a):
-#     img = a.asnumpy() # convert to numpy array
-#     img = img.transpose((1, 2, 0))  # Move channel to the last dimension
-#     img = img.astype(np.uint8)  # use uint8 (0-255)
-
-#     plt.imshow(img)
-#     # plt.show()
-#     import random
-#     int_name = str(random.randint(1,10))
-#     plt.savefig(int_name + '.png')
-
 def closest_colour(requested_colour):
     min_colours = {}
     for key, name in webcolors.css3_hex_to_names.items():
@@ -87,14 +62,7 @@ def closest_colour(requested_colour):
         min_colours[(rd + gd + bd)] = name
     return min_colours[min(min_colours.keys())]
 
-# https://stackoverflow.com/questions/43216772/how-to-check-rgb-colors-against-a-color-range
-# TARGET_COLORS = {"red": (255, 0, 0), "yellow": (255, 255, 0), "green": (0, 255, 0)}
 
-# def color_difference (color1, color2):
-#     return sum([abs(component1-component2) for component1, component2 in zip(color1, color2)])
-
-
-#  fork from : https://gluon-cv.mxnet.io/_modules/gluoncv/utils/viz/bbox.html
 def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.5,
                  class_names=None, colors=None,
                  absolute_coordinates=True, scale=1.0, hx_rect=None):
@@ -270,7 +238,6 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                     # 警告音 
                     duration = 0.5  # seconds
                     freq = 660  # Hz
-                    # https://stackoverflow.com/questions/16573051/sound-alarm-when-code-finishes
                     os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
                     print('#'*10)
 
@@ -308,255 +275,3 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             print('裁减检测到的情况出现在我们划定的识别区域')
 
     return img
-
-def image_get(q, ip, rect):
-    frame_index = 0
-
-
-    args = parse_args()
-    print('是否使用GPU:', args.gpu)
-    if args.gpu:
-        ctx = mx.gpu()
-    else:
-        ctx = mx.cpu()
-    # ctx = mx.cpu()
-
-    net = model_zoo.get_model(args.network, pretrained=False)
-    
-    classes = ['hat', 'person']
-    for param in net.collect_params().values():
-        if param._data is not None:
-            continue
-        param.initialize()
-    net.reset_class(classes)
-    net.collect_params().reset_ctx(ctx)
-
-    if args.network == 'yolo3_darknet53_voc':
-        net.load_parameters('darknet.params',ctx=ctx)
-        print('use darknet to extract feature')
-    elif args.network == 'yolo3_mobilenet1.0_voc':
-        net.load_parameters('mobilenet1.0.params',ctx=ctx)
-        print('use mobile1.0 to extract feature')
-    else:
-        net.load_parameters('mobilenet0.25.params',ctx=ctx)
-        print('use mobile0.25 to extract feature')
-        print('#'*20)
-
-    # cv2.namedWindow(ip, flags=cv2.WINDOW_FREERATIO)
-    while True:
-        frame = q.get()
-        # cv2.imshow(ip, frame)
-        # cv2.waitKey(1)
-
-        
-
-            
-        # frame = '1.jpg'
-        # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
-        # x = x.as_in_context(ctx)
-        # box_ids, scores, bboxes = net(x)
-        # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
-        # cv2.imshow('image', orig_img[...,::-1])
-        # cv2.waitKey(0)
-        # cv2.imwrite(frame.split('.')[0] + '_result.jpg', orig_img[...,::-1])
-        # cv2.destroyAllWindows()
-        count = 0
-
-            
-
-
-
-        # Image pre-processing
-        new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
-
-        # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
-        # x, orig_img = data.transforms.presets.yolo.transform_test(new_frame, short=args.short)
-        x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
-        # print('Shape of pre-processed image:', x.shape)
-        x = x.as_in_context(ctx)
-        box_ids, scores, bboxes = net(x)
-
-        # render_as_image(bboxes)
-        # ---
-        # if isinstance(bboxes[0], mx.nd.NDArray):
-
-        #     bboxes_a = bboxes[0].asnumpy()
-        # for i, bbox in enumerate(bboxes_a):
-        #     xmin, ymin, xmax, ymax = [int(x) for x in bbox]
-        #     print(xmin, ymin, xmax, ymax)
-        #     if xmin > -1 :
-        #         cv2.rectangle(orig_img, (xmin, ymin), (xmax, ymax), 122, 2)
-
-
-
-        # for idx in range(len(bboxes.asnumpy())):
-        #     x, y, w, h = cv2.boundingRect(bboxes.asnumpy()[idx])
-        #     mask[y:y+h, x:x+w] = 0
-        #     print("Box {0}: ({1},{2}), ({3},{4}), ({5},{6}), ({7},{8})".format(idx,x,y,x+w,y,x+w,y+h,x,y+h))
-        #     cv2.drawContours(mask, bboxes.asnumpy(), idx, (255, 255, 255), -1)
-        #     r = float(cv2.countNonZero(mask[y:y+h, x:x+w])) / (w * h)
-
-        #----
-
-
-        # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
-        x = forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
-                                        class_names=net.classes,thresh=args.threshold, hx_rect=rect)
-        # x = origin_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
-        #                                 class_names=net.classes,thresh=args.threshold)
-
-        # print('#'*10, type(bboxes), bboxes.shape)
-        # 让窗口可以调整
-        cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-        cv2.imshow('image', orig_img[...,::-1])
-
-        # count += 8
-        # cap.set(1, count)
-
-    # cv2.waitKey(0)
-
-    # cv2.imwrite(frame.split('.')[0] + '_result.jpg', orig_img[...,::-1])
-
-    # cv2.destroyAllWindows()
-
-    # frame = imutils.resize(frame, width=min(800, frame.shape[1]))
-    # (rects, weights) = hog.detectMultiScale(frame, winStride=(8, 8), padding=(8, 8), scale=1.15)
-    # rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-    # pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
- 
-    # for (x, y, w, h) in pick:
-    #     cv2.rectangle(frame, (x, y), (w, h), (0, 255, 0), 2)
-    #     newpath = os.path.join('myimages/' , str(frame_index) + ".jpg")
-    #     cv2.imwrite(newpath,frame[y:h,x:w])
-
-    # frame_index = frame_index + 1
-    # print('#'*20, frame_index)
-
-    # cv2.imshow("frame",frame)
-
-        if cv2.waitKey(1) == 27:
-                break
-
-
-
-
-def run_single_camera():
-    user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
-    ch = 1
-
-    full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (user_name, user_pwd, camera_ip, ch)
-
-    mp.set_start_method(method='spawn')  # init
-    queue = mp.Queue(maxsize=2)
-    processes = [mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip, ch)),
-                 mp.Process(target=image_get, args=(queue, camera_ip, url_rect_dict[full_vedio_url]))]
-
-    [process.start() for process in processes]
-    [process.join() for process in processes]
-    
-
-def run_multi_camera():
-
-    # user_name, user_pwd = "admin", "password"
-    # user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
-
-    # chanels = [1, 3]
-
-    # video_urls = [
-    # "rtsp://admin:yxgl$666@192.168.200.182:554",
-    # "rtsp://admin:yxgl$666@192.168.200.183:554",
-    # "rtsp://admin:yxgl$666@192.168.200.190:554",
-    # "rtsp://admin:yxgl$666@192.168.200.204:554",
-
-    # "rtsp://admin:12345@192.168.200.76:554",
-    # "rtsp://admin:12345@192.168.200.91:554",   
-    # "rtsp://admin:12345@192.168.200.95:554",
-    # "rtsp://admin:12345@192.168.200.97:554"
-    # ]
-
-    # rtsps = [('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-    #          ('admin', 'huaxin12345','10.248.10.43:554',101, 'hik'),
-    #          ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-    #          ('admin', 'huaxin12345','10.248.10.43:554',102, 'hik'),
-    #         ]
-
-    # rtsps = [('admin', 'yxgl$666','192.168.200.182:554',1, 'hik'), 
-    #         ('admin', 'yxgl$666','192.168.200.183:554',1, 'hik'), 
-    #         ('admin', 'yxgl$666','192.168.200.190:554',1, 'hik'), 
-    #         ('admin', 'yxgl$666','192.168.200.204:554',1, 'hik'), 
-    #         ('admin', '12345','192.168.200.76:554',1, 'hik'), 
-    #         ('admin', '12345','192.168.200.91:554',1, 'hik'), 
-    #         ('admin', '12345','192.168.200.95:554',1, 'hik'), 
-    #         ('admin', '12345','192.168.200.97:554',1, 'hik'), 
-
-    #         ]
-
-    rtsps = [
-            ('admin', 'huaxin12345','10.248.10.43:554',1, 'hik'), 
-            ('admin', 'huaxin12345','10.248.10.43:554',1, 'hik'), 
-            ('admin', 'huaxin12345','10.248.10.43:554',1, 'hik'), 
-            # ('admin', 'huaxin12345','192.168.200.233:554',1, 'hik'), 
-
-
-            ]
-
-    # 本地测试
-    # rtsps = [
-    #     ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-    #     ('admin', 'admin123','10.248.10.100:554',3, 'dahua'),
-    #     ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-    #     ('admin', 'admin123','10.248.10.100:554',3, 'dahua'),
-    #     ('admin', 'admin123','10.248.10.100:554',1, 'dahua'), 
-    #     # ('admin', 'admin123','10.248.10.100:554',3, 'dahua'), 
-    # ]
-
-    mp.set_start_method(method='spawn')  # init
-    queues = [mp.Queue(maxsize=4) for _ in rtsps]
-
-    processes = []
-    for queue, rtsp in zip(queues, rtsps):
-        user_name = rtsp[0]
-        user_pwd =  rtsp[1]
-        camera_ip = rtsp[2]
-        ch        = rtsp[3]
-        camera_corp = rtsp[4]
-        processes.append(mp.Process(target=image_put, args=(queue, user_name, user_pwd, camera_ip, ch)))
-        # 大华的情况 ：
-        if camera_corp == 'dahua':
-            full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (user_name, user_pwd, camera_ip, ch)
-        # 网络摄像头是海康:
-        elif camera_corp == 'hik':
-            full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%d" % (user_name, user_pwd, camera_ip, ch)
-        full_vedio_url = deal_specialchar_in_url(full_vedio_url)
-        # rect = url_rect_dict[full_vedio_url]
-        rect = url_rect_dict.get(full_vedio_url, None)
-        # print(full_vedio_url, type(rect), rect, rect[0], rect[1])
-        processes.append(mp.Process(target=image_get, args=(queue, camera_ip, rect)))
-
-    for process in processes:
-        process.daemon = True
-        process.start()
-    for process in processes:
-        process.join()
-        
-
-import json
-def load_rect_config():
-    url_rect_dict = {}
-    # This loads your dict
-    with open(saved_config_filename, 'r') as f:
-        url_rect_dict = json.load(f)
-    return url_rect_dict
-
-
-
-
-if __name__ == '__main__':
-    saved_config_filename = 'i8url_rect_dict.json'
-    url_rect_dict = load_rect_config()
-    print(url_rect_dict)
-    run_multi_camera()
-    # run_single_camera()
-    # python3 i9rtsp_color_hik.py --gpu=True --network=yolo3_mobilenet0.25_voc
-
-    pass
