@@ -273,7 +273,7 @@ def run_multi_camera():
 
 
     # -------------------- start ai processes
-    num_of_ai_process = 4
+    num_of_ai_process = 8
     chunk_queues = list(chunks(queues, int(len(queues)/num_of_ai_process)))
     print(chunk_queues)
     for i in range(0, num_of_ai_process):
