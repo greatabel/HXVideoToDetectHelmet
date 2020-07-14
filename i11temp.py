@@ -69,8 +69,8 @@ def image_get_v0(quelist, window_name, rect):
         print('use mobile0.25 to extract feature')
         print('#'*20)
 
-    # cv2.namedWindow(ip, flags=cv2.WINDOW_FREERATIO)
-    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+
+    # cv2.namedWindow("image", cv2.WINDOW_NORMAL)
     while True:
         for q in quelist:
 
@@ -138,7 +138,8 @@ def image_get_v0(quelist, window_name, rect):
             # print('#'*10, type(bboxes), bboxes.shape)
             # 让窗口可以调整
             
-            cv2.imshow('image', orig_img[...,::-1])
+            # cv2.imshow('image', orig_img[...,::-1])
+            print('processing:', window_name)
             if cv2.waitKey(1) == 27:
                     break
 
@@ -159,17 +160,17 @@ def run_multi_camera():
         ["admin", "admin123", "10.248.10.100:554", 3],
         ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
         ["admin", "admin123", "10.248.10.100:554", 3],
-        # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-        # ["admin", "admin123", "10.248.10.100:554", 3],
-        # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-        # ["admin", "admin123", "10.248.10.100:554", 3],
+        ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
+        ["admin", "admin123", "10.248.10.100:554", 3],
+        ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
+        ["admin", "admin123", "10.248.10.100:554", 3],
 
-        # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-        # ["admin", "admin123", "10.248.10.100:554", 3],
-        # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-        # ["admin", "admin123", "10.248.10.100:554", 3],
-        # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-        # ["admin", "admin123", "10.248.10.100:554", 3],
+        ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
+        ["admin", "admin123", "10.248.10.100:554", 3],
+        ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
+        ["admin", "admin123", "10.248.10.100:554", 3],
+        ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
+        ["admin", "admin123", "10.248.10.100:554", 3],
         # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
         # ["admin", "admin123", "10.248.10.100:554", 3],
         # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
@@ -227,7 +228,7 @@ def run_multi_camera():
 
 
     # -------------------- start ai processes
-    num_of_ai_process = 2
+    num_of_ai_process = 4
     chunk_queues = list(chunks(queues, int(len(queues)/num_of_ai_process)))
     print(chunk_queues)
     for i in range(0, num_of_ai_process):
