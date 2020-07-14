@@ -9,13 +9,20 @@ import i11process_frame
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
-def image_put(q, name, pwd, ip, channel=1):
-    cap = cv2.VideoCapture("rtsp://%s:%s@%s//Streaming/Channels/%d" % (name, pwd, ip, channel))
-    if cap.isOpened():
-        print('HIKVISION')
-    else:
-        cap = cv2.VideoCapture("rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (name, pwd, ip, channel))
-        print('DaHua')
+def image_put(q, name, pwd, ip, channel=1, camera_corp='hik'):
+    # 大华的情况 ：
+    if camera_corp == 'dahua':
+        full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (name, pwd, ip, channel)
+    # 网络摄像头是海康:
+    elif camera_corp == 'hik':
+        full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%d" % (name, pwd, ip, channel)
+    full_vedio_url = i11process_frame.deal_specialchar_in_url(full_vedio_url)
+    cap = cv2.VideoCapture(full_vedio_url)
+    # if cap.isOpened():
+    #     print('HIKVISION')
+    # else:
+    #     cap = cv2.VideoCapture("rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (name, pwd, ip, channel))
+    #     print('DaHua')
 
     # 通过timeF控制多少帧数真正读取1帧到队列中
     timeF = 15
@@ -28,7 +35,6 @@ def image_put(q, name, pwd, ip, channel=1):
             q.get() if q.qsize() > 1 else time.sleep(0.01)
         count += 1
         # print('count=', count)
-
 
 def image_get(quelist, window_name):
     cv2.namedWindow(window_name, flags=cv2.WINDOW_FREERATIO)
@@ -151,8 +157,8 @@ def chunks(lst, n):
 
 
 def run_multi_camera():
-
     # user_name, user_pwd = "admin", "password"
+
     camera_ip_l = [
             ('admin', 'yxgl$666','192.168.200.210:554',1, 'hik'), 
             ('admin', 'yxgl$666','192.168.200.211:554',1, 'hik'), 
@@ -199,66 +205,6 @@ def run_multi_camera():
             # ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'),            
 
             ]
-    # camera_ip_l = [
-    #     ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     ["admin", "admin123", "10.248.10.100:554", 3],
-    #     ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     ["admin", "admin123", "10.248.10.100:554", 3],
-    #     ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     ["admin", "admin123", "10.248.10.100:554", 3],
-    #     ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     ["admin", "admin123", "10.248.10.100:554", 3],
-    #     ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     ["admin", "admin123", "10.248.10.100:554", 3],
-
-    #     ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     ["admin", "admin123", "10.248.10.100:554", 3],
-    #     ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     ["admin", "admin123", "10.248.10.100:554", 3],
-    #     ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-    #     # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
-    #     # ["admin", "admin123", "10.248.10.100:554", 3],
-
-
-    #     # 把你的摄像头的地址放到这里，如果是ipv6，那么需要加一个中括号。
-    # ]
-
     mp.set_start_method(method='spawn')  # init
     queues = [mp.Queue(maxsize=4) for _ in camera_ip_l]
     processes = []
@@ -268,13 +214,13 @@ def run_multi_camera():
     
     for queue, camera_ip in zip(queues, camera_ip_l):
         print(camera_ip, camera_ip[0], '#', camera_ip[1])
-        processes.append(mp.Process(target=image_put, args=(queue, camera_ip[0], camera_ip[1], camera_ip[2], camera_ip[3])))
+        processes.append(mp.Process(target=image_put, args=(queue, camera_ip[0], camera_ip[1], camera_ip[2], camera_ip[3], camera_ip[4])))
         # processes.append(mp.Process(target=image_get, args=(queue, camera_ip[2])))
 
 
 
     # -------------------- start ai processes
-    num_of_ai_process = 8
+    num_of_ai_process = 4
     chunk_queues = list(chunks(queues, int(len(queues)/num_of_ai_process)))
     print(chunk_queues)
     for i in range(0, num_of_ai_process):
