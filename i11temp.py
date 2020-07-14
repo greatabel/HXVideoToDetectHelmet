@@ -76,7 +76,7 @@ def image_get_v0(quelist, window_name, rect):
         print('#'*20)
 
 
-    # cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
     while True:
         for q in quelist:
 
@@ -144,7 +144,7 @@ def image_get_v0(quelist, window_name, rect):
             # print('#'*10, type(bboxes), bboxes.shape)
             # 让窗口可以调整
             
-            # cv2.imshow('image', orig_img[...,::-1])
+            cv2.imshow('image', orig_img[...,::-1])
             print('processing:', window_name)
             if cv2.waitKey(1) == 27:
                     break
@@ -171,6 +171,8 @@ def run_multi_camera():
         ["admin", "admin123", "10.248.10.100:554", 1, 'dahua'],  # ipv4
         ["admin", "admin123", "10.248.10.100:554", 3, 'dahua'],
 
+        ["admin", "huaxin12345", "10.248.10.43:554", 1, "hik" ],
+        ["admin", "huaxin12345", "10.248.10.43:554", 1, "hik" ],
         # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
         # ["admin", "admin123", "10.248.10.100:554", 3],
         # ["admin", "admin123", "10.248.10.100:554", 1],  # ipv4
