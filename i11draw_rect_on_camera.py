@@ -217,7 +217,7 @@ video_urls = [
 # ]
 
 saved_config_filename = 'i11rtsp_list.csv'
-url_rect_dict = {}
+# url_rect_dict = {}
 
 rect = (0,0,0,0)
 startPoint = False
@@ -324,15 +324,15 @@ for rtsp_obj in video_urls:
 cap.release()
 cv2.destroyAllWindows()
 
-data  = []
+rtsp_list  = []
 for rtsp_obj, area in zip(video_urls, area_list):
-    data.append([rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3], rtsp_obj[4], area])
+    rtsp_list.append([rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3], rtsp_obj[4], area])
 
-print(data, '#'*20)
+# print(data, '#'*20)
 
 with open(saved_config_filename, "w", newline="") as f:
     writer = csv.writer(f)
-    writer.writerows(data)
+    writer.writerows(rtsp_list)
 
 # # This saves your dict
 # with open(saved_config_filename, 'w') as f:
@@ -345,4 +345,4 @@ with open(saved_config_filename, "w", newline="") as f:
 # with open(saved_config_filename, 'r') as f:
 #     url_rect_dict = json.load(f)
 print('完成设置不同摄像头检测区域：')
-print(url_rect_dict) 
+print(rtsp_list) 
