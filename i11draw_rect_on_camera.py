@@ -7,7 +7,7 @@ import mxnet as mx
 
 import cv2
 import numpy as np
-import json
+import csv
 import urllib
 from i11process_frame import deal_specialchar_in_url
 
@@ -216,7 +216,7 @@ video_urls = [
 #     "rtsp://admin:12345@192.168.200.97:554/Streaming/Channels/1"
 # ]
 
-saved_config_filename = 'i11url_rect_dict.json'
+saved_config_filename = 'i11rtsp_list.csv'
 url_rect_dict = {}
 
 rect = (0,0,0,0)
@@ -245,7 +245,7 @@ def on_mouse(event,x,y,flags,params):
             rect = (rect[0], rect[1], x, y)
             endPoint = True
 
-
+area_list = []
 for rtsp_obj in video_urls:
     # 大华的情况 ：
     if rtsp_obj[4] == 'dahua':
@@ -317,16 +317,25 @@ for rtsp_obj in video_urls:
                 results = [results[0], results[3], results[2], results[1]]
                 print(results)
 
-            url_rect_dict[addr] = results
+            # url_rect_dict[rtsp_obj] = results
+            area_list.append(results)
             video_flag = False
 
 cap.release()
 cv2.destroyAllWindows()
 
-# This saves your dict
-with open(saved_config_filename, 'w') as f:
-    # passing an indent parameter makes the json pretty-printed
-    json.dump(url_rect_dict, f, indent=2) 
+data  = []
+for rtsp_obj, area in zip(video_urls, area_list):
+    data.append([rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3], rtsp_obj[4], area])
+
+with open(saved_config_filename, 'wb') as myfile:
+    wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+    wr.writerow(data)
+    
+# # This saves your dict
+# with open(saved_config_filename, 'w') as f:
+#     # passing an indent parameter makes the json pretty-printed
+#     json.dump(url_rect_dict, f, indent=2) 
 
 
 # url_rect_dict = {}
