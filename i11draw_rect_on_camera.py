@@ -328,10 +328,12 @@ data  = []
 for rtsp_obj, area in zip(video_urls, area_list):
     data.append([rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3], rtsp_obj[4], area])
 
-with open(saved_config_filename, 'wb') as myfile:
-    wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-    wr.writerow(data)
-    
+print(data, '#'*20)
+
+with open(saved_config_filename, "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerows(data)
+
 # # This saves your dict
 # with open(saved_config_filename, 'w') as f:
 #     # passing an indent parameter makes the json pretty-printed
