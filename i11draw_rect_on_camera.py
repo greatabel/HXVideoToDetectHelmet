@@ -199,7 +199,7 @@ video_urls = [
     # ['admin', 'yxgl$666','192.168.200.196:554',1, 'hik'], # 10
     # ['admin', 'yxgl$666','192.168.200.199:554',1, 'hik'],
     # ['admin', 'yxgl$666','192.168.200.204:554',1, 'hik'],    
-    ]
+    
 
 
 ]
@@ -249,11 +249,11 @@ def on_mouse(event,x,y,flags,params):
 for rtsp_obj in video_urls:
     # 大华的情况 ：
     if rtsp_obj[4] == 'dahua':
-        full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" 
+        video_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" \
             % (rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3])
     # 网络摄像头是海康:
     elif rtsp_obj[4] == 'hik':
-        full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%d" % (rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3])
+        video_url = "rtsp://%s:%s@%s/Streaming/Channels/%d" % (rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3])
 
 
     video_flag = True
