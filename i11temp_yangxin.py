@@ -12,7 +12,7 @@ import i11process_frame
 
 saved_config_filename = 'i11rtsp_list.csv'
 
-def image_put(q, name, pwd, ip, channel=1, camera_corp='hik'):
+def image_put(q, name, pwd, ip, channel=1, camera_corp='hik', rect=None):
     # 大华的情况 ：
     if camera_corp == 'dahua':
         full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%s&subtype=0" % (name, pwd, ip, channel)
@@ -34,20 +34,20 @@ def image_put(q, name, pwd, ip, channel=1, camera_corp='hik'):
         res, frame = cap.read()
         if count % timeF == 0:
             # print('pick=', count)
-            q.put(cap.read()[1])
+            q.put((cap.read()[1], rect))
             q.get() if q.qsize() > 1 else time.sleep(0.01)
         count += 1
         # print('count=', count)
 
-def image_get(quelist, window_name):
-    cv2.namedWindow(window_name, flags=cv2.WINDOW_FREERATIO)
-    while True:
-        for q in quelist:
-            frame = q.get()
-            cv2.imshow(window_name, frame)
-            cv2.waitKey(1)
+# def image_get(quelist, window_name):
+#     cv2.namedWindow(window_name, flags=cv2.WINDOW_FREERATIO)
+#     while True:
+#         for q in quelist:
+#             frame = q.get()
+#             cv2.imshow(window_name, frame)
+#             cv2.waitKey(1)
 
-def image_get_v0(quelist, window_name, rect):
+def image_get_v0(quelist, window_name):
 
     args = i11process_frame.parse_args()
     print('是否使用GPU:', args.gpu)
@@ -79,11 +79,12 @@ def image_get_v0(quelist, window_name, rect):
         print('#'*20)
 
 
-    # cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
     while True:
         for q in quelist:
 
-            frame = q.get()
+            frame, rect = q.get()
+            print('rect=', rect, type(rect))
             # cv2.imshow(ip, frame)
             # cv2.waitKey(1)
 
@@ -99,11 +100,6 @@ def image_get_v0(quelist, window_name, rect):
             # cv2.waitKey(0)
             # cv2.imwrite(frame.split('.')[0] + '_result.jpg', orig_img[...,::-1])
             # cv2.destroyAllWindows()
-
-
-                
-
-
 
             # Image pre-processing
             new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
@@ -147,7 +143,7 @@ def image_get_v0(quelist, window_name, rect):
             # print('#'*10, type(bboxes), bboxes.shape)
             # 让窗口可以调整
             
-            # cv2.imshow('image', orig_img[...,::-1])
+            cv2.imshow('image', orig_img[...,::-1])
             print('processing:', window_name)
             if cv2.waitKey(1) == 27:
                     break
@@ -194,7 +190,8 @@ def run_multi_camera(camera_ip_l):
     
     for queue, camera_ip in zip(queues, camera_ip_l):
         print(camera_ip, camera_ip[0], '#', camera_ip[1])
-        processes.append(mp.Process(target=image_put, args=(queue, camera_ip[0], camera_ip[1], camera_ip[2], camera_ip[3], camera_ip[4])))
+        processes.append(mp.Process(target=image_put, 
+            args=(queue, camera_ip[0], camera_ip[1], camera_ip[2], camera_ip[3], camera_ip[4], camera_ip[5])))
         # processes.append(mp.Process(target=image_get, args=(queue, camera_ip[2])))
 
 
@@ -205,7 +202,7 @@ def run_multi_camera(camera_ip_l):
     print(chunk_queues)
     for i in range(0, num_of_ai_process):
         print('ai process', i)
-        processes.append(mp.Process(target=image_get_v0, args=(chunk_queues[i], str(i), None)))
+        processes.append(mp.Process(target=image_get_v0, args=(chunk_queues[i], str(i))))
     # -------------------- end   ai processes
 
     for process in processes:
