@@ -5,9 +5,12 @@ import multiprocessing as mp
 
 from gluoncv import model_zoo, data, utils
 import mxnet as mx
+
+import csv
 import i11process_frame
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
+saved_config_filename = 'i11rtsp_list.csv'
 
 def image_put(q, name, pwd, ip, channel=1, camera_corp='hik'):
     # 大华的情况 ：
@@ -156,32 +159,32 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 
-def run_multi_camera():
+def run_multi_camera(camera_ip_l):
     # user_name, user_pwd = "admin", "password"
 
-    camera_ip_l = [
-            ('admin', 'yxgl$666','192.168.200.210:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.211:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.232:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.182:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.183:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.190:554',1, 'hik'), 
-            ('admin', 'yxgl$666','192.168.200.204:554',1, 'hik'), 
-            ('admin', '12345','192.168.200.76:554',1, 'hik'), 
-            ('admin', '12345','192.168.200.91:554',1, 'hik'), 
-            ('admin', '12345','192.168.200.95:554',1, 'hik'), 
-            ('admin', '12345','192.168.200.97:554',1, 'hik'), 
-            # ('admin', 'yxgl$666','192.168.200.232:554',1, 'hik'), 
-            # ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'), 
-            # ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'),
-            # ('admin', 'yxgl$666','192.168.200.210:554',1, 'hik'), 
-            # ('admin', 'yxgl$666','192.168.200.211:554',1, 'hik'), 
-            # ('admin', 'yxgl$666','192.168.200.232:554',1, 'hik'), 
-            # ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'), 
-            # ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'),            
+    # camera_ip_l = [
+    #         ('admin', 'yxgl$666','192.168.200.210:554',1, 'hik'), 
+    #         ('admin', 'yxgl$666','192.168.200.211:554',1, 'hik'), 
+    #         ('admin', 'yxgl$666','192.168.200.232:554',1, 'hik'), 
+    #         ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'), 
+    #         ('admin', 'yxgl$666','192.168.200.182:554',1, 'hik'), 
+    #         ('admin', 'yxgl$666','192.168.200.183:554',1, 'hik'), 
+    #         ('admin', 'yxgl$666','192.168.200.190:554',1, 'hik'), 
+    #         ('admin', 'yxgl$666','192.168.200.204:554',1, 'hik'), 
+    #         ('admin', '12345','192.168.200.76:554',1, 'hik'), 
+    #         ('admin', '12345','192.168.200.91:554',1, 'hik'), 
+    #         ('admin', '12345','192.168.200.95:554',1, 'hik'), 
+    #         ('admin', '12345','192.168.200.97:554',1, 'hik'), 
+    #         # ('admin', 'yxgl$666','192.168.200.232:554',1, 'hik'), 
+    #         # ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'), 
+    #         # ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'),
+    #         # ('admin', 'yxgl$666','192.168.200.210:554',1, 'hik'), 
+    #         # ('admin', 'yxgl$666','192.168.200.211:554',1, 'hik'), 
+    #         # ('admin', 'yxgl$666','192.168.200.232:554',1, 'hik'), 
+    #         # ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'), 
+    #         # ('admin', 'yxgl$666','192.168.200.233:554',1, 'hik'),            
 
-            ]
+    #         ]
     mp.set_start_method(method='spawn')  # init
     queues = [mp.Queue(maxsize=4) for _ in camera_ip_l]
     processes = []
@@ -211,9 +214,14 @@ def run_multi_camera():
     for process in processes:
         process.join()
 
-
+def load_rtsp_list():
+    with open(saved_config_filename, newline='') as f:
+        reader = csv.reader(f)
+        rtsp_list = list(reader)
+    # print(data, '#'*10, data[0],'\n', data[0][0])
+    return rtsp_list
 
 if __name__ == '__main__':
-    print('here')
+    camera_ip_l = load_rtsp_list()
     # python3 i11temp_yangxin.py --gpu=True --network=yolo3_mobilenet0.25_voc
-    run_multi_camera() 
+    run_multi_camera(camera_ip_l) 
