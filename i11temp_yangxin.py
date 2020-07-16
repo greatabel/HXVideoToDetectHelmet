@@ -7,6 +7,7 @@ from gluoncv import model_zoo, data, utils
 import mxnet as mx
 
 import csv
+import ast
 import i11process_frame
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
@@ -189,9 +190,10 @@ def run_multi_camera(camera_ip_l):
 
     
     for queue, camera_ip in zip(queues, camera_ip_l):
-        print(camera_ip, camera_ip[0], '#', camera_ip[1])
+        rect = ast.literal_eval(camera_ip[5])
+        # print(camera_ip, camera_ip[0], '##', rect, type(rect))
         processes.append(mp.Process(target=image_put, 
-            args=(queue, camera_ip[0], camera_ip[1], camera_ip[2], camera_ip[3], camera_ip[4], camera_ip[5])))
+            args=(queue, camera_ip[0], camera_ip[1], camera_ip[2], camera_ip[3], camera_ip[4], rect)))
         # processes.append(mp.Process(target=image_get, args=(queue, camera_ip[2])))
 
 
