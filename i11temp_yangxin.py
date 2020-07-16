@@ -15,10 +15,10 @@ saved_config_filename = 'i11rtsp_list.csv'
 def image_put(q, name, pwd, ip, channel=1, camera_corp='hik'):
     # 大华的情况 ：
     if camera_corp == 'dahua':
-        full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (name, pwd, ip, channel)
+        full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%s&subtype=0" % (name, pwd, ip, channel)
     # 网络摄像头是海康:
     elif camera_corp == 'hik':
-        full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%d" % (name, pwd, ip, channel)
+        full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%s" % (name, pwd, ip, channel)
     full_vedio_url = i11process_frame.deal_specialchar_in_url(full_vedio_url)
     cap = cv2.VideoCapture(full_vedio_url)
     # if cap.isOpened():
@@ -200,7 +200,7 @@ def run_multi_camera(camera_ip_l):
 
 
     # -------------------- start ai processes
-    num_of_ai_process = 8
+    num_of_ai_process = 3
     chunk_queues = list(chunks(queues, int(len(queues)/num_of_ai_process)))
     print(chunk_queues)
     for i in range(0, num_of_ai_process):
