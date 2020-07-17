@@ -35,6 +35,7 @@ def listener_process(queue, configurer):
             record = queue.get()
             if record is None:  # We send this as a sentinel to tell the listener to quit.
                 break
+            print('record','*'*20,record.name, record)
             logger = logging.getLogger(record.name)
             logger.handle(record)  # No level or filter logic applied - just do it!
         except Exception:
@@ -214,8 +215,8 @@ def run_multi_camera(camera_ip_l):
 
     
     for queue, camera_ip in zip(queues, camera_ip_l):
-        rect = ast.literal_eval(camera_ip[5])
-        # print(camera_ip, camera_ip[0], '##', rect, type(rect))
+        rect = ast.literal_eval(camera_ip[7])
+        print(camera_ip, camera_ip[0], '##', rect, type(rect))
         processes.append(mp.Process(target=image_put, 
             args=(queue, camera_ip[0], camera_ip[1], camera_ip[2], camera_ip[3], camera_ip[4], rect)))
         # processes.append(mp.Process(target=image_get, args=(queue, camera_ip[2])))

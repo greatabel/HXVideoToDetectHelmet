@@ -24,3 +24,13 @@
 2020-06-29 09:09:46,668 Process-7 10.248.10.100:554,1 CRITICAL red-hat-in-area
 2020-06-29 09:09:51,207 Process-7 10.248.10.100:554,1 CRITICAL red-hat-in-area
 2020-06-29 09:09:51,441 Process-3 10.248.10.100:554,1 CRITICAL red-hat-in-area
+2020-07-17 10:38:40,564 Process-5 0 CRITICAL yellow-hat-in-area
+2020-07-17 11:05:30,995 Process-5 0 CRITICAL yellow-hat-in-area
+2020-07-17 11:06:54,243 Process-5 0 CRITICAL yellow-hat-in-area
+2020-07-17 11:06:56,521 Process-5 0 CRITICAL yellow-hat-in-area
+2020-07-17 11:12:41,475 Process-6 1 CRITICAL yellow-hat-in-area
+2020-07-17 11:12:42,161 Process-6 1 CRITICAL yellow-hat-in-area
+2020-07-17 11:12:50,588 Process-6 1 CRITICAL yellow-hat-in-area
+2020-07-17 11:12:53,515 Process-6 1 CRITICAL yellow-hat-in-area
+2020-07-17 11:12:54,198 Process-6 1 CRITICAL yellow-hat-in-area
+2020-07-17 11:13:30,534 Process-5 0 CRITICAL yellow-hat-in-area

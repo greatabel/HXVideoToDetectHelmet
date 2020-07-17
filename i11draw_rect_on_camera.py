@@ -181,10 +181,10 @@ from i11process_frame import deal_specialchar_in_url
 
 video_urls = [
     # start 本地测试
-    ["admin", "admin123", "10.248.10.100:554", 1, 'dahua'],  # ipv4
-    ["admin", "admin123", "10.248.10.100:554", 3, 'dahua'],
+    ["admin", "admin123", "10.248.10.100:554", 1, 'dahua', "华新数创5楼室内0", "00030350,00000819"],  # ipv4
+    ["admin", "admin123", "10.248.10.100:554", 3, 'dahua', "华新数创5楼室内1", "00030350"],
 
-    ["admin", "huaxin12345", "10.248.10.43:554", 1, "hik"],
+    ["admin", "huaxin12345", "10.248.10.43:554", 1, "hik","", ""],
     # end   本地测试
 
     # ['admin', 'yxgl$666','192.168.200.182:554',1, 'hik'],
@@ -326,7 +326,8 @@ cv2.destroyAllWindows()
 
 rtsp_list  = []
 for rtsp_obj, area in zip(video_urls, area_list):
-    rtsp_list.append([rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3], rtsp_obj[4], area])
+    rtsp_list.append([rtsp_obj[0], rtsp_obj[1], rtsp_obj[2],
+                      rtsp_obj[3], rtsp_obj[4],  rtsp_obj[5],  rtsp_obj[6], area])
 
 # print(data, '#'*20)
 

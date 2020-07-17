@@ -23,7 +23,7 @@ import logging.handlers
 from random import choice, random
 import time
 
-
+# https://docs.python.org/3/howto/logging-cookbook.html#logging-to-a-single-file-from-multiple-processes
 def listener_configurer():
     root = logging.getLogger()
     h = logging.handlers.RotatingFileHandler('temp.log', 'a', 300000, 10)

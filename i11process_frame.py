@@ -17,6 +17,7 @@ import webcolors
 from sklearn.cluster import KMeans
 import os
 import urllib
+import logging
 
 
 
