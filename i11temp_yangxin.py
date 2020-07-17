@@ -6,12 +6,42 @@ import multiprocessing as mp
 from gluoncv import model_zoo, data, utils
 import mxnet as mx
 
+
+import logging
+import logging.handlers
+from random import choice, random
+
 import csv
 import ast
 import i11process_frame
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
-rtsp_filertsp_file_path = 'i11rtsp_list.csv'
+rtsp_file_path = 'i11rtsp_list.csv'
+
+def listener_configurer():
+    root = logging.getLogger()
+    h = logging.handlers.RotatingFileHandler('temp.log', 'a', 300000, 10)
+    f = logging.Formatter('%(asctime)s %(processName)-8s %(name)s %(levelname)-8s %(message)s')
+    h.setFormatter(f)
+    root.addHandler(h)
+
+# This is the listener process top-level loop: wait for logging events
+# (LogRecords)on the queue and handle them, quit when you get a None for a
+# LogRecord.
+def listener_process(queue, configurer):
+    configurer()
+    while True:
+        try:
+            record = queue.get()
+            if record is None:  # We send this as a sentinel to tell the listener to quit.
+                break
+            logger = logging.getLogger(record.name)
+            logger.handle(record)  # No level or filter logic applied - just do it!
+        except Exception:
+            import sys, traceback
+            print('Whoops! Problem:', file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+
 
 def image_put(q, name, pwd, ip, channel=1, camera_corp='hik', rect=None):
     # 大华的情况 ：
@@ -48,7 +78,19 @@ def image_put(q, name, pwd, ip, channel=1, camera_corp='hik', rect=None):
 #             cv2.imshow(window_name, frame)
 #             cv2.waitKey(1)
 
-def image_get_v0(quelist, window_name):
+def image_get_v0(quelist, window_name, log_queue):
+
+    h = logging.handlers.QueueHandler(log_queue)  # Just the one handler needed
+    root = logging.getLogger()
+    root.addHandler(h)
+    # send all messages, for demo; no other level or filter logic applied.
+    root.setLevel(logging.DEBUG)
+
+
+    logger = logging.getLogger(str(window_name))
+    # level = choice(LEVELS)
+    # message = choice(MESSAGES)
+    # logger.log(level, message)
 
     args = i11process_frame.parse_args()
     print('是否使用GPU:', args.gpu)
@@ -138,7 +180,7 @@ def image_get_v0(quelist, window_name):
 
             # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
             x = i11process_frame.forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
-                                            class_names=net.classes,thresh=args.threshold, hx_rect=rect)
+                                            class_names=net.classes,thresh=args.threshold, hx_rect=rect, logger=logger)
             # x = origin_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
             #                                 class_names=net.classes,thresh=args.threshold)
 
@@ -159,7 +201,12 @@ def chunks(lst, n):
 
 def run_multi_camera(camera_ip_l):
 
-    mp.set_start_method(method='spawn')  # init0
+    log_queue = mp.Queue(-1)
+    listener = mp.Process(target=listener_process,
+                                       args=(log_queue, listener_configurer))
+    listener.start()
+
+    # mp.set_start_method(method='spawn')  # init0
     queues = [mp.Queue(maxsize=4) for _ in camera_ip_l]
     processes = []
 
@@ -181,7 +228,7 @@ def run_multi_camera(camera_ip_l):
     print(chunk_queues)
     for i in range(0, num_of_ai_process):
         print('ai process', i)
-        processes.append(mp.Process(target=image_get_v0, args=(chunk_queues[i], str(i))))
+        processes.append(mp.Process(target=image_get_v0, args=(chunk_queues[i], str(i),log_queue)))
     # -------------------- end   ai processes
 
     for process in processes:
