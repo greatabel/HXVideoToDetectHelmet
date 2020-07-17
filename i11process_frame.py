@@ -149,7 +149,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                 # print(cls_id, '-> ', colors[cls_id])
         xmin, ymin, xmax, ymax = [int(x) for x in bbox]
 
-        print('hx_rect=', hx_rect, '#'*10, xmin, ymin, xmax, ymax )
+        # print('hx_rect=', hx_rect, '#'*10, xmin, ymin, xmax, ymax )
 
         # ---- 裁减检测到的情况出现在我们划定的识别区域 ----
         if hx_rect is None or (hx_rect[0] < xmin and hx_rect[1] < ymin
@@ -272,6 +272,6 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                             (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
                             bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
         else:
-            print('裁减检测到的情况出现在我们划定的识别区域')
+            print('裁减检测到的情况出现在我们划定的识别区域之外')
 
     return img
