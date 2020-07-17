@@ -101,7 +101,9 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
         The image with detected results.
 
     """
-    
+
+    # 决定是否是异常状况，是否保存截图的信号量
+    save_img_flag = False
 
 
     if labels is not None and not len(bboxes) == len(labels):
@@ -241,6 +243,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                     # freq = 660  # Hz
                     # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
                     logger.log(logging.CRITICAL, 'yellow-hat-in-area')
+                    save_img_flag = True
                     # print('#'*10)
 
                 elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
@@ -251,6 +254,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                     # freq = 440  # Hz
                     # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
                     logger.log(logging.CRITICAL, 'red-hat-in-area')
+                    save_img_flag = True
                     # print('#'*20)
 
                 # elif colorname == 'darkolivegreen':
@@ -277,4 +281,4 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
         else:
             print('裁减检测到的情况出现在我们划定的识别区域之外')
 
-    return img
+    return img, save_img_flag

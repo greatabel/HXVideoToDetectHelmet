@@ -61,7 +61,7 @@ def warning_processor(logger, record):
         duration = 0.5  # seconds
         freq = 660  # Hz
         os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-        
+
 
 def image_put(q, queueid):
     name = queue_rtsp_dict.get(queueid, None)[0]
@@ -210,7 +210,7 @@ def image_get_v0(quelist, window_name, log_queue):
 
 
             # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
-            x = i11process_frame.forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
+            x, save_img_flag = i11process_frame.forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
                                             class_names=net.classes,thresh=args.threshold, hx_rect=rect, logger=logger)
             # x = origin_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
             #                                 class_names=net.classes,thresh=args.threshold)
@@ -220,6 +220,11 @@ def image_get_v0(quelist, window_name, log_queue):
             
             cv2.imshow('image', orig_img[...,::-1])
             print('processing:', window_name)
+            if save_img_flag:
+                print('@'*20, ' save image')
+                now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time())) 
+                img_name='screenshots/' + str(queueid) + '_'+ now + '.jpg'
+                cv2.imwrite(img_name, orig_img[...,::-1])
             if cv2.waitKey(1) == 27:
                     break
 
