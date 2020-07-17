@@ -6,6 +6,7 @@ import multiprocessing as mp
 from gluoncv import model_zoo, data, utils
 import mxnet as mx
 
+import os
 
 import logging
 import logging.handlers
@@ -16,7 +17,9 @@ import ast
 import i11process_frame
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
+
 rtsp_file_path = 'i11rtsp_list.csv'
+queue_rtsp_dict = {}
 
 def listener_configurer():
     root = logging.getLogger()
@@ -35,16 +38,39 @@ def listener_process(queue, configurer):
             record = queue.get()
             if record is None:  # We send this as a sentinel to tell the listener to quit.
                 break
-            print('record','*'*20,record.name, record)
+            # print('record','*'*20,record.name, record)
             logger = logging.getLogger(record.name)
-            logger.handle(record)  # No level or filter logic applied - just do it!
+            # logger.handle(record)  # No level or filter logic applied - just do it!
+            warning_processor(logger, record)
         except Exception:
             import sys, traceback
             print('Whoops! Problem:', file=sys.stderr)
             traceback.print_exc(file=sys.stderr)
 
 
-def image_put(q, name, pwd, ip, channel=1, camera_corp='hik', rect=None):
+def warning_processor(logger, record):
+    queueid = record.name
+    logger.handle(record)  # No level or filter logic applied - just do it!
+    if record.msg == 'red-hat-in-area':
+        # # 警告音 
+        duration = 1  # seconds
+        freq = 440  # Hz
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+    elif record.msg == 'yellow-hat-in-area':
+    # # 警告音 yellow
+        duration = 0.5  # seconds
+        freq = 660  # Hz
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+        
+
+def image_put(q, queueid):
+    name = queue_rtsp_dict.get(queueid, None)[0]
+    pwd = queue_rtsp_dict.get(queueid, None)[1]
+    ip = queue_rtsp_dict.get(queueid, None)[2]
+    channel = queue_rtsp_dict.get(queueid, None)[3]
+    camera_corp = queue_rtsp_dict.get(queueid, None)[4]
+
+
     # 大华的情况 ：
     if camera_corp == 'dahua':
         full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%s&subtype=0" % (name, pwd, ip, channel)
@@ -66,7 +92,7 @@ def image_put(q, name, pwd, ip, channel=1, camera_corp='hik', rect=None):
         res, frame = cap.read()
         if count % timeF == 0:
             # print('pick=', count)
-            q.put((cap.read()[1], rect))
+            q.put((cap.read()[1], queueid))
             q.get() if q.qsize() > 1 else time.sleep(0.01)
         count += 1
         # print('count=', count)
@@ -88,10 +114,7 @@ def image_get_v0(quelist, window_name, log_queue):
     root.setLevel(logging.DEBUG)
 
 
-    logger = logging.getLogger(str(window_name))
-    # level = choice(LEVELS)
-    # message = choice(MESSAGES)
-    # logger.log(level, message)
+
 
     args = i11process_frame.parse_args()
     print('是否使用GPU:', args.gpu)
@@ -127,8 +150,15 @@ def image_get_v0(quelist, window_name, log_queue):
     while True:
         for q in quelist:
 
-            frame, rect = q.get()
-            # print('rect=', rect, type(rect))
+            frame, queueid = q.get()
+            rect = ast.literal_eval(queue_rtsp_dict.get(queueid, None)[7])
+
+
+            logger = logging.getLogger(str(queueid))
+            # level = choice(LEVELS)
+            # message = choice(MESSAGES)
+            # logger.log(level, message)
+            # print('*** rect=', rect, type(rect))
 
             # cv2.imshow(ip, frame)
             # cv2.waitKey(1)
@@ -213,14 +243,16 @@ def run_multi_camera(camera_ip_l):
 
 
 
-    
+    queueid = 0
     for queue, camera_ip in zip(queues, camera_ip_l):
-        rect = ast.literal_eval(camera_ip[7])
-        print(camera_ip, camera_ip[0], '##', rect, type(rect))
+        # rect = ast.literal_eval(camera_ip[7])
+        # print(camera_ip, camera_ip[0], '##', rect, type(rect))
         processes.append(mp.Process(target=image_put, 
-            args=(queue, camera_ip[0], camera_ip[1], camera_ip[2], camera_ip[3], camera_ip[4], rect)))
-        # processes.append(mp.Process(target=image_get, args=(queue, camera_ip[2])))
+            args=(queue, queueid)))
 
+        queue_rtsp_dict[queueid] = camera_ip
+        queueid += 1
+        # processes.append(mp.Process(target=image_get, args=(queue, camera_ip[2])))
 
 
     # -------------------- start ai processes

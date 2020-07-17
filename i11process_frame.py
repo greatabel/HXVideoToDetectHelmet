@@ -237,21 +237,21 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                     # 黄色
                     bcolor = (255,255,0)
                     # 警告音 
-                    duration = 0.5  # seconds
-                    freq = 660  # Hz
-                    os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+                    # duration = 0.5  # seconds
+                    # freq = 660  # Hz
+                    # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
                     logger.log(logging.CRITICAL, 'yellow-hat-in-area')
-                    print('#'*10)
+                    # print('#'*10)
 
                 elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
                     # 红色
                     bcolor = (255, 0, 0)
                     # 警告音 
-                    duration = 1  # seconds
-                    freq = 440  # Hz
-                    os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+                    # duration = 1  # seconds
+                    # freq = 440  # Hz
+                    # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
                     logger.log(logging.CRITICAL, 'red-hat-in-area')
-                    print('#'*20)
+                    # print('#'*20)
 
                 # elif colorname == 'darkolivegreen':
                 #     if dominant_color is not None:
