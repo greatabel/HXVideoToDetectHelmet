@@ -58,6 +58,7 @@ def send_text_and_image_wechat(filename, msg, touser):
   access_token = get_token()
   media_id = upload_media_to_wechat(access_token, filename)
   print('-'*20)
+  print('msg=', msg)
   url_get_send = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={}'\
                       .format(access_token)
   send_msg_json = {

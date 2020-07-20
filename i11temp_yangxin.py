@@ -231,7 +231,7 @@ def image_get_v0(quelist, window_name, log_queue):
                 # 发送企业维新消息
                 print('img_name ',img_name, 'queue_rtsp_dict=', queue_rtsp_dict )
                 print('*-*-'*20, '\n')
-                i11qy_wechat.send_text_and_image_wechat(img_name, queue_rtsp_dict.get(queueid, None)[7]+' 发生非授权头盔进入区域',
+                i11qy_wechat.send_text_and_image_wechat(img_name, queue_rtsp_dict.get(queueid, None)[5]+'发生非授权头盔进入区域',
                     queue_rtsp_dict.get(queueid, None)[6])
 
             if cv2.waitKey(1) == 27:
