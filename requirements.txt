@@ -3,6 +3,8 @@ gluoncv
 imutils
 mxnet
 # mxnet-cu102
+requests_toolbelt
+simplejson
 sklearn
 opencv-python
 webcolors==1.10

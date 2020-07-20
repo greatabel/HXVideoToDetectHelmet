@@ -22,6 +22,7 @@ from requests_toolbelt import MultipartEncoder
 filepath = '/Users/abel/Downloads/AbelProject/HXVideoToDetectHelmet/screenshots/'
 filename = '1_2020-07-17-17_16_40.jpg'
 
+# 在ubuntu中配置环境变量在：  ~/.bashrc
 qy_wechat_corpid = environ.get('HX_QY_WECHAT_CORPID')
 qy_wechat_corpsecret = environ.get('HX_QY_WECHAT_CORPSECRET')
 agentid = 1000030
