@@ -22,7 +22,7 @@ from requests_toolbelt import MultipartEncoder
 filepath = 'screenshots/'
 filename = '1_2020-07-17-17_16_40.jpg'
 msg = "阳新骨料ai测试"
-touser = "80002302|00038910"
+test_touser = "80002302|00038910"
 
 # 在ubuntu中配置环境变量在：  ~/.bashrc
 qy_wechat_corpid = environ.get('HX_QY_WECHAT_CORPID')
@@ -95,4 +95,4 @@ def send_text_and_image_wechat(filename, msg, touser):
 
 
 if __name__ == "__main__":
-  send_text_and_image_wechat(filename, msg, touser)
+  send_text_and_image_wechat(filename, msg, touser=test_touser)

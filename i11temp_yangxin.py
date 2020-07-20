@@ -15,11 +15,14 @@ from random import choice, random
 import csv
 import ast
 import i11process_frame
+import i11qy_wechat
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
 rtsp_file_path = 'i11rtsp_list.csv'
 queue_rtsp_dict = {}
+img_name = ''
+
 
 def listener_configurer():
     root = logging.getLogger()
@@ -223,8 +226,14 @@ def image_get_v0(quelist, window_name, log_queue):
             if save_img_flag:
                 print('@'*20, ' save image')
                 now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time())) 
-                img_name='screenshots/' + str(queueid) + '_'+ now + '.jpg'
-                cv2.imwrite(img_name, orig_img[...,::-1])
+                img_name= str(queueid) + '_'+ now + '.jpg'
+                cv2.imwrite('screenshots/' + img_name, orig_img[...,::-1])
+                # 发送企业维新消息
+                print('img_name ',img_name, 'queue_rtsp_dict=', queue_rtsp_dict )
+                print('*-*-'*20, '\n')
+                i11qy_wechat.send_text_and_image_wechat(img_name, queue_rtsp_dict.get(queueid, None)[7]+' 发生非授权头盔进入区域',
+                    queue_rtsp_dict.get(queueid, None)[6])
+
             if cv2.waitKey(1) == 27:
                     break
 
@@ -236,7 +245,7 @@ def chunks(lst, n):
 
 
 def run_multi_camera(camera_ip_l):
-
+    global queue_rtsp_dict
     log_queue = mp.Queue(-1)
     listener = mp.Process(target=listener_process,
                                        args=(log_queue, listener_configurer))

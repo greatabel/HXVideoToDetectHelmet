@@ -107,3 +107,29 @@
 2020-07-17 17:00:50,397 Process-5 0 CRITICAL red-hat-in-area
 2020-07-17 17:16:40,771 Process-6 1 CRITICAL red-hat-in-area
 2020-07-17 17:16:41,204 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:44:53,564 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:44:55,211 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:44:56,992 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:47:39,306 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:47:41,155 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:47:42,763 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:49:33,755 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:49:35,455 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:49:37,123 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:50:40,336 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:50:41,962 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:50:43,559 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 20:59:23,855 Process-5 0 CRITICAL yellow-hat-in-area
+2020-07-20 21:01:55,023 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 21:04:42,650 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 21:04:42,673 Process-5 urllib3.connectionpool DEBUG    Starting new HTTPS connection (1): qyapi.weixin.qq.com:443
+2020-07-20 21:04:42,868 Process-5 urllib3.connectionpool DEBUG    https://qyapi.weixin.qq.com:443 "GET /cgi-bin/gettoken?corpid=wx40c0bdcf28eccde7&corpsecret=_LZvN0nbAfMZibg2FJzHOUT1p8FiVcHrWTtB8jT_Ato HTTP/1.1" 200 277
+2020-07-20 21:06:59,321 Process-5 0 CRITICAL red-hat-in-area
+2020-07-20 21:06:59,376 Process-5 urllib3.connectionpool DEBUG    Starting new HTTPS connection (1): qyapi.weixin.qq.com:443
+2020-07-20 21:06:59,619 Process-5 urllib3.connectionpool DEBUG    https://qyapi.weixin.qq.com:443 "GET /cgi-bin/gettoken?corpid=wx40c0bdcf28eccde7&corpsecret=_LZvN0nbAfMZibg2FJzHOUT1p8FiVcHrWTtB8jT_Ato HTTP/1.1" 200 277
+2020-07-20 21:06:59,623 Process-5 urllib3.connectionpool DEBUG    Starting new HTTPS connection (1): qyapi.weixin.qq.com:443
+2020-07-20 21:06:59,860 Process-5 urllib3.connectionpool DEBUG    https://qyapi.weixin.qq.com:443 "POST /cgi-bin/media/upload?access_token=8fdrAKtRmlq42nLluMkY2p7XYHcOHFVn9c46Wh0zSpFQIaU_JBhhw5RRq-jvCz1alswNIovqn8S39KTt-EQxYhVHk5EBAgvr9UzjcJaT_48UqMc0JhxtyHvc7jTQauDibNMIq92KYh8o7UJMAjeVT7fQqW9QusrfQnqMnHeEXgMEm_IMpat2ehuI8xvPMhSKH2cp1gXraltgIakW-65ZIg&type=file HTTP/1.1" 200 146
+2020-07-20 21:06:59,863 Process-5 urllib3.connectionpool DEBUG    Starting new HTTPS connection (1): qyapi.weixin.qq.com:443
+2020-07-20 21:07:00,014 Process-5 urllib3.connectionpool DEBUG    https://qyapi.weixin.qq.com:443 "POST /cgi-bin/message/send?access_token=8fdrAKtRmlq42nLluMkY2p7XYHcOHFVn9c46Wh0zSpFQIaU_JBhhw5RRq-jvCz1alswNIovqn8S39KTt-EQxYhVHk5EBAgvr9UzjcJaT_48UqMc0JhxtyHvc7jTQauDibNMIq92KYh8o7UJMAjeVT7fQqW9QusrfQnqMnHeEXgMEm_IMpat2ehuI8xvPMhSKH2cp1gXraltgIakW-65ZIg HTTP/1.1" 200 239
+2020-07-20 21:07:00,021 Process-5 urllib3.connectionpool DEBUG    Starting new HTTPS connection (1): qyapi.weixin.qq.com:443
+2020-07-20 21:07:00,168 Process-5 urllib3.connectionpool DEBUG    https://qyapi.weixin.qq.com:443 "POST /cgi-bin/message/send?access_token=8fdrAKtRmlq42nLluMkY2p7XYHcOHFVn9c46Wh0zSpFQIaU_JBhhw5RRq-jvCz1alswNIovqn8S39KTt-EQxYhVHk5EBAgvr9UzjcJaT_48UqMc0JhxtyHvc7jTQauDibNMIq92KYh8o7UJMAjeVT7fQqW9QusrfQnqMnHeEXgMEm_IMpat2ehuI8xvPMhSKH2cp1gXraltgIakW-65ZIg HTTP/1.1" 200 52
