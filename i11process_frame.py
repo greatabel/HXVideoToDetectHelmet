@@ -66,7 +66,7 @@ def closest_colour(requested_colour):
 
 def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.5,
                  class_names=None, colors=None,
-                 absolute_coordinates=True, scale=1.0, hx_rect=None, logger=None):
+                 absolute_coordinates=True, scale=1.0, hx_rect=None):
     """Visualize bounding boxes with OpenCV.
 
     Parameters
@@ -103,7 +103,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
     """
 
     # 决定是否是异常状况，是否保存截图的信号量
-    save_img_flag = False
+    warning_signal = None
 
 
     if labels is not None and not len(bboxes) == len(labels):
@@ -242,8 +242,8 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                     # duration = 0.5  # seconds
                     # freq = 660  # Hz
                     # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-                    logger.log(logging.CRITICAL, 'yellow-hat-in-area')
-                    save_img_flag = True
+                    # logger.log(logging.CRITICAL, 'yellow-hat-in-area')
+                    warning_signal = 'yellow-hat-in-area'
                     # print('#'*10)
 
                 elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
@@ -253,8 +253,8 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                     # duration = 1  # seconds
                     # freq = 440  # Hz
                     # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-                    logger.log(logging.CRITICAL, 'red-hat-in-area')
-                    save_img_flag = True
+                    # logger.log(logging.CRITICAL, 'red-hat-in-area')
+                    warning_signal = 'red-hat-in-area'
                     # print('#'*20)
 
                 # elif colorname == 'darkolivegreen':
@@ -281,4 +281,4 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
         else:
             print('裁减检测到的情况出现在我们划定的识别区域之外')
 
-    return img, save_img_flag
+    return img, warning_signal
