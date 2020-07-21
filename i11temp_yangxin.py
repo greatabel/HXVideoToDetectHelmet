@@ -27,7 +27,7 @@ img_name = ''
 
 def listener_configurer():
     root = logging.getLogger()
-    h = logging.handlers.RotatingFileHandler('temp.log', 'a', 300000, 10)
+    h = logging.handlers.RotatingFileHandler('temp.log', 'a', 3000000, 10)
     f = logging.Formatter('%(asctime)s %(processName)-8s %(name)s %(levelname)-8s %(message)s')
     h.setFormatter(f)
     root.addHandler(h)
@@ -89,6 +89,7 @@ def warning_processor(logger, record):
 
     # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
     timelimit = 5
+    # time_span_limit 代表在这个时间内只能发一次消息报警
     time_span_limit = 180
     if len(queueid_warning_dict[record.name]) >=5:
         sendmsg_flag = i11process_frame.proces_timelist(queueid_warning_dict[record.name], timelimit)
