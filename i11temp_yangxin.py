@@ -53,8 +53,9 @@ def listener_process(queue, configurer):
 
 
 queueid_warning_dict = {}
+queueid_lastsendtime_dict = {}
 def warning_processor(logger, record):
-    global queueid_warning_dict
+    global queueid_warning_dict, queueid_lastsendtime_dict
     queueid = record.name
     logger.handle(record)  # No level or filter logic applied - just do it!
     # recore.name 就是queueid 代表rtsp的获取队列id
@@ -62,12 +63,12 @@ def warning_processor(logger, record):
         queueid_warning_dict[record.name] = [record.asctime]
     else:
         queueid_warning_dict[record.name].append(record.asctime)
-        # 定期清空 记录时间的list， 容量设置为10, 当缓存达到比较大(100)时候清理list容量到1
-        if len(queueid_warning_dict[record.name]) > 10:
+        # 定期清空 记录时间的list， 容量达到30， 就清空到只剩下最新的1个
+        if len(queueid_warning_dict[record.name]) > 30:
             del queueid_warning_dict[record.name][:len(queueid_warning_dict[record.name])-1]
             print('delete recordtime list')
 
-    print('\n', '-^-'*10, queueid_warning_dict)
+    # print('\n', '-^-'*10, queueid_warning_dict)
     helmet_color = ''
     warning_signal, img_name, area, senduserids = record.msg.split('#') 
 
@@ -86,13 +87,23 @@ def warning_processor(logger, record):
 
     msg = area + ' 发生 ' + helmet_color + '非授权头盔进入区域'
 
-    # timelimit 为在限制区域时间差达到多少后，才会发送消息报警
+    # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
+    timelimit = 5
+    time_span_limit = 180
     if len(queueid_warning_dict[record.name]) >=5:
-        sendmsg_flag = i11process_frame.proces_timelist(queueid_warning_dict[record.name], 30)
+        sendmsg_flag = i11process_frame.proces_timelist(queueid_warning_dict[record.name], timelimit)
+        
+        now = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
+        if queueid_lastsendtime_dict.get(record.name) is not None:
+
+            timespan_flag = i11process_frame.compare_time(now, queueid_lastsendtime_dict.get(record.name), time_span_limit)
+            if timespan_flag == False:
+                sendmsg_flag = False
         if sendmsg_flag:
-            # 防止频繁的报警
             i11qy_wechat.send_text_and_image_wechat(img_name, msg, senduserids)
 
+
+            queueid_lastsendtime_dict[record.name] = now
 
 def image_put(q, queueid):
     name = queue_rtsp_dict.get(queueid, None)[0]

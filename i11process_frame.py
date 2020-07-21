@@ -20,11 +20,22 @@ import urllib
 import logging
 
 
+def compare_time(t1, t2, timelimit):
+    t1 = datetime.strptime(t1, '%Y-%m-%d %H:%M:%S')
+    t2 = datetime.strptime(t2, '%Y-%m-%d %H:%M:%S')
+    interval = t1 - t2
+    print('<'*30, interval)
+    if interval.total_seconds() > timelimit:
+        return True
+    else:
+        return False
+
+
 def proces_timelist(timelist, timelimit):
     timestamps = []
     for str_time in timelist:
         timestamp = datetime.strptime(str_time, '%Y-%m-%d %H:%M:%S,%f')
-        print(timestamp, type(timestamp))
+        # print(timestamp, type(timestamp))
         timestamps.append(timestamp)
     max_time = max(timestamps)
     min_time = min(timestamps)
