@@ -1,7 +1,7 @@
 import multiprocessing as mp
 import cv2
 import time
-
+from datetime import datetime
 
 from gluoncv import model_zoo, data, utils
 #from matplotlib import pyplot as plt
@@ -19,6 +19,22 @@ import os
 import urllib
 import logging
 
+
+def proces_timelist(timelist, timelimit):
+    timestamps = []
+    for str_time in timelist:
+        timestamp = datetime.strptime(str_time, '%Y-%m-%d %H:%M:%S,%f')
+        print(timestamp, type(timestamp))
+        timestamps.append(timestamp)
+    max_time = max(timestamps)
+    min_time = min(timestamps)
+    interval = max_time - min_time
+    # print(type(interval), '$'*20, interval.total_seconds())
+    # print('interval:', interval)
+    if interval.total_seconds() > timelimit:
+        return True
+    else:
+        return False
 
 
 def deal_specialchar_in_url(istr):

@@ -12,6 +12,7 @@ import logging
 import logging.handlers
 from random import choice, random
 
+
 import csv
 import ast
 import i11process_frame
@@ -60,8 +61,12 @@ def warning_processor(logger, record):
     if queueid_warning_dict.get(record.name) is None:
         queueid_warning_dict[record.name] = [record.asctime]
     else:
-
         queueid_warning_dict[record.name].append(record.asctime)
+        # 定期清空 记录时间的list， 容量设置为10, 当缓存达到比较大(100)时候清理list容量到1
+        if len(queueid_warning_dict[record.name]) > 10:
+            del queueid_warning_dict[record.name][:len(queueid_warning_dict[record.name])-1]
+            print('delete recordtime list')
+
     print('\n', '-^-'*10, queueid_warning_dict)
     helmet_color = ''
     warning_signal, img_name, area, senduserids = record.msg.split('#') 
@@ -81,8 +86,12 @@ def warning_processor(logger, record):
 
     msg = area + ' 发生 ' + helmet_color + '非授权头盔进入区域'
 
-    # 防止频繁的报警
-    i11qy_wechat.send_text_and_image_wechat(img_name, msg, senduserids)
+    # timelimit 为在限制区域时间差达到多少后，才会发送消息报警
+    if len(queueid_warning_dict[record.name]) >=5:
+        sendmsg_flag = i11process_frame.proces_timelist(queueid_warning_dict[record.name], 30)
+        if sendmsg_flag:
+            # 防止频繁的报警
+            i11qy_wechat.send_text_and_image_wechat(img_name, msg, senduserids)
 
 
 def image_put(q, queueid):
