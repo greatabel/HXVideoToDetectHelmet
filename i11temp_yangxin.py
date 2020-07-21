@@ -51,10 +51,18 @@ def listener_process(queue, configurer):
             traceback.print_exc(file=sys.stderr)
 
 
+queueid_warning_dict = {}
 def warning_processor(logger, record):
+    global queueid_warning_dict
     queueid = record.name
     logger.handle(record)  # No level or filter logic applied - just do it!
-    print(record, '#'*10, record.name)
+    # recore.name 就是queueid 代表rtsp的获取队列id
+    if queueid_warning_dict.get(record.name) is None:
+        queueid_warning_dict[record.name] = [record.asctime]
+    else:
+
+        queueid_warning_dict[record.name].append(record.asctime)
+    print('\n', '-^-'*10, queueid_warning_dict)
     helmet_color = ''
     warning_signal, img_name, area, senduserids = record.msg.split('#') 
 
@@ -70,7 +78,8 @@ def warning_processor(logger, record):
         freq = 660  # Hz
         os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
         helmet_color = '黄色'
-    msg = area + '发生' + helmet_color + '非授权头盔进入区域'
+
+    msg = area + ' 发生 ' + helmet_color + '非授权头盔进入区域'
 
     # 防止频繁的报警
     i11qy_wechat.send_text_and_image_wechat(img_name, msg, senduserids)
