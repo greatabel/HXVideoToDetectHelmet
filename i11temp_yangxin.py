@@ -98,6 +98,7 @@ def warning_processor(logger, record):
         if queueid_lastsendtime_dict.get(record.name) is not None:
 
             timespan_flag = i11process_frame.compare_time(now, queueid_lastsendtime_dict.get(record.name), time_span_limit)
+            # 时间间隔没到 也不能发送
             if timespan_flag == False:
                 sendmsg_flag = False
         if sendmsg_flag:
