@@ -63,8 +63,8 @@ def warning_processor(logger, record):
         queueid_warning_dict[record.name] = [record.asctime]
     else:
         queueid_warning_dict[record.name].append(record.asctime)
-        # 定期清空 记录时间的list， 容量达到30， 就清空到只剩下最新的1个
-        if len(queueid_warning_dict[record.name]) > 30:
+        # 定期清空 记录时间的list， 容量达到50， 就清空到只剩下最新的1个
+        if len(queueid_warning_dict[record.name]) > 50:
             del queueid_warning_dict[record.name][:len(queueid_warning_dict[record.name])-1]
             print('delete recordtime list')
 
@@ -88,10 +88,10 @@ def warning_processor(logger, record):
     msg = area + ' 发生 ' + helmet_color + '非授权头盔进入区域'
 
     # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
-    timelimit = 5
+    timelimit = 10
     # time_span_limit 代表在这个时间内只能发一次消息报警
     time_span_limit = 180
-    if len(queueid_warning_dict[record.name]) >=5:
+    if len(queueid_warning_dict[record.name]) >= 10:
         sendmsg_flag = i11process_frame.proces_timelist(queueid_warning_dict[record.name], timelimit)
         
         now = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
