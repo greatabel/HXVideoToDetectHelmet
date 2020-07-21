@@ -55,6 +55,7 @@ def upload_media_to_wechat(access_token, filename):
 
 
 def send_text_and_image_wechat(filename, msg, touser):
+
   access_token = get_token()
   media_id = upload_media_to_wechat(access_token, filename)
   print('-'*20)
@@ -79,7 +80,7 @@ def send_text_and_image_wechat(filename, msg, touser):
 
 
   send_img_json = {
-     "touser" : "80002302|00038910",
+     "touser" : touser,
 
      "msgtype" : "image",
      "agentid" : agentid,
