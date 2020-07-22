@@ -317,7 +317,8 @@ for rtsp_obj in video_urls:
 
     #Reading the first frame
     (grabbed, frame) = cap.read()
-
+    if frame is None:
+        print('\n### error ###', video_url)
     while(cap.isOpened() and video_flag): 
 
         (grabbed, frame) = cap.read()
