@@ -142,8 +142,8 @@ def image_put(q, queueid):
                         q.put((cap.read()[1], queueid))
                         q.get() if q.qsize() > 1 else time.sleep(0.01)
                     count += 1
-        except cv2.error as e:
-            print('#'*10, 'cv2 error:', e)
+    except cv2.error as e:
+        print('#'*10, 'cv2 error:', e)
         # print('count=', count)
 
 # def image_get(quelist, window_name):
