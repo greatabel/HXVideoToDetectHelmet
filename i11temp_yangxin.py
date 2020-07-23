@@ -195,7 +195,7 @@ def image_get_v0(quelist, window_name, log_queue):
         print('#'*20)
 
 
-    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+    # cv2.namedWindow("image", cv2.WINDOW_NORMAL)
     while True:
         for q in quelist:
 
@@ -268,7 +268,7 @@ def image_get_v0(quelist, window_name, log_queue):
                 # print('#'*10, type(bboxes), bboxes.shape)
                 # 让窗口可以调整
                 
-                cv2.imshow('image', orig_img[...,::-1])
+                # cv2.imshow('image', orig_img[...,::-1])
                 print('processing:', window_name)
                 if warning_signal is not None:
                     print('@'*20, ' save image')
