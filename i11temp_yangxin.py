@@ -221,65 +221,67 @@ def image_get_v0(quelist, window_name, log_queue):
             # cv2.destroyAllWindows()
 
             # Image pre-processing
-            new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
+            if frame is not None:
+                new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
 
-            # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
-            # x, orig_img = data.transforms.presets.yolo.transform_test(new_frame, short=args.short)
-            x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
-            # print('Shape of pre-processed image:', x.shape)
-            x = x.as_in_context(ctx)
-            box_ids, scores, bboxes = net(x)
+                # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
+                # x, orig_img = data.transforms.presets.yolo.transform_test(new_frame, short=args.short)
+                x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
+                # print('Shape of pre-processed image:', x.shape)
+                x = x.as_in_context(ctx)
+                box_ids, scores, bboxes = net(x)
 
-            # render_as_image(bboxes)
-            # ---
-            # if isinstance(bboxes[0], mx.nd.NDArray):
+                # render_as_image(bboxes)
+                # ---
+                # if isinstance(bboxes[0], mx.nd.NDArray):
 
-            #     bboxes_a = bboxes[0].asnumpy()
-            # for i, bbox in enumerate(bboxes_a):
-            #     xmin, ymin, xmax, ymax = [int(x) for x in bbox]
-            #     print(xmin, ymin, xmax, ymax)
-            #     if xmin > -1 :
-            #         cv2.rectangle(orig_img, (xmin, ymin), (xmax, ymax), 122, 2)
-
-
-
-            # for idx in range(len(bboxes.asnumpy())):
-            #     x, y, w, h = cv2.boundingRect(bboxes.asnumpy()[idx])
-            #     mask[y:y+h, x:x+w] = 0
-            #     print("Box {0}: ({1},{2}), ({3},{4}), ({5},{6}), ({7},{8})".format(idx,x,y,x+w,y,x+w,y+h,x,y+h))
-            #     cv2.drawContours(mask, bboxes.asnumpy(), idx, (255, 255, 255), -1)
-            #     r = float(cv2.countNonZero(mask[y:y+h, x:x+w])) / (w * h)
-
-            #----
+                #     bboxes_a = bboxes[0].asnumpy()
+                # for i, bbox in enumerate(bboxes_a):
+                #     xmin, ymin, xmax, ymax = [int(x) for x in bbox]
+                #     print(xmin, ymin, xmax, ymax)
+                #     if xmin > -1 :
+                #         cv2.rectangle(orig_img, (xmin, ymin), (xmax, ymax), 122, 2)
 
 
-            # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
-            x, warning_signal = i11process_frame.forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
-                                            class_names=net.classes,thresh=args.threshold, hx_rect=rect)
-            # x = origin_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
-            #                                 class_names=net.classes,thresh=args.threshold)
 
-            # print('#'*10, type(bboxes), bboxes.shape)
-            # 让窗口可以调整
-            
-            cv2.imshow('image', orig_img[...,::-1])
-            print('processing:', window_name)
-            if warning_signal is not None:
-                print('@'*20, ' save image')
-                now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time())) 
-                img_name= str(queueid) + '_'+ now + '.jpg'
-                cv2.imwrite('screenshots/' + img_name, orig_img[...,::-1])
-                # 发送企业维新消息
-                # print('img_name ',img_name, 'queue_rtsp_dict=', queue_rtsp_dict )
-                # print('*-*-'*20, '\n')
-                # i11qy_wechat.send_text_and_image_wechat(img_name, queue_rtsp_dict.get(queueid, None)[5]+'发生非授权头盔进入区域',
-                #     queue_rtsp_dict.get(queueid, None)[6])
+                # for idx in range(len(bboxes.asnumpy())):
+                #     x, y, w, h = cv2.boundingRect(bboxes.asnumpy()[idx])
+                #     mask[y:y+h, x:x+w] = 0
+                #     print("Box {0}: ({1},{2}), ({3},{4}), ({5},{6}), ({7},{8})".format(idx,x,y,x+w,y,x+w,y+h,x,y+h))
+                #     cv2.drawContours(mask, bboxes.asnumpy(), idx, (255, 255, 255), -1)
+                #     r = float(cv2.countNonZero(mask[y:y+h, x:x+w])) / (w * h)
 
-                logger.log(logging.CRITICAL, warning_signal + '#' + img_name + '#' +queue_rtsp_dict.get(queueid, None)[5]
-                            + '#' + queue_rtsp_dict.get(queueid, None)[6])
-            if cv2.waitKey(1) == 27:
-                    break
+                #----
 
+
+                # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
+                x, warning_signal = i11process_frame.forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
+                                                class_names=net.classes,thresh=args.threshold, hx_rect=rect)
+                # x = origin_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
+                #                                 class_names=net.classes,thresh=args.threshold)
+
+                # print('#'*10, type(bboxes), bboxes.shape)
+                # 让窗口可以调整
+                
+                cv2.imshow('image', orig_img[...,::-1])
+                print('processing:', window_name)
+                if warning_signal is not None:
+                    print('@'*20, ' save image')
+                    now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time())) 
+                    img_name= str(queueid) + '_'+ now + '.jpg'
+                    cv2.imwrite('screenshots/' + img_name, orig_img[...,::-1])
+                    # 发送企业维新消息
+                    # print('img_name ',img_name, 'queue_rtsp_dict=', queue_rtsp_dict )
+                    # print('*-*-'*20, '\n')
+                    # i11qy_wechat.send_text_and_image_wechat(img_name, queue_rtsp_dict.get(queueid, None)[5]+'发生非授权头盔进入区域',
+                    #     queue_rtsp_dict.get(queueid, None)[6])
+
+                    logger.log(logging.CRITICAL, warning_signal + '#' + img_name + '#' +queue_rtsp_dict.get(queueid, None)[5]
+                                + '#' + queue_rtsp_dict.get(queueid, None)[6])
+                if cv2.waitKey(1) == 27:
+                        break
+            else:
+                print('skip ', queueid, ' frame')
 
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
