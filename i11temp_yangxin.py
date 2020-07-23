@@ -122,23 +122,28 @@ def image_put(q, queueid):
     elif camera_corp == 'hik':
         full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%s" % (name, pwd, ip, channel)
     full_vedio_url = i11process_frame.deal_specialchar_in_url(full_vedio_url)
-    cap = cv2.VideoCapture(full_vedio_url)
-    # if cap.isOpened():
-    #     print('HIKVISION')
-    # else:
-    #     cap = cv2.VideoCapture("rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (name, pwd, ip, channel))
-    #     print('DaHua')
+    try:
+        cap = cv2.VideoCapture(full_vedio_url)
+        # if cap.isOpened():
+        #     print('HIKVISION')
+        # else:
+        #     cap = cv2.VideoCapture("rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" % (name, pwd, ip, channel))
+        #     print('DaHua')
 
-    # 通过timeF控制多少帧数真正读取1帧到队列中
-    timeF = 15
-    count = 1 
-    while True:
-        res, frame = cap.read()
-        if count % timeF == 0:
-            # print('pick=', count)
-            q.put((cap.read()[1], queueid))
-            q.get() if q.qsize() > 1 else time.sleep(0.01)
-        count += 1
+        # 通过timeF控制多少帧数真正读取1帧到队列中
+        timeF = 15
+        count = 1 
+        while True:
+            if cap.isOpened():
+                status, frame = cap.read()
+                if status:
+                    if count % timeF == 0:
+                        # print('pick=', count)
+                        q.put((cap.read()[1], queueid))
+                        q.get() if q.qsize() > 1 else time.sleep(0.01)
+                    count += 1
+        except cv2.error as e:
+            print('#'*10, 'cv2 error:', e)
         # print('count=', count)
 
 # def image_get(quelist, window_name):
