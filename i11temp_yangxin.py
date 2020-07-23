@@ -281,7 +281,7 @@ def image_get_v0(quelist, window_name, log_queue):
                 if cv2.waitKey(1) == 27:
                         break
             else:
-                print('skip ', queueid, ' frame')
+                print('skip frame from queueid=', queueid)
 
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
