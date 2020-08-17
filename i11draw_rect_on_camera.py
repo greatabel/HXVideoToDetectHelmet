@@ -276,6 +276,15 @@ video_urls = [
 
 ]
 
+
+video_urls = [
+    # start 本地测试
+    ["admin", "admin123", "10.248.10.100:554", 1, 'dahua', "华新数创5楼室内0", "80002302|00038910"],  # ipv4
+    ["admin", "admin123", "10.248.10.100:554", 3, 'dahua', "华新数创5楼室内1", "80002302"],
+
+    ["admin", "huaxin12345", "10.248.10.43:554", 1, "hik","", "80002302"],
+    # end   本地测试
+]
 # video_urls = [
 #     "rtsp://admin:yxgl$666@192.168.200.182:554/Streaming/Channels/1",
 #     "rtsp://admin:yxgl$666@192.168.200.183:554/Streaming/Channels/1",

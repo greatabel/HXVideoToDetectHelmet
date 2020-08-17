@@ -1,8 +1,8 @@
 termcolor
-gluoncv
+gluoncv==0.7.0
 imutils
-mxnet
-# mxnet-cu102
+# mxnet
+mxnet-cu100
 requests_toolbelt
 simplejson
 sklearn
