@@ -124,9 +124,10 @@ class color_detection:
             #cv2.imshow("crop_hsv_2",crop_hsv)
             #cv2.waitKey(0)
             # 判断区域内与安全衣颜色相近的像素个数是否大于某一定值，并作出该区域是否有安全衣的判断
+            print("count_orange=", count_orange)
             if count_orange > 250:
                 cv2.drawContours(frame_resize, [box[detect_i]], 0, [0, 255, 0], 2)
-                print("count_orange=", count_orange)
+                
                 detect_flag.append(True)
             else:
                 cv2.drawContours(frame_resize, [box[detect_i]], 0, [0, 0, 255], 2)
@@ -172,7 +173,7 @@ def deal_specialchar_in_url(istr):
     return result
 
 if __name__ == '__main__':
-    rtsp_url = "rtsp://admin:yxgl$666@192.168.200.211:554:554/Streaming/Channels/1"
+    rtsp_url = "rtsp://admin:yxgl123456@192.168.200.160:554:554/Streaming/Channels/1"
     # 初始化姿态检测主函数
     detect = color_detection()
     # 获取视频
