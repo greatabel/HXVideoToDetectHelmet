@@ -9,7 +9,7 @@
 import cv2
 cap = cv2.VideoCapture("rtsp://admin:admin123@10.248.10.100:554/cam/realmonitor?channel=1&subtype=0")
 
-# cap = cv2.VideoCapture("rtsp://admin:yxgl123456@10.249.181.12:8002/cam/realmonitor?channel=3&subtype=0")
+cap = cv2.VideoCapture("rtsp://admin:yxgl$666@192.168.200.185:554/cam/realmonitor?channel=1&subtype=0")
 # cap = cv2.VideoCapture("rtsp://admin:yxgl123456@192.168.200.150:554//Streaming/Channels/1")
 # cap = cv2.VideoCapture("rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/Channels/101")
 # cap = cv2.VideoCapture("rtsp://admin:yxgl!123456@10.249.181.9:554/Streaming/tracks/1701?starttime=20200602t063812z&endtime=20200602t064016z")
