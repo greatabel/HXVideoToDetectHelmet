@@ -99,7 +99,7 @@ class process:
                     for c in cnts:
                         area = cv2.contourArea(c)
                         x1, y1, w1, h1 = cv2.boundingRect(c)
-                        print('area=', erea)
+                        print('area=', area)
                         if area > 100:
                             num = num+1
                             cv2.rectangle(res, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
