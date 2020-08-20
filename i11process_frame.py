@@ -257,61 +257,62 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             else:
                 class_name = str(cls_id) if cls_id >= 0 else ''
             score = '{:d}%'.format(int(scores.flat[i]*100)) if scores is not None else ''
+            # 如果识别率太低的情况还是排除掉
+            if scores.flat[i] > 0.65:
+                if class_name == 'person':
+                    #天蓝色
+                    bcolor = (12, 203, 232)
 
-            if class_name == 'person':
-                #天蓝色
-                bcolor = (12, 203, 232)
+                    if 'NoHat' in default_enter_rule:
+                        warning_signal = 'without-hat-in-area'
 
-                if 'NoHat' in default_enter_rule:
-                    warning_signal = 'without-hat-in-area'
+                elif class_name == 'hat':
+                    if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
+                     'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
+                        # 黄色
+                        bcolor = (255,255,0)
+                        # 警告音 
+                        # duration = 0.5  # seconds
+                        # freq = 660  # Hz
+                        # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+                        # logger.log(logging.CRITICAL, 'yellow-hat-in-area')
+                        if 'YHat' in default_enter_rule:
+                            warning_signal = 'yellow-hat-in-area'
+                        # print('#'*10)
 
-            elif class_name == 'hat':
-                if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
-                 'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
-                    # 黄色
-                    bcolor = (255,255,0)
-                    # 警告音 
-                    # duration = 0.5  # seconds
-                    # freq = 660  # Hz
-                    # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-                    # logger.log(logging.CRITICAL, 'yellow-hat-in-area')
-                    if 'YHat' in default_enter_rule:
-                        warning_signal = 'yellow-hat-in-area'
-                    # print('#'*10)
+                    elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
+                        # 红色
+                        bcolor = (255, 0, 0)
+                        # 警告音 
+                        # duration = 1  # seconds
+                        # freq = 440  # Hz
+                        # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+                        # logger.log(logging.CRITICAL, 'red-hat-in-area')
+                        if 'RHat' in default_enter_rule:
+                            warning_signal = 'red-hat-in-area'
+                        # print('#'*20)
 
-                elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
-                    # 红色
-                    bcolor = (255, 0, 0)
-                    # 警告音 
-                    # duration = 1  # seconds
-                    # freq = 440  # Hz
-                    # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-                    # logger.log(logging.CRITICAL, 'red-hat-in-area')
-                    if 'RHat' in default_enter_rule:
-                        warning_signal = 'red-hat-in-area'
-                    # print('#'*20)
+                    # elif colorname == 'darkolivegreen':
+                    #     if dominant_color is not None:
+                    #         if (dominant_color[0] > 100 and dominant_color[1] > 70) or \
+                    #            (dominant_color[0] < 100 and dominant_color[2] < 50):
+                    #            # seem as yellow
+                    #             bcolor = (255,255,0)
+                    # elif colorname == 'darkslategray':
+                    #     if dominant_color is not None:
+                    #         if (dominant_color[0] < 65 and dominant_color[1] <= 50):
+                    #             # as yellow
+                    #             bcolor = (255,255,0)
+                    #         if (dominant_color[0] > 80 and dominant_color[1] >= 50):
+                    #             # as red
+                    #             bcolor = (255,0,0)                                 
+                cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
 
-                # elif colorname == 'darkolivegreen':
-                #     if dominant_color is not None:
-                #         if (dominant_color[0] > 100 and dominant_color[1] > 70) or \
-                #            (dominant_color[0] < 100 and dominant_color[2] < 50):
-                #            # seem as yellow
-                #             bcolor = (255,255,0)
-                # elif colorname == 'darkslategray':
-                #     if dominant_color is not None:
-                #         if (dominant_color[0] < 65 and dominant_color[1] <= 50):
-                #             # as yellow
-                #             bcolor = (255,255,0)
-                #         if (dominant_color[0] > 80 and dominant_color[1] >= 50):
-                #             # as red
-                #             bcolor = (255,0,0)                                 
-            cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
-
-            if class_name or score:
-                y = ymin - 15 if ymin - 15 > 15 else ymin + 15
-                cv2.putText(img, '{:s} {:s}'.format(class_name, score),
-                            (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
-                            bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
+                if class_name or score:
+                    y = ymin - 15 if ymin - 15 > 15 else ymin + 15
+                    cv2.putText(img, '{:s} {:s}'.format(class_name, score),
+                                (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
+                                bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
         else:
             print('裁减检测到的情况出现在我们划定的识别区域之外')
 
