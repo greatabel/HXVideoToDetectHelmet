@@ -115,7 +115,7 @@ class process:
         cv2.imshow("image", frame_resize)
         cv2.waitKey(1)
         #self.write_frame(frame_resize)
-        #self.write_video(detect_input)
+        self.write_video(detect_input)
 
 if __name__ == '__main__':
     # 初始化姿态检测主函数
