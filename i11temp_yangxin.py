@@ -203,7 +203,7 @@ def image_get_v0(quelist, window_name, log_queue):
 
             frame, queueid = q.get()
             rect = ast.literal_eval(queue_rtsp_dict.get(queueid, None)[7])
-            default_enter_rule = ast.literal_eval(queue_rtsp_dict.get(queueid, None)[8])
+            default_enter_rule = queue_rtsp_dict.get(queueid, None)[8]
 
             logger = logging.getLogger(str(queueid))
             # level = choice(LEVELS)
