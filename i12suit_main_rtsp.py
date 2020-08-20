@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     # 获取视频
 
-    rtsp_url = "rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/1"
+    rtsp_url = "rtsp://admin:yxgl$666@192.168.200.215:554/Streaming/Channels/1"
     url = process.deal_specialchar_in_url(rtsp_url)
     videoCapture = cv2.VideoCapture(url)
 
