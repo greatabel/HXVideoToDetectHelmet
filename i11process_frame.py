@@ -93,7 +93,8 @@ def closest_colour(requested_colour):
 
 def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.5,
                  class_names=None, colors=None,
-                 absolute_coordinates=True, scale=1.0, hx_rect=None):
+                 absolute_coordinates=True, scale=1.0, hx_rect=None,
+                 default_enter_rule=None):
     """Visualize bounding boxes with OpenCV.
 
     Parameters
@@ -260,6 +261,10 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             if class_name == 'person':
                 #天蓝色
                 bcolor = (12, 203, 232)
+
+                if 'NoHat' in default_enter_rule:
+                    warning_signal = 'without-hat-in-area'
+
             elif class_name == 'hat':
                 if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
                  'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
@@ -270,7 +275,8 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                     # freq = 660  # Hz
                     # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
                     # logger.log(logging.CRITICAL, 'yellow-hat-in-area')
-                    warning_signal = 'yellow-hat-in-area'
+                    if 'YHat' in default_enter_rule:
+                        warning_signal = 'yellow-hat-in-area'
                     # print('#'*10)
 
                 elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
@@ -281,7 +287,8 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                     # freq = 440  # Hz
                     # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
                     # logger.log(logging.CRITICAL, 'red-hat-in-area')
-                    warning_signal = 'red-hat-in-area'
+                    if 'RHat' in default_enter_rule:
+                        warning_signal = 'red-hat-in-area'
                     # print('#'*20)
 
                 # elif colorname == 'darkolivegreen':

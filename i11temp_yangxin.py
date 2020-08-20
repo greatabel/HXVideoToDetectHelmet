@@ -77,15 +77,17 @@ def warning_processor(logger, record):
         duration = 1  # seconds
         freq = 440  # Hz
         os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-        helmet_color = '红色'
+        helmet_color = '红色头盔'
     elif warning_signal == 'yellow-hat-in-area':
         # # 警告音 yellow
         duration = 0.5  # seconds
         freq = 660  # Hz
         os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-        helmet_color = '黄色'
+        helmet_color = '黄色头盔'
+    elif warning_signal == 'without-hat-in-area':
+        helmet_color = '未佩戴头盔'
 
-    msg = area + ' 发生 ' + helmet_color + '非授权头盔进入区域'
+    msg = area + ' 发生 ' + helmet_color + '非授权进入区域'
 
     # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
     timelimit = 8
@@ -201,7 +203,7 @@ def image_get_v0(quelist, window_name, log_queue):
 
             frame, queueid = q.get()
             rect = ast.literal_eval(queue_rtsp_dict.get(queueid, None)[7])
-
+            default_enter_rule = ast.literal_eval(queue_rtsp_dict.get(queueid, None)[8])
 
             logger = logging.getLogger(str(queueid))
             # level = choice(LEVELS)
@@ -261,7 +263,7 @@ def image_get_v0(quelist, window_name, log_queue):
 
                 # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
                 x, warning_signal = i11process_frame.forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
-                                                class_names=net.classes,thresh=args.threshold, hx_rect=rect)
+                                                class_names=net.classes,thresh=args.threshold, hx_rect=rect, default_enter_rule=default_enter_rule)
                 # x = origin_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
                 #                                 class_names=net.classes,thresh=args.threshold)
 
