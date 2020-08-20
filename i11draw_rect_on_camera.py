@@ -520,7 +520,7 @@ cv2.destroyAllWindows()
 rtsp_list  = []
 for rtsp_obj, area in zip(video_urls, area_list):
     rtsp_list.append([rtsp_obj[0], rtsp_obj[1], rtsp_obj[2],
-                      rtsp_obj[3], rtsp_obj[4],  rtsp_obj[5],  rtsp_obj[6], area])
+                      rtsp_obj[3], rtsp_obj[4],  rtsp_obj[5],  rtsp_obj[6], area, rtsp_obj[7] ])
 
 # print(data, '#'*20)
 
