@@ -74,9 +74,9 @@ class process:
         diff_median = cv2.medianBlur(cv2.morphologyEx(diff_threshold, cv2.MORPH_OPEN, self.__kernel), 5)
         # 寻找封闭区域并填充
         #opencv3
-        img, contours, hierarchy = cv2.findContours(diff_median, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # img, contours, hierarchy = cv2.findContours(diff_median, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         #opencv4
-        #contours, hierarchy = cv2.findContours(diff_median, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(diff_median, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         red_lower = np.array([0,140,140])
         red_upper = np.array([15,255,255])
