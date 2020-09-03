@@ -8,6 +8,7 @@
 #
 import cv2
 cap = cv2.VideoCapture("rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/1")
+cap = cv2.VideoCapture("rtsp://admin:test1024@10.248.10.111/h264/ch33/main/av_stream")
 
 # cap = cv2.VideoCapture("rtsp://admin:yxgl$666@192.168.200.215:554/Streaming/Channels/1")
 # cap = cv2.VideoCapture("rtsp://admin:yxgl123456@192.168.200.150:554//Streaming/Channels/1")
