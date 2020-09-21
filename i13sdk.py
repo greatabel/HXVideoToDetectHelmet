@@ -6,11 +6,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-print(cv2.__version__)
+# print(cv2.__version__)
 # 海康摄像头
 def HKI_base64(ip, name, pw):
     HKIPcamera.init(ip, name, pw)
-    print('here0')
+    print('here0', ip, name, pw)
     # HKIPcamera.getfram()
     while 1:
         print(ip, name, pw, '#'*5)
