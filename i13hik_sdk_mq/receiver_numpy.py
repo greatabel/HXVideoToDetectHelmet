@@ -1,20 +1,29 @@
 import pika
-import simplejson as json
-import base64
+import json
+
 #https://stackoverflow.com/questions/50404273/python-tutorial-code-from-rabbitmq-failing-to-run
+
+import numpy
+import cv2
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 channel = connection.channel()
 
 
 channel.queue_declare(queue='hello')
-filename = 'received_test.jpg'
+
 def callback(ch, method, properties, body):
     msg = json.loads(body)
-    msg = 
-    print(" [x] Received %r" % msg)
-    imgdata = base64.b64decode(msg['img'])
-    print(type(imgdata), '#'*10)
+    numpy_data = numpy.asarray(msg["img"])
+    # print(" [x] Received %r" % msg)
+    # imgdata = base64.b64decode(msg['img'])
+    print(type(numpy_data), '#'*10, numpy_data)
+    cv2.imwrite("filename.png", numpy_data)
+
+
+    # cv2.namedWindow('f', flags=cv2.WINDOW_NORMAL)
+    # cv2.imshow('f',numpy_data)
+    # cv2.imshow('received_test', numpy_data)
     # with open(filename, 'wb') as f:
     #     f.write(imgdata)
 

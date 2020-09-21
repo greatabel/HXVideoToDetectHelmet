@@ -13,6 +13,7 @@ import ast
 import urllib
 
 from i13sdk import HKI_base64
+
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
@@ -63,7 +64,9 @@ def image_put(q, queueid):
             ret, frame = cap.read()
             # print(frame, type(frame),'#', ret)
             if frame is not None:
-
+                # from i13rabbitmq import sender
+                # print(type(frame), frame)
+                # sender('localhost', frame)
                 # # Our operations on the frame come here
                 # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -71,6 +74,7 @@ def image_put(q, queueid):
                 # cv2.imshow('frame',gray)
                 cv2.namedWindow('frame', flags=cv2.WINDOW_NORMAL)
                 cv2.imshow('frame',frame)
+
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
     elif camera_corp in ('hik_sdk'):

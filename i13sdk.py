@@ -6,6 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
+
+from i13rabbitmq import sender
+
 # print(cv2.__version__)
 # 海康摄像头
 def HKI_base64(ip, name, pw):
@@ -21,12 +24,13 @@ def HKI_base64(ip, name, pw):
         img = np.array(frame)
         # print('img=', img)
         # cv2.imshow('Camera', img)
-        img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        # img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        sender('localhost', img)
         cv2.namedWindow('Camera', flags=cv2.WINDOW_NORMAL)
         cv2.imshow('Camera', img)
         cv2.waitKey(1)
         # print('here')
-        # time.sleep(0.1)
+        time.sleep(3)
     HKIPcamera.release()
 
 if __name__ == '__main__':
