@@ -17,6 +17,7 @@ with open(myfile, "rb") as image:
 msg = {
     'placeid': 2,
     'time': '2020-09-21:10:58:59',
+    'ai_type': 'hat_detection',
     'img': img
 
 }
