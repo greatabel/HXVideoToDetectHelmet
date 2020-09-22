@@ -11,7 +11,7 @@ from i13rabbitmq import sender
 
 # print(cv2.__version__)
 # 海康摄像头
-def HKI_base64(ip, name, pw):
+def HKI_base64(ip, name, pw, queueid):
     HKIPcamera.init(ip, name, pw)
     print('here0', ip, name, pw)
     # HKIPcamera.getfram()
@@ -25,7 +25,7 @@ def HKI_base64(ip, name, pw):
         # print('img=', img)
         # cv2.imshow('Camera', img)
         # img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        sender('localhost', img)
+        sender('localhost', img, queueid)
         cv2.namedWindow('Camera', flags=cv2.WINDOW_NORMAL)
         cv2.imshow('Camera', img)
         cv2.waitKey(1)

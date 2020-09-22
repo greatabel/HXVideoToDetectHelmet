@@ -17,6 +17,7 @@ def callback(ch, method, properties, body):
     numpy_data = numpy.asarray(msg["img"])
     # print(" [x] Received %r" % msg)
     # imgdata = base64.b64decode(msg['img'])
+    print(msg['placeid'], '@'*10, msg['time'])
     print(type(numpy_data), '#'*10, numpy_data)
     cv2.imwrite("filename.png", numpy_data)
 

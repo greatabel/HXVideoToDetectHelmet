@@ -17,7 +17,7 @@ from i13sdk import HKI_base64
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
-rtsp_file_path = 'i11rtsp_list.csv'
+rtsp_file_path = 'i13rtsp_list.csv'
 queue_rtsp_dict = {}
 img_name = ''
 
@@ -39,11 +39,11 @@ def deal_specialchar_in_url(istr):
 
 def image_put(q, queueid):
 
-    name = queue_rtsp_dict.get(queueid, None)[0]
-    pwd = queue_rtsp_dict.get(queueid, None)[1]
-    ip = queue_rtsp_dict.get(queueid, None)[2]
-    channel = queue_rtsp_dict.get(queueid, None)[3]
-    camera_corp = queue_rtsp_dict.get(queueid, None)[4]
+    name = queue_rtsp_dict.get(queueid, None)[1]
+    pwd = queue_rtsp_dict.get(queueid, None)[2]
+    ip = queue_rtsp_dict.get(queueid, None)[3]
+    channel = queue_rtsp_dict.get(queueid, None)[4]
+    camera_corp = queue_rtsp_dict.get(queueid, None)[5]
     # 大华的情况 ：
     if camera_corp == 'dahua':
         full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%s&subtype=0" % (name, pwd, ip, channel)
@@ -78,7 +78,7 @@ def image_put(q, queueid):
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
     elif camera_corp in ('hik_sdk'):
-        HKI_base64(ip[:-4], name, pwd)
+        HKI_base64(ip[:-4], name, pwd, queueid)
 
 
 
@@ -92,15 +92,15 @@ def run_multi_camera(camera_ip_l):
 
 
 
-    queueid = 0
+    
     for queue, camera_ip in zip(queues, camera_ip_l):
         # rect = ast.literal_eval(camera_ip[7])
         # print(camera_ip, camera_ip[0], '##', rect, type(rect))
         processes.append(mp.Process(target=image_put, 
-            args=(queue, queueid)))
+            args=(queue, camera_ip[0])))
 
-        queue_rtsp_dict[queueid] = camera_ip
-        queueid += 1
+        queue_rtsp_dict[camera_ip[0]] = camera_ip
+        
         # processes.append(mp.Process(target=image_get, args=(queue, camera_ip[2])))
 
     [process.start() for process in processes]
