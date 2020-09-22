@@ -64,21 +64,22 @@ def image_put(q, queueid):
             ret, frame = cap.read()
             # print(frame, type(frame),'#', ret)
             if frame is not None:
-                # from i13rabbitmq import sender
-                # print(type(frame), frame)
-                # sender('localhost', frame)
+                from i13rabbitmq import sender
+                print(type(frame), frame)
+                sender('localhost', frame, queueid)
                 # # Our operations on the frame come here
                 # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
                 # Display the resulting frame
                 # cv2.imshow('frame',gray)
-                cv2.namedWindow('frame', flags=cv2.WINDOW_NORMAL)
-                cv2.imshow('frame',frame)
+                
+                cv2.namedWindow('not-sdk', flags=cv2.WINDOW_NORMAL)
+                cv2.imshow('not-sdk',frame)
 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
-    elif camera_corp in ('hik_sdk'):
-        HKI_base64(ip[:-4], name, pwd, queueid)
+    # elif camera_corp in ('hik_sdk'):
+    #     HKI_base64(ip[:-4], name, pwd, queueid)
 
 
 

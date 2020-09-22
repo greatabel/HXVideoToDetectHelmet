@@ -116,7 +116,7 @@ def image_put(q, queueid):
     channel = queue_rtsp_dict.get(queueid, None)[3]
     camera_corp = queue_rtsp_dict.get(queueid, None)[4]
 
-
+    full_vedio_url = None
     # 大华的情况 ：
     if camera_corp == 'dahua':
         full_vedio_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%s&subtype=0" % (name, pwd, ip, channel)
@@ -202,6 +202,7 @@ def image_get_v0(quelist, window_name, log_queue):
         for q in quelist:
 
             frame, queueid = q.get()
+            print('#'*20, type(frame), frame)
             rect = ast.literal_eval(queue_rtsp_dict.get(queueid, None)[7])
             default_enter_rule = queue_rtsp_dict.get(queueid, None)[8]
 
@@ -322,7 +323,7 @@ def run_multi_camera(camera_ip_l):
 
 
     # -------------------- start ai processes
-    num_of_ai_process = 5
+    num_of_ai_process = 2
     chunk_queues = list(chunks(queues, int(len(queues)/num_of_ai_process)))
     print(chunk_queues)
     for i in range(0, num_of_ai_process):
