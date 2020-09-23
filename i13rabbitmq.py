@@ -14,7 +14,7 @@ class NumpyArrayEncoder(JSONEncoder):
 
 
 def sender(host, img, queueid=None):
-	print(type(img), '1')
+	print(type(img), 'in sender')
 	connection = pika.BlockingConnection(pika.ConnectionParameters(
 	        host=host))
 	channel = connection.channel()
