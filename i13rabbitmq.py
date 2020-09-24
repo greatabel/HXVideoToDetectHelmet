@@ -1,44 +1,64 @@
 import pika
 import json
 from json import JSONEncoder
-import numpy
+import numpy as np
 import time
 import cv2
+import base64
 
+# class NumpyArrayEncoder(JSONEncoder):
+#     def default(self, obj):
+#         if isinstance(obj, numpy.ndarray):
+#             return obj.tolist()
+#         return JSONEncoder.default(self, obj)
 
-class NumpyArrayEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, numpy.ndarray):
-            return obj.tolist()
-        return JSONEncoder.default(self, obj)
-
-
+QUEUE_SIZE = 5
 def sender(host, img, queueid=None):
 	print(type(img), 'in sender')
 	connection = pika.BlockingConnection(pika.ConnectionParameters(
 	        host=host))
 	channel = connection.channel()
 
-	channel.queue_declare(queue='hello')
+	channel.queue_declare(
+		queue='hello',
+        arguments={'x-max-length': 5, "x-queue-mode": "lazy"},
+		)
 
 	# myfile = 'test0.jpg'
 	# img = None
 	# with open(myfile, "rb") as image:
 	#     img = base64.b64encode(image.read())
 	#     print(type(img), '#'*10)
+  
+	_, img_encode = cv2.imencode('.jpg', img)
+	np_data = np.array(img_encode)
+	str_data = np_data.tostring()
+	b64_bytes = base64.b64encode(str_data)
+
+	picData_string = b64_bytes.decode()
+
 	now = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
 	msg = {
 	    'placeid': queueid,
 	    'time': now,
-	    'img': img
+	    'img': picData_string
 
 	}
-	print(type(msg), '@'*10)
+	print(type(msg), '@'*10, 'msg=', msg)
+	json0 = json.dumps(msg)
+	# import codecs
+	# with codecs.open('data.json', 'w', 'utf8') as outfile:
+	#     outfile.write(json.dumps(msg,cls=NumpyArrayEncoder))
+	import sys
+	s = sys.getsizeof(msg)
+	print(s, s/1024, s/1048576)
+	s0 = sys.getsizeof(json0)
+	print(s0, s0/1024, s0/1048576, type(json0))
 	channel.basic_publish(exchange='',
 	                      routing_key='hello',
-	                      body=json.dumps(msg, cls=NumpyArrayEncoder) 
+	                      body=json0
 	                      )
-	print(" [x] Sent msg'")
+	print("rabbitMQ [x] Sent msg'", '-'*20)
 	connection.close()
 
 

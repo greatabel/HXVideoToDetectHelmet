@@ -14,7 +14,7 @@ import urllib
 
 import numpy
 from i13sdk import HKI_base64
-
+from i13rabbitmq import sender
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
@@ -53,32 +53,53 @@ def image_put(q, queueid):
         full_vedio_url = "rtsp://%s:%s@%s/Streaming/Channels/%s" % (name, pwd, ip, channel)
 
     if camera_corp in ('dahua', 'hik'):
-        full_vedio_url = deal_specialchar_in_url(full_vedio_url)
-        cap = cv2.VideoCapture(full_vedio_url)
-        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
+
+        try:
+            ull_vedio_url = deal_specialchar_in_url(full_vedio_url)
+            cap = cv2.VideoCapture(full_vedio_url)
+            # 通过timeF控制多少帧数真正读取1帧到队列中
+            timeF = 15
+            count = 1 
+            while True:
+                if cap.isOpened():
+                    status, frame = cap.read()
+                    if status:
+                        if count % timeF == 0:
+                            # print('pick=', count)
+                            print(type(frame), numpy.size(frame), 'queueid=', queueid)
+                            # time.sleep(0.5)
+                            # print('sleep 0.5')
+                            sender('localhost', frame, queueid)
+                        count += 1
+        except cv2.error as e:
+            print('#'*10, 'cv2 error:', e)
+
+        # full_vedio_url = deal_specialchar_in_url(full_vedio_url)
+        # cap = cv2.VideoCapture(full_vedio_url)
+        # cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
         
 
-        count = 0
+        # count = 0
 
-        while(True):
-            # Capture frame-by-frame
-            ret, frame = cap.read()
-            # print(frame, type(frame),'#', ret)
-            if frame is not None:
-                from i13rabbitmq import sender
-                print(type(frame), numpy.size(frame), 'queueid=', queueid)
-                sender('localhost', frame, queueid)
-                # # Our operations on the frame come here
-                # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # while(True):
+        #     # Capture frame-by-frame
+        #     ret, frame = cap.read()
+        #     # print(frame, type(frame),'#', ret)
+        #     if frame is not None:
+        #         from i13rabbitmq import sender
+        #         print(type(frame), numpy.size(frame), 'queueid=', queueid)
+        #         sender('localhost', frame, queueid)
+        #         # # Our operations on the frame come here
+        #         # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-                # Display the resulting frame
-                # cv2.imshow('frame',gray)
+        #         # Display the resulting frame
+        #         # cv2.imshow('frame',gray)
                 
-                # cv2.namedWindow('not-sdk', flags=cv2.WINDOW_NORMAL)
-                # cv2.imshow('not-sdk',frame)
+        #         # cv2.namedWindow('not-sdk', flags=cv2.WINDOW_NORMAL)
+        #         # cv2.imshow('not-sdk',frame)
 
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
+        #         if cv2.waitKey(1) & 0xFF == ord('q'):
+        #             break
     # elif camera_corp in ('hik_sdk'):
     #     HKI_base64(ip[:-4], name, pwd, queueid)
 

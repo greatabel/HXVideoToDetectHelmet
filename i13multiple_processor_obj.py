@@ -21,6 +21,7 @@ import i11qy_wechat
 import pika
 import json
 import numpy
+import base64
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
@@ -49,6 +50,8 @@ def listener_process(queue, configurer):
 
             if record is None:  # We send this as a sentinel to tell the listener to quit.
                 break
+            if 'pika' in record.name:
+                print('-'*30, record, '-'*30)
             elif 'pika' not in record.name:
                                 # print('record','*'*20,record.name, record)
                 logger = logging.getLogger(record.name)
@@ -119,7 +122,8 @@ def warning_processor(logger, record):
 
 
 class Hat_and_Person_Detector():
-    def __init__(self,  log_queue):
+    def __init__(self, processid, log_queue):
+        print('processid', processid, '-^-'*5)
         self.log_queue = log_queue
 
         self.log_queue = log_queue
@@ -241,13 +245,18 @@ class Hat_and_Person_Detector():
         else:
             print('skip frame from queueid=', queueid)
 
+QUEUE_SIZE = 5
 def receiver(host, processid, log_queue):
 
 
-    detector = Hat_and_Person_Detector(log_queue)
+    detector = Hat_and_Person_Detector(processid, log_queue)
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
     channel = connection.channel()
-    channel.queue_declare(queue='hello')
+    channel.queue_declare(
+        queue='hello',
+        arguments={'x-max-length': 5, "x-queue-mode": "lazy"},
+        )
+
     # channel.basic_consume(on_message_callback=lambda ch, method, properties, body: image_get_v0(ch, 
     #                         method, properties, body, processid=processid, detector=detector),
     #                       queue='hello',
@@ -274,12 +283,16 @@ def image_get_v0(ch, method, properties, body, processid, detector):
     print('************************************')
 
 
-    print('in image_get_v0 ', ch, method, properties, processid)
+    print('in image_get_v0 ', ch, method, properties, 'processid==>', processid)
     msg = json.loads(body)
     frame = None
     if msg is not None:
+        img = base64.b64decode(msg['img'].encode())
+        
+        # get image array
+        frame = cv2.imdecode(numpy.fromstring(img, numpy.uint8), 1)
 
-        frame = numpy.asarray(msg["img"])
+        # frame = numpy.asarray(msg["img"])
         queueid = msg['placeid']
         # print(" [x] Received %r" % msg)
         # imgdata = base64.b64decode(msg['img'])
