@@ -6,13 +6,14 @@ import time
 import cv2
 import base64
 
+import i13rabbitmq_config
+
 # class NumpyArrayEncoder(JSONEncoder):
 #     def default(self, obj):
 #         if isinstance(obj, numpy.ndarray):
 #             return obj.tolist()
 #         return JSONEncoder.default(self, obj)
 
-QUEUE_SIZE = 5
 def sender(host, img, queueid=None):
 	print(type(img), 'in sender')
 	connection = pika.BlockingConnection(pika.ConnectionParameters(
@@ -21,7 +22,7 @@ def sender(host, img, queueid=None):
 
 	channel.queue_declare(
 		queue='hello',
-        arguments={'x-max-length': 5, "x-queue-mode": "lazy"},
+        arguments= i13rabbitmq_config.ARGUMENTS,
 		)
 
 	# myfile = 'test0.jpg'

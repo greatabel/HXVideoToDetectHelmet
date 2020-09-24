@@ -22,6 +22,7 @@ import pika
 import json
 import numpy
 import base64
+import i13rabbitmq_config
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
@@ -245,7 +246,6 @@ class Hat_and_Person_Detector():
         else:
             print('skip frame from queueid=', queueid)
 
-QUEUE_SIZE = 5
 def receiver(host, processid, log_queue):
 
 
@@ -254,7 +254,7 @@ def receiver(host, processid, log_queue):
     channel = connection.channel()
     channel.queue_declare(
         queue='hello',
-        arguments={'x-max-length': 5, "x-queue-mode": "lazy"},
+        arguments=i13rabbitmq_config.ARGUMENTS,
         )
 
     # channel.basic_consume(on_message_callback=lambda ch, method, properties, body: image_get_v0(ch, 
