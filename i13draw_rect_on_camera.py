@@ -452,7 +452,7 @@ def on_mouse(event,x,y,flags,params):
             endPoint = True
 
 area_list = []
-for idx, rtsp_obj in enumerate(video_urls):
+for rtsp_obj in video_urls:
     # 大华的情况 ：
     if rtsp_obj[4] == 'dahua':
         video_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%d&subtype=0" \
@@ -511,7 +511,7 @@ for idx, rtsp_obj in enumerate(video_urls):
         if key == 27:
             # break
             print('setting ', video_url, ' square:', (rect[0], rect[1]), (rect[2], rect[3]))
-            results = [idx,rect[0], rect[1], rect[2], rect[3]]
+            results = [rect[0], rect[1], rect[2], rect[3]]
             print(type(results), 'results', results, results[0])
             # 如果点击者先右后左的话 保证左侧的点在前，右侧的点在后
             if results[0] > results[2]:                
@@ -532,11 +532,13 @@ cap.release()
 cv2.destroyAllWindows()
 
 rtsp_list  = []
+i = 0
 for rtsp_obj, area in zip(video_urls, area_list):
-    rtsp_list.append([rtsp_obj[0], rtsp_obj[1], rtsp_obj[2],
+    rtsp_list.append([i, rtsp_obj[0], rtsp_obj[1], rtsp_obj[2],
                       rtsp_obj[3], rtsp_obj[4],  rtsp_obj[5],  rtsp_obj[6], area, rtsp_obj[7] ])
 
 # print(data, '#'*20)
+i += 1
 
 with open(saved_config_filename, "w", newline="") as f:
     writer = csv.writer(f)
