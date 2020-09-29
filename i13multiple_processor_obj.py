@@ -248,9 +248,14 @@ class Hat_and_Person_Detector():
 
 def receiver(host, processid, log_queue):
 
-
+    host = '10.248.68.249'
+    credentials = pika.PlainCredentials('test', 'test')
+    parameters = pika.ConnectionParameters(host,
+                                       5672,
+                                       '/',
+                                       credentials)
     detector = Hat_and_Person_Detector(processid, log_queue)
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host))
+    connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
     channel.queue_declare(
         queue='hello',
@@ -293,7 +298,7 @@ def image_get_v0(ch, method, properties, body, processid, detector):
         frame = cv2.imdecode(numpy.fromstring(img, numpy.uint8), 1)
 
         # frame = numpy.asarray(msg["img"])
-        queueid = msg['placeid']
+        queueid = int(msg['placeid'])
         # print(" [x] Received %r" % msg)
         # imgdata = base64.b64decode(msg['img'])
         print(msg['placeid'], '@'*10, msg['time'])
