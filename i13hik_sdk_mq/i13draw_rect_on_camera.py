@@ -287,7 +287,12 @@ video_urls = [
     # ["admin", "huaxin12345", "10.248.10.43:554", 1, "hik","", "80002302", 'YHat, BHat, NoHat'],
     # end   本地测试
 
-    ["admin", "huaxin12345", "10.248.10.43:554", 1, "hik","", "80002302", 'YHat, BHat, NoHat'],
+    ["admin", "huaxin12345", "10.248.10.43:554", 1, "hik","", 
+        "80002302|00038910|00014019|00004135|00004302|00004186|00004313|00004070|00004069|00004088", 'RHat, YHat, BHat, NoHat'],
+    ["admin", "huaxin12345", "192.168.1.186:554", 1, "hik","",
+         "80002302|00038910|00014019|00004135|00004302|00004186|00004313|00004070|00004069|00004088", 'RHat, YHat, BHat, NoHat'],
+
+    ]
 
 ''' 
 default_enter_rule:
@@ -506,7 +511,7 @@ for idx, rtsp_obj in enumerate(video_urls):
         if key == 27:
             # break
             print('setting ', video_url, ' square:', (rect[0], rect[1]), (rect[2], rect[3]))
-            results = [idx, rect[0], rect[1], rect[2], rect[3]]
+            results = [idx,rect[0], rect[1], rect[2], rect[3]]
             print(type(results), 'results', results, results[0])
             # 如果点击者先右后左的话 保证左侧的点在前，右侧的点在后
             if results[0] > results[2]:                
