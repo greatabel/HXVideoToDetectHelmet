@@ -302,7 +302,7 @@ def image_get_v0(ch, method, properties, body, processid, detector):
 
         print('-----------------------')
 
-        # print(queue_rtsp_dict, queueid, type(queueid))
+        print(queue_rtsp_dict, queueid, type(queueid))
         # frame, queueid = q.get()
         rect = ast.literal_eval(queue_rtsp_dict.get(queueid, None)[7])
         default_enter_rule = queue_rtsp_dict.get(queueid, None)[8]
@@ -372,7 +372,7 @@ def run_multi_camera(camera_ip_l):
     global queue_rtsp_dict
     for line in camera_ip_l:
         print('line:', line, type(line))
-        queue_rtsp_dict[str(line[0])] = line[1:]
+        queue_rtsp_dict[int(line[0])] = line[1:]
     log_queue = mp.Queue(-1)
     listener = mp.Process(target=listener_process,
                                        args=(log_queue, listener_configurer))
