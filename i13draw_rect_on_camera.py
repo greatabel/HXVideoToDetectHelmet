@@ -538,7 +538,7 @@ for rtsp_obj, area in zip(video_urls, area_list):
                       rtsp_obj[3], rtsp_obj[4],  rtsp_obj[5],  rtsp_obj[6], area, rtsp_obj[7] ])
 
 # print(data, '#'*20)
-i += 1
+    i += 1
 
 with open(saved_config_filename, "w", newline="") as f:
     writer = csv.writer(f)
