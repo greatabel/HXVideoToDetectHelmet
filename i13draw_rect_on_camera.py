@@ -422,7 +422,7 @@ default_enter_rule = 'BHat, NoHat'
 #     "rtsp://admin:12345@192.168.200.97:554/Streaming/Channels/1"
 # ]
 
-saved_config_filename = 'i11rtsp_list.csv'
+saved_config_filename = 'i13rtsp_list.csv'
 # url_rect_dict = {}
 
 rect = (0,0,0,0)
