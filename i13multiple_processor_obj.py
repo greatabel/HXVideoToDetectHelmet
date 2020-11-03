@@ -247,8 +247,10 @@ class Hat_and_Person_Detector():
             print('skip frame from queueid=', queueid)
 
 def receiver(host, processid, log_queue):
-
-    host = '10.248.68.249'
+    # at yangxin shuini factory
+    # host = '10.248.68.249'
+    
+    host = '127.0.0.1'
     credentials = pika.PlainCredentials('test', 'test')
     parameters = pika.ConnectionParameters(host,
                                        5672,

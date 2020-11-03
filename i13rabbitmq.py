@@ -45,7 +45,8 @@ def sender(host, img, queueid=None):
 	    'img': picData_string
 
 	}
-	print(type(msg), '@'*10, 'msg=', msg)
+	print('placeid=', queueid)
+	# print(type(msg), '@'*10, 'msg=', msg)
 	json0 = json.dumps(msg)
 	# import codecs
 	# with codecs.open('data.json', 'w', 'utf8') as outfile:

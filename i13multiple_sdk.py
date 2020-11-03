@@ -15,7 +15,7 @@ import urllib
 import numpy
 from i13sdk import HKI_base64
 from i13rabbitmq import sender
-#https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
+# https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
 rtsp_file_path = 'i13rtsp_list.csv'
