@@ -50,6 +50,7 @@ class SceneManager(object):
         :param sceneId: integer ID of the camera scene
         :return: the existing scene
         """
+        print(sceneId, ' get_scene')
         if sceneId in self.Scenes.keys():
             return self.Scenes[sceneId]
         else:
@@ -103,7 +104,7 @@ class Scene(object):
         bw_image = cv2.resize(bw_image, self.resized)
         bw_image = cv2.cvtColor(bw_image, cv2.COLOR_BGR2GRAY)
         ret, thresh = cv2.threshold(bw_image, thresh=128, maxval=256, type=0)
-        img, contours, hierarchy = cv2.findContours(thresh, mode=1, method=1)
+        contours, hierarchy = cv2.findContours(thresh, mode=1, method=1)
         zone_polygons = [cv2.approxPolyDP(curve=contour, epsilon=5, closed=True) for contour in contours]
         return zone_polygons
 
@@ -146,6 +147,7 @@ class LifeJacketDetector:
         blue_upper = np.array([124,255,255])
         #获取场景参数
         scene = self.sm.get_scene(sceneId)
+        frame = cv2.resize(frame, (1280, 720))
         #获得码率及尺寸
         size = (frame.shape[1], frame.shape[0])
         logger.info("sceneId=%s size=(%d,%d)",sceneId, size[0], size[1])
@@ -176,9 +178,9 @@ class LifeJacketDetector:
         dilated = cv2.dilate(th, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5)), iterations=2)
         dilated = cv2.medianBlur(dilated, 5)
         #opencv3
-        img, contours, hier = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # img, contours, hier = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         #opencv4
-        #contours, hier = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hier = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         is_warning = False
 
         for c in contours:
@@ -282,16 +284,16 @@ class LifeJacketWraper(object):
         self.rtk_out = config['frame_q_out']
 
         # Exchange declaration
-        self.ch.exchange_declare(exchange=self.ex_in, exchange_type='direct', durable=True)
-        self.ch.exchange_declare(exchange=self.ex_out, exchange_type='direct', durable=True)
+        # self.ch.exchange_declare(exchange=self.ex_in, exchange_type='direct', durable=True)
+        # self.ch.exchange_declare(exchange=self.ex_out, exchange_type='direct', durable=True)
 
-        # Queue declaration
-        self.q_in = self.ch.queue_declare(queue=self.qn_in, durable=True)
-        self.q_out = self.ch.queue_declare(queue=self.qn_out, durable=True)
+        # # Queue declaration
+        # self.q_in = self.ch.queue_declare(queue=self.qn_in, durable=True)
+        # self.q_out = self.ch.queue_declare(queue=self.qn_out, durable=True)
 
-        # Bind queues to corresponding exchanges
-        self.ch.queue_bind(exchange=self.ex_in, queue=self.qn_in, routing_key=self.rtk_in)
-        self.ch.queue_bind(exchange=self.ex_out, queue=self.qn_out, routing_key=self.rtk_out)
+        # # Bind queues to corresponding exchanges
+        # self.ch.queue_bind(exchange=self.ex_in, queue=self.qn_in, routing_key=self.rtk_in)
+        # self.ch.queue_bind(exchange=self.ex_out, queue=self.qn_out, routing_key=self.rtk_out)
 
         # Init Detector
         self.detector = LifeJacketDetector()
@@ -306,7 +308,7 @@ class LifeJacketWraper(object):
 
     def getOpencvImg(self, obj_json):
         # get image bytes string
-        img = base64.b64decode(obj_json['picData'].encode())
+        img = base64.b64decode(obj_json['img'].encode())
         # get image array
         img_opencv = cv2.imdecode(np.fromstring(img, np.uint8), 1)
         h, w, c = img_opencv.shape
@@ -328,13 +330,18 @@ class LifeJacketWraper(object):
 
     def running(self):
         def callback(ch, method, properties, body):
+                #     'placeid': queueid,
+                # 'time': now,
+                # 'img': picData_string
             start_time = time.time()
             obj_json = self.getJsonObj(body=body)
-            sceneId = str(obj_json["cameraId"]) + "_" + obj_json["recorderId"]
-            picId = obj_json['picId']
+            # sceneId = str(obj_json["cameraId"]) + "_" + obj_json["recorderId"]
+            sceneId = str(obj_json["placeid"])
+            picId =sceneId
             # Getting json string from mq and get the image array
-            timeID = self.getTimeStr(obj_json)
-            print("%s %s %s %s"%(timeID, obj_json['recorderId'], obj_json['cameraId'], "#" * 8))
+            # timeID = self.getTimeStr(obj_json)
+            timeID =  str(obj_json["time"])
+            print("%s %s"%(timeID, obj_json['placeid']))
 
             img_opencv, h, w, c = self.getOpencvImg(obj_json)
             # Prediction
@@ -353,7 +360,9 @@ class LifeJacketWraper(object):
                 # dumps json obj
                 response_dict = json.dumps(response_dict, sort_keys=True, indent=2)
                 print("response_dict=", response_dict)
-                self.ch.basic_publish(exchange=self.ex_out, routing_key=self.qn_out, body=response_dict) 
+                # alert need to implement
+
+                # self.ch.basic_publish(exchange=self.ex_out, routing_key=self.qn_out, body=response_dict) 
             else:
                 self.eventsByScene[sceneId] = {'eventId': None, 'eventPics': []} 
 

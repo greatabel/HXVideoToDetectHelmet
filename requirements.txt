@@ -2,8 +2,9 @@ termcolor
 gluoncv==0.7.0
 imutils
 # mxnet
-mxnet-cu100
+#mxnet-cu100
 pika==1.1.0
+torch==1.6.0
 requests_toolbelt
 simplejson
 sklearn
