@@ -69,7 +69,7 @@ def image_put(q, queueid):
                             print(type(frame), numpy.size(frame), 'queueid=', queueid)
                             # time.sleep(0.5)
                             # print('sleep 0.5')
-                            sender('localhost', frame, queueid)
+                            sender('localhost', frame, queueid, None)
                         count += 1
         except cv2.error as e:
             print('#'*10, 'cv2 error:', e)

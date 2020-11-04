@@ -352,7 +352,7 @@ class LifeJacketWraper(object):
                 response_dict = {
                      'protocol': '1.0.0',
                      'alertType': self.alertType,
-                     'latestPicId': obj_json['picId'],
+                     # 'latestPicId': obj_json['picId'],
                      'eventId': self.eventsByScene[sceneId]['eventId'],
                      'eventPics': self.eventsByScene[sceneId]['eventPics'],
                      'Time01StampID': timeID,

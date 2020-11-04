@@ -13,7 +13,7 @@ config = {
     'mq_pswd': 'test',  
     'mq_server_host': '127.0.0.1',
     'mq_server_port': '5672',
-    'frame_q_in': 'hello',
+    'frame_q_in': 'SafetyBelt',
     'frame_q_out':'hx_safetybelet_out',
 }
 

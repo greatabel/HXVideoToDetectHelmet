@@ -128,7 +128,7 @@ class SaftyBeltDetector():
             self.sm.create_scene(sceneId=sceneId)
 
         self.size = (1920, 1080)
-        self.video_write = cv2.VideoWriter("output_video.mp4", cv2.VideoWriter_fourcc(*'XVID'), 25, self.size)
+        # self.video_write = cv2.VideoWriter("output_video.mp4", cv2.VideoWriter_fourcc(*'XVID'), 25, self.size)
 
     def point_warn_zone_test(self, point, buffer=0):
         """

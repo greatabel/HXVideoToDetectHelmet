@@ -14,14 +14,14 @@ import i13rabbitmq_config
 #             return obj.tolist()
 #         return JSONEncoder.default(self, obj)
 
-def sender(host, img, queueid=None):
-	print(type(img), 'in sender')
+def sender(host, img, queueid=None, queue_name='hello'):
+	print(type(img), queueid,'in sender', queue_name)
 	connection = pika.BlockingConnection(pika.ConnectionParameters(
 	        host=host))
 	channel = connection.channel()
 
 	channel.queue_declare(
-		queue='hello',
+		queue=queue_name,
         arguments= i13rabbitmq_config.ARGUMENTS,
 		)
 
@@ -57,7 +57,7 @@ def sender(host, img, queueid=None):
 	s0 = sys.getsizeof(json0)
 	print(s0, s0/1024, s0/1048576, type(json0))
 	channel.basic_publish(exchange='',
-	                      routing_key='hello',
+	                      routing_key=queue_name,
 	                      body=json0
 	                      )
 	print("rabbitMQ [x] Sent msg'", '-'*20)
