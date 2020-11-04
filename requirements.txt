@@ -5,8 +5,10 @@ imutils
 #mxnet-cu100
 pika==1.1.0
 torch==1.6.0
+torchvision==0.7.0
 requests_toolbelt
 simplejson
 sklearn
 opencv-python
 webcolors==1.10
+

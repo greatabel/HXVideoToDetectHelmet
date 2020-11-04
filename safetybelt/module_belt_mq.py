@@ -48,6 +48,7 @@ class SceneManager(object):
         return new_scene
 
     def get_scene(self, sceneId):
+        print(sceneId, ' in get_scene')
         """
         :param sceneId: integer ID of the camera scene
         :return: the existing scene
@@ -96,7 +97,7 @@ class Scene(object):
         bw_image = cv2.imread(bw_image_path)
         bw_image = cv2.cvtColor(bw_image, cv2.COLOR_BGR2GRAY)
         ret, thresh = cv2.threshold(bw_image, thresh=128, maxval=256, type=0)
-        img, contours, hierarchy = cv2.findContours(thresh, mode=1, method=1)
+        contours, hierarchy = cv2.findContours(thresh, mode=1, method=1)
         cnt = contours[0]
         x, y, w, h = cv2.boundingRect(cnt)
         self.position = (x, y, w, h)
@@ -104,14 +105,14 @@ class Scene(object):
 
 class SaftyBeltDetector():
     def __init__(self, gpu_id=0):
-        self.debug = True
+        self.debug = False
         self.num_classes = 3
         self.person_polygons = None
         gpu_id = "cuda:" + str(gpu_id)
         self.device = torch.device(gpu_id)
         self.model = BiSeNet(self.num_classes, backbone='resnet50', pretrained_base=False)
         self.model_half = BiSeNet(self.num_classes, backbone='resnet50', pretrained_base=False)
-        params = torch.load("/media/liujin/disk/project/safetybelt_detect/model/bisenet_resnet50_pascal_voc.pth",map_location=self.device)
+        params = torch.load("./model/bisenet_resnet50_pascal_voc.pth",map_location=self.device)
         self.model.load_state_dict(params)
         self.model_half.load_state_dict(params)
 
@@ -165,8 +166,8 @@ class SaftyBeltDetector():
         erode_person = cv2.erode(dilated_person, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)), iterations=2)
         erode_person = cv2.medianBlur(erode_person, 5)
 
-        img, contours_belt, hierarchy = cv2.findContours(erode_belt,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-        img, contours_person, hierarchy = cv2.findContours(erode_person,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        contours_belt, hierarchy = cv2.findContours(erode_belt,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        contours_person, hierarchy = cv2.findContours(erode_person,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
         if self.debug:
             belt_polygons = [cv2.approxPolyDP(curve=contour, epsilon=5, closed=True) for contour in contours_belt]
             cv2.drawContours(frame, belt_polygons, -1, (0, 255, 0), 2)
@@ -407,16 +408,16 @@ class SafetyBeltWraper(object):
         self.rtk_out = config['frame_q_out']
 
         # Exchange declaration
-        self.ch.exchange_declare(exchange=self.ex_in, exchange_type='direct', durable=True)
-        self.ch.exchange_declare(exchange=self.ex_out, exchange_type='direct', durable=True)
+        # self.ch.exchange_declare(exchange=self.ex_in, exchange_type='direct', durable=True)
+        # self.ch.exchange_declare(exchange=self.ex_out, exchange_type='direct', durable=True)
 
-        # Queue declaration
-        self.q_in = self.ch.queue_declare(queue=self.qn_in, durable=True)
-        self.q_out = self.ch.queue_declare(queue=self.qn_out, durable=True)
+        # # Queue declaration
+        # self.q_in = self.ch.queue_declare(queue=self.qn_in, durable=True)
+        # self.q_out = self.ch.queue_declare(queue=self.qn_out, durable=True)
 
-        # Bind queues to corresponding exchanges
-        self.ch.queue_bind(exchange=self.ex_in, queue=self.qn_in, routing_key=self.rtk_in)
-        self.ch.queue_bind(exchange=self.ex_out, queue=self.qn_out, routing_key=self.rtk_out)
+        # # Bind queues to corresponding exchanges
+        # self.ch.queue_bind(exchange=self.ex_in, queue=self.qn_in, routing_key=self.rtk_in)
+        # self.ch.queue_bind(exchange=self.ex_out, queue=self.qn_out, routing_key=self.rtk_out)
 
         # Init Detector
         self.detector = SaftyBeltDetector(gpu_id=gpu_id)
@@ -431,7 +432,7 @@ class SafetyBeltWraper(object):
 
     def getOpencvImg(self, obj_json):
         # get image bytes string
-        img = base64.b64decode(obj_json['picData'].encode())
+        img = base64.b64decode(obj_json['img'].encode())
         # get image array
         img_opencv = cv2.imdecode(np.fromstring(img, np.uint8), 1)
         h, w, c = img_opencv.shape
@@ -455,11 +456,14 @@ class SafetyBeltWraper(object):
         def callback(ch, method, properties, body):
             start_time = time.time()
             obj_json = self.getJsonObj(body=body)
-            sceneId = str(obj_json["cameraId"]) + "_" + obj_json["recorderId"]
-            picId = obj_json['picId']
+            # sceneId = str(obj_json["cameraId"]) + "_" + obj_json["recorderId"]
+            sceneId = str(obj_json["placeid"])
+            # picId = obj_json['picId']
+            picId = sceneId
             # Getting json string from mq and get the image array
-            timeID = self.getTimeStr(obj_json)
-            print("%s %s %s %s"%(timeID, obj_json['recorderId'], obj_json['cameraId'], "#" * 8))
+            # timeID = self.getTimeStr(obj_json)
+            timeID =  str(obj_json["time"])
+            # print("%s %s %s %s"%(timeID, obj_json['recorderId'], obj_json['cameraId'], "#" * 8))
 
             img_opencv, h, w, c = self.getOpencvImg(obj_json)
             # Prediction
@@ -470,15 +474,15 @@ class SafetyBeltWraper(object):
                 response_dict = {
                      'protocol': '1.0.0',
                      'alertType': self.alertType,
-                     'latestPicId': obj_json['picId'],
-                     'eventId': self.eventsByScene[sceneId]['eventId'],
+                     # 'latestPicId': obj_json['picId'],
+                     # 'eventId': self.eventsByScene[sceneId]['eventId'],
                      'eventPics': self.eventsByScene[sceneId]['eventPics'],
                      'Time01StampID': timeID,
                 }
                 # dumps json obj
                 response_dict = json.dumps(response_dict, sort_keys=True, indent=2)
                 print("response_dict=", response_dict)
-                self.ch.basic_publish(exchange=self.ex_out, routing_key=self.qn_out, body=response_dict) 
+                # self.ch.basic_publish(exchange=self.ex_out, routing_key=self.qn_out, body=response_dict) 
             else:
                 self.eventsByScene[sceneId] = {'eventId': None, 'eventPics': []} 
 
