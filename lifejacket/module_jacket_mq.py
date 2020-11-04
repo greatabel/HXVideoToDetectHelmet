@@ -253,6 +253,65 @@ class LifeJacketDetector:
             raise Exception("exit")
         return is_warning
 
+
+
+queueid_warning_dict = {}
+queueid_lastsendtime_dict = {}
+def warning_processor(logger, record):
+    global queueid_warning_dict, queueid_lastsendtime_dict
+    queueid = record.name
+    logger.handle(record)  # No level or filter logic applied - just do it!
+    # recore.name 就是queueid 代表rtsp的获取队列id
+    if queueid_warning_dict.get(record.name) is None:
+        queueid_warning_dict[record.name] = [record.asctime]
+    else:
+        queueid_warning_dict[record.name].append(record.asctime)
+        # 定期清空 记录时间的list， 容量达到50， 就清空到只剩下最新的1个
+        if len(queueid_warning_dict[record.name]) > 50:
+            del queueid_warning_dict[record.name][:len(queueid_warning_dict[record.name])-1]
+            print('delete recordtime list')
+
+    # print('\n', '-^-'*10, queueid_warning_dict)
+    helmet_color = ''
+    warning_signal, img_name, area, senduserids = record.msg.split('#') 
+
+    if warning_signal == 'red-hat-in-area':
+        # # 警告音 
+        duration = 1  # seconds
+        freq = 440  # Hz
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+        helmet_color = '红色头盔'
+    elif warning_signal == 'yellow-hat-in-area':
+        # # 警告音 yellow
+        duration = 0.5  # seconds
+        freq = 660  # Hz
+        os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+        helmet_color = '黄色头盔'
+    elif warning_signal == 'without-hat-in-area':
+        helmet_color = '未佩戴头盔'
+
+    msg = area + ' 发生 ' + helmet_color + '非授权进入区域'
+
+    # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
+    timelimit = 8
+    # time_span_limit 代表在这个时间内只能发一次消息报警
+    time_span_limit = 180
+    if len(queueid_warning_dict[record.name]) >= 8:
+        sendmsg_flag = i13process_frame.proces_timelist(queueid_warning_dict[record.name], timelimit)
+        
+        now = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
+        if queueid_lastsendtime_dict.get(record.name) is not None:
+
+            timespan_flag = i13process_frame.compare_time(now, queueid_lastsendtime_dict.get(record.name), time_span_limit)
+            # 时间间隔没到 也不能发送
+            if timespan_flag == False:
+                sendmsg_flag = False
+        if sendmsg_flag:
+            i11qy_wechat.send_text_and_image_wechat(img_name, msg, senduserids)
+
+
+            queueid_lastsendtime_dict[record.name] = now
+            
 class LifeJacketWraper(object):
     def __init__(self, gpu_id=0):
         """

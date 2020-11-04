@@ -8,7 +8,7 @@ __pycache__/
 screenshots/
 
 # model file
-.pth
+*.pth
 
 # C extensions
 *.so

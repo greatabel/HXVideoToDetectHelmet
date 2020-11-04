@@ -16,6 +16,16 @@ import pika
 import base64
 import json
 
+import logging
+import logging.handlers
+
+import multiprocessing as mp
+import argparse
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from  i14message_decison_maker import *
+
+
 if sys.version > '3':
     PY3 = True
     from scenes.config_file import config
@@ -374,7 +384,7 @@ class SaftyBeltDetector():
         if cv2.waitKey(1) & 0xFF == (ord('q') or ord('Q')):
             exit(0)
         
-        return flag
+        return flag, frame
 
 class SafetyBeltWraper(object):
     def __init__(self, gpu_id=0):
@@ -452,8 +462,19 @@ class SafetyBeltWraper(object):
         detectionResults = bytes.decode(detectionResults, encoding='utf-8')
         return detectionResults
 
-    def running(self):
+    def running(self, log_queue):
+        h = logging.handlers.QueueHandler(log_queue)  # Just the one handler needed
+        root = logging.getLogger()
+        root.addHandler(h)
+        # send all messages, for demo; no other level or filter logic applied.
+        root.setLevel(logging.DEBUG)
+
+        
+        
+
         def callback(ch, method, properties, body):
+
+
             start_time = time.time()
             obj_json = self.getJsonObj(body=body)
             # sceneId = str(obj_json["cameraId"]) + "_" + obj_json["recorderId"]
@@ -467,7 +488,11 @@ class SafetyBeltWraper(object):
 
             img_opencv, h, w, c = self.getOpencvImg(obj_json)
             # Prediction
-            is_alarm = self.detector.prediction(img_opencv, sceneId)
+            is_alarm, frame = self.detector.prediction(img_opencv, sceneId)
+
+            global queue_rtsp_dict
+            print(queue_rtsp_dict, '3'*20)
+            print('is_alarm=', '----------------')
             if is_alarm:
                 self.eventsByScene[sceneId]['eventId'] = picId + "|" + str(self.alertType)
                 self.eventsByScene[sceneId]['eventPics'].append({'picId': picId, 'alertObjects': {}})
@@ -482,7 +507,26 @@ class SafetyBeltWraper(object):
                 # dumps json obj
                 response_dict = json.dumps(response_dict, sort_keys=True, indent=2)
                 print("response_dict=", response_dict)
-                # self.ch.basic_publish(exchange=self.ex_out, routing_key=self.qn_out, body=response_dict) 
+                # self.ch.basic_publish(exchange=self.ex_out, routing_key=self.qn_out, body=response_dict)
+
+                # add temp send 
+                print('----------------', ' save image')
+
+
+                queueid = int(sceneId)
+                logger = logging.getLogger(str(queueid))
+                now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time())) 
+                img_name= str(sceneId) + '_'+ now + '.jpg'
+                cv2.imwrite('./screenshots/' + img_name, frame)
+
+                warning_signal = 'no-belt-in-area'
+                print('----------------', logging.CRITICAL, warning_signal + '#' + img_name + '#' +queue_rtsp_dict.get(queueid, None)[5]
+                            + '#' + queue_rtsp_dict.get(queueid, None)[6])
+                logger.log(logging.CRITICAL, warning_signal + '#' + img_name + '#' +queue_rtsp_dict.get(queueid, None)[5]
+                            + '#' + queue_rtsp_dict.get(queueid, None)[6])
+                print('@after logger.log()')
+
+                #  
             else:
                 self.eventsByScene[sceneId] = {'eventId': None, 'eventPics': []} 
 
@@ -499,14 +543,29 @@ class SafetyBeltWraper(object):
         self.ch.start_consuming()
 
 
+
+
+queue_rtsp_dict = {}
+
+
 if __name__ == '__main__':
-    import argparse
+    
+    camera_ip_l = load_rtsp_list()
+    for line in camera_ip_l:
+        print('line:', line, type(line))
+        queue_rtsp_dict[int(line[0])] = line[1:]
+    log_queue = mp.Queue(-1)
+    listener = mp.Process(target=listener_process,
+                                       args=(log_queue, listener_configurer))
+    listener.start()
+
+    
 
     parser = argparse.ArgumentParser()
     parser.add_argument('gpu', default='0')
     args = parser.parse_args()
 
     beltWrapper = SafetyBeltWraper(gpu_id=int(args.gpu))
-    beltWrapper.running()
+    beltWrapper.running(log_queue)
 
 
