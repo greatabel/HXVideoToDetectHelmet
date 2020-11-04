@@ -12,7 +12,18 @@ import importlib
 import pika
 import base64
 import json
-from log import Logger
+# from log import Logger
+
+
+import logging
+import logging.handlers
+
+import multiprocessing as mp
+import argparse
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from  i15message_decison_maker import *
+
 
 if sys.version > '3':
     PY3 = True
@@ -24,7 +35,7 @@ else:
     sys.path.append("./scenes")
     from config_file import config
 
-logger = Logger(logname='./log/module_jacket.log', loglevel=1, logger="module_jacket").getlog()
+# logger = Logger(logname='./log/module_jacket.log', loglevel=1, logger="module_jacket").getlog()
 
 class SceneManager(object):
     def __init__(self, bw_image_dir):
@@ -150,27 +161,28 @@ class LifeJacketDetector:
         frame = cv2.resize(frame, (1280, 720))
         #获得码率及尺寸
         size = (frame.shape[1], frame.shape[0])
-        logger.info("sceneId=%s size=(%d,%d)",sceneId, size[0], size[1])
+        frame_resize = cv2.resize(frame, (scene.resized_width, scene.resized_height))
+        # logger.info("sceneId=%s size=(%d,%d)",sceneId, size[0], size[1])
         if scene.size != size:
-            logger.error("[%s]:size=(%d,%d) scene.size=(%d,%d)",sceneId, size[0], size[1], scene.size[0],scene.size[1])
-            return False
+            # logger.error("[%s]:size=(%d,%d) scene.size=(%d,%d)",sceneId, size[0], size[1], scene.size[0],scene.size[1])
+            return False, frame_resize
 
         now = datetime.datetime.now()
         hour = now.hour
         start = 7
         end = 19
+        
+        # if int(hour) not in list(range(start, end)):
+        #     # logger.info("Hour:%d not in the range(%d %d)", hour,start,end)
+        #     time.sleep(60)
+        #     return False,frame_resize
 
-        if int(hour) not in list(range(start, end)):
-            logger.info("Hour:%d not in the range(%d %d)", hour,start,end)
-            time.sleep(60)
-            return False
-
-        frame_resize = cv2.resize(frame, (scene.resized_width, scene.resized_height))
+        
         # 获取前景mask
         fg_mask = scene.bs.apply(frame_resize)
         if scene.frame_num < scene.history:
             scene.frame_num += 1
-            return False
+            return False, frame_resize
 
         #形态学处理后，找外接矩形框
         th = cv2.threshold(fg_mask.copy(), 200, 255, cv2.THRESH_BINARY)[1]
@@ -247,71 +259,17 @@ class LifeJacketDetector:
             cv2.putText(frame_resize, "WARNING", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1,  (0, 0, 255), 2)
         else:
             cv2.putText(frame_resize, "NORMAL", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        print(type(frame_resize), len(frame_resize))
         cv2.imshow("image", frame_resize)
         if cv2.waitKey(1) & 0xFF == (ord('q') or ord('Q')):
             camera.release()
             raise Exception("exit")
-        return is_warning
+        return is_warning, frame_resize
 
 
 
-queueid_warning_dict = {}
-queueid_lastsendtime_dict = {}
-def warning_processor(logger, record):
-    global queueid_warning_dict, queueid_lastsendtime_dict
-    queueid = record.name
-    logger.handle(record)  # No level or filter logic applied - just do it!
-    # recore.name 就是queueid 代表rtsp的获取队列id
-    if queueid_warning_dict.get(record.name) is None:
-        queueid_warning_dict[record.name] = [record.asctime]
-    else:
-        queueid_warning_dict[record.name].append(record.asctime)
-        # 定期清空 记录时间的list， 容量达到50， 就清空到只剩下最新的1个
-        if len(queueid_warning_dict[record.name]) > 50:
-            del queueid_warning_dict[record.name][:len(queueid_warning_dict[record.name])-1]
-            print('delete recordtime list')
-
-    # print('\n', '-^-'*10, queueid_warning_dict)
-    helmet_color = ''
-    warning_signal, img_name, area, senduserids = record.msg.split('#') 
-
-    if warning_signal == 'red-hat-in-area':
-        # # 警告音 
-        duration = 1  # seconds
-        freq = 440  # Hz
-        os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-        helmet_color = '红色头盔'
-    elif warning_signal == 'yellow-hat-in-area':
-        # # 警告音 yellow
-        duration = 0.5  # seconds
-        freq = 660  # Hz
-        os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-        helmet_color = '黄色头盔'
-    elif warning_signal == 'without-hat-in-area':
-        helmet_color = '未佩戴头盔'
-
-    msg = area + ' 发生 ' + helmet_color + '非授权进入区域'
-
-    # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
-    timelimit = 8
-    # time_span_limit 代表在这个时间内只能发一次消息报警
-    time_span_limit = 180
-    if len(queueid_warning_dict[record.name]) >= 8:
-        sendmsg_flag = i13process_frame.proces_timelist(queueid_warning_dict[record.name], timelimit)
-        
-        now = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
-        if queueid_lastsendtime_dict.get(record.name) is not None:
-
-            timespan_flag = i13process_frame.compare_time(now, queueid_lastsendtime_dict.get(record.name), time_span_limit)
-            # 时间间隔没到 也不能发送
-            if timespan_flag == False:
-                sendmsg_flag = False
-        if sendmsg_flag:
-            i11qy_wechat.send_text_and_image_wechat(img_name, msg, senduserids)
 
 
-            queueid_lastsendtime_dict[record.name] = now
-            
 class LifeJacketWraper(object):
     def __init__(self, gpu_id=0):
         """
@@ -387,8 +345,15 @@ class LifeJacketWraper(object):
         detectionResults = bytes.decode(detectionResults, encoding='utf-8')
         return detectionResults
 
-    def running(self):
+    def running(self, log_queue):
+        h = logging.handlers.QueueHandler(log_queue)  # Just the one handler needed
+        root = logging.getLogger()
+        root.addHandler(h)
+        # send all messages, for demo; no other level or filter logic applied.
+        root.setLevel(logging.DEBUG)
+
         def callback(ch, method, properties, body):
+            print('start callback')
                 #     'placeid': queueid,
                 # 'time': now,
                 # 'img': picData_string
@@ -404,8 +369,9 @@ class LifeJacketWraper(object):
 
             img_opencv, h, w, c = self.getOpencvImg(obj_json)
             # Prediction
-            is_alarm = self.detector.prediction(img_opencv, sceneId)
-            if is_alarm:
+            is_alarm, myframe = self.detector.prediction(img_opencv, sceneId)
+            print('is_alarm=', is_alarm, type(myframe))
+            if not is_alarm:
                 self.eventsByScene[sceneId]['eventId'] = picId + "|" + str(self.alertType)
                 self.eventsByScene[sceneId]['eventPics'].append({'picId': picId, 'alertObjects': {}})
                 response_dict = {
@@ -420,6 +386,24 @@ class LifeJacketWraper(object):
                 response_dict = json.dumps(response_dict, sort_keys=True, indent=2)
                 print("response_dict=", response_dict)
                 # alert need to implement
+
+                # add temp send 
+                print('----------------', ' save image')
+
+
+                queueid = int(sceneId)
+                logger = logging.getLogger(str(queueid))
+                now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time())) 
+                img_name= str(sceneId) + '_'+ now + '.jpg'
+                cv2.imwrite('./screenshots/' + img_name, myframe)
+
+                warning_signal = 'no-belt-in-area'
+                print('----------------', logging.CRITICAL, warning_signal + '#' + img_name + '#' +queue_rtsp_dict.get(queueid, None)[5]
+                            + '#' + queue_rtsp_dict.get(queueid, None)[6])
+                logger.log(logging.CRITICAL, warning_signal + '#' + img_name + '#' +queue_rtsp_dict.get(queueid, None)[5]
+                            + '#' + queue_rtsp_dict.get(queueid, None)[6])
+                print('@after logger.log()')
+
 
                 # self.ch.basic_publish(exchange=self.ex_out, routing_key=self.qn_out, body=response_dict) 
             else:
@@ -437,10 +421,20 @@ class LifeJacketWraper(object):
         # Starting consuming
         self.ch.start_consuming()
 
+queue_rtsp_dict = {}
 
 if __name__ == '__main__':
+    camera_ip_l = load_rtsp_list()
+    for line in camera_ip_l:
+        print('line:', line, type(line))
+        queue_rtsp_dict[int(line[0])] = line[1:]
+    log_queue = mp.Queue(-1)
+    listener = mp.Process(target=listener_process,
+                                       args=(log_queue, listener_configurer))
+    listener.start()
+
     lifeJacketWrapper = LifeJacketWraper()
-    lifeJacketWrapper.running()
+    lifeJacketWrapper.running(log_queue)
 
 
 
