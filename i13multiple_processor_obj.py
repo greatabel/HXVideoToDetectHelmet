@@ -248,9 +248,9 @@ class Hat_and_Person_Detector():
 
 def receiver(host, processid, log_queue):
     # at yangxin shuini factory
-    # host = '10.248.68.249'
+    host = '10.248.68.249'
     
-    host = '127.0.0.1'
+    # host = '127.0.0.1'
     credentials = pika.PlainCredentials('test', 'test')
     parameters = pika.ConnectionParameters(host,
                                        5672,
