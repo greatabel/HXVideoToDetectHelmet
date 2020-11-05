@@ -25,3 +25,8 @@ then run:
 python3 i13multiple_processor_obj.py --gpu=True --network=yolo3_mobilenet0.25_voc
 python3 module_belt_mq.py 0
 python3 module_jacket_mq.py 
+
+设置显卡：
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.0/lib64
+export PATH=$PATH:/usr/local/cuda-10.0/bin
+export CUDA_HOME=$CUDA_HOME:/usr/local/cuda-10.0
