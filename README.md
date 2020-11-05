@@ -30,6 +30,7 @@ python3 module_jacket_mq.py
 
 source samaritan0/bin/activate
 
+subl ~/.bashrc
 设置显卡：
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-10.0/lib64
 export PATH=$PATH:/usr/local/cuda-10.0/bin
