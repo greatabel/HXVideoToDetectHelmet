@@ -371,7 +371,7 @@ class LifeJacketWraper(object):
             # Prediction
             is_alarm, myframe = self.detector.prediction(img_opencv, sceneId)
             print('is_alarm=', is_alarm, type(myframe))
-            if not is_alarm:
+            if  is_alarm:
                 self.eventsByScene[sceneId]['eventId'] = picId + "|" + str(self.alertType)
                 self.eventsByScene[sceneId]['eventPics'].append({'picId': picId, 'alertObjects': {}})
                 response_dict = {
