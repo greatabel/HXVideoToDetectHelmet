@@ -311,7 +311,11 @@ def image_get_v0(ch, method, properties, body, processid, detector):
 
         print(queue_rtsp_dict, queueid, type(queueid))
         # frame, queueid = q.get()
-        rect = ast.literal_eval(queue_rtsp_dict.get(queueid, None)[7])
+        rect = None 
+        if queue_rtsp_dict.get(queueid, None)[7] != None and \
+             queue_rtsp_dict.get(queueid, None)[7].strip() != '':
+            print('#'*30, 'here')
+            rect = ast.literal_eval(queue_rtsp_dict.get(queueid, None)[7])
         default_enter_rule = queue_rtsp_dict.get(queueid, None)[8]
         detector.process(frame, rect, default_enter_rule, queueid)
 
@@ -392,7 +396,7 @@ def run_multi_camera(camera_ip_l):
 
 
     # -------------------- start ai processes
-    num_of_ai_process = 2
+    num_of_ai_process = 10
 
     for i in range(0, num_of_ai_process):
         print('ai process', i)
