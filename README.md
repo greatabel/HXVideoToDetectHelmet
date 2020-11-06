@@ -28,6 +28,9 @@ python3 module_jacket_mq.py
 
 
 
+临时测试视频
+python3 i3rstp_color_video.py --gpu=True --network=yolo3_mobilenet0.25_voc
+
 source samaritan0/bin/activate
 
 subl ~/.bashrc
