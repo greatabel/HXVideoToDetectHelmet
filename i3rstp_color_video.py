@@ -36,7 +36,7 @@ def parse_args():
 
 
 def image_put(q, user, pwd, ip, channel=1):
-    cap = cv2.VideoCapture("i0output.avi" )
+    cap = cv2.VideoCapture("i1output.avi" )
     # if cap.isOpened():
     #     print('HIKVISION')
     # else:
@@ -45,7 +45,8 @@ def image_put(q, user, pwd, ip, channel=1):
 
     while True:
         q.put(cap.read()[1])
-        q.get() if q.qsize() > 1 else time.sleep(0.01)
+        #q.get() if q.qsize() > 1 else time.sleep(0.01)
+        q.get() if q.qsize() > 5 else time.sleep(0.01)
 
 
 # def render_as_image(a):
@@ -227,6 +228,8 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
         # # ----
         # bcolor = [x * 255 for x in colors[cls_id]]
         bcolor = (255, 255, 255) 
+        # 默认设置为黄色，根据视频
+        bcolor = (255,255,0)
         
 
         # cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
@@ -239,52 +242,57 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
 
         if class_name == 'person':
             #天蓝色
-            bcolor = (12, 203, 232)
+            bcolor =(0, 255, 255)
+            if scores.flat[i] > 0.71:
+                
+                warning_signal = 'without-hat-in-area'
+                
+                cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
+                y = ymin - 15 if ymin - 15 > 15 else ymin + 15
+                cv2.putText(img, '{:s} {:s}'.format(class_name, score),
+                    (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
+                    bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
+
         elif class_name == 'hat':
-            if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
-             'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
-                # 黄色
-                bcolor = (255,255,0)
-                # 警告音 
-                duration = 0.5  # seconds
-                freq = 660  # Hz
-                os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-                print('#'*10)
+            print(scores.flat[i], '^'*20)
+            bcolor = (255,255,0)
+            if scores.flat[i] > 0.65:
+                if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
+                 'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
+                    # 黄色
+                    bcolor = (255,255,0)
+                    # 警告音 
+                    # duration = 0.5  # seconds
+                    # freq = 660  # Hz
+                    # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+                    # logger.log(logging.CRITICAL, 'yellow-hat-in-area')
 
-            elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
-                # 红色
-                bcolor = (255, 0, 0)
-                # 警告音 
-                duration = 1  # seconds
-                freq = 440  # Hz
-                os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
-                print('#'*20)
+               
+                    warning_signal = 'yellow-hat-in-area'
+                    print('yhat', '@'*30)
+                    # print('#'*10)
 
-            # elif colorname == 'darkolivegreen':
-            #     if dominant_color is not None:
-            #         if (dominant_color[0] > 100 and dominant_color[1] > 70) or \
-            #            (dominant_color[0] < 100 and dominant_color[2] < 50):
-            #            # seem as yellow
-            #             bcolor = (255,255,0)
-            # elif colorname == 'darkslategray':
-            #     if dominant_color is not None:
-            #         if (dominant_color[0] < 65 and dominant_color[1] <= 50):
-            #             # as yellow
-            #             bcolor = (255,255,0)
-            #         if (dominant_color[0] > 80 and dominant_color[1] >= 50):
-            #             # as red
-            #             bcolor = (255,0,0)                                 
-        cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
+                elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
+                    # 红色
+                    bcolor =  (0, 0, 255)
+                    # 警告音 
+                    # duration = 1  # seconds
+                    # freq = 440  # Hz
+                    # os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+                    # logger.log(logging.CRITICAL, 'red-hat-in-area')
+                    
+                    warning_signal = 'red-hat-in-area'
 
-        if class_name or score:
-            y = ymin - 15 if ymin - 15 > 15 else ymin + 15
-            cv2.putText(img, '{:s} {:s}'.format(class_name, score),
-                        (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
-                        bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
-
+                cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
+                y = ymin - 15 if ymin - 15 > 15 else ymin + 15
+                cv2.putText(img, '{:s} {:s}'.format(class_name, score),
+                    (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
+                    bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
+                # print('#'*20)
     return img
 
 def image_get(q, window_name):
+    global images_prepares
     frame_index = 0
 
 
@@ -339,83 +347,95 @@ def image_get(q, window_name):
 
             
 
+        if frame is not None:
 
+            # Image pre-processing
+            new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
 
-        # Image pre-processing
-        new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
+            # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
+            # x, orig_img = data.transforms.presets.yolo.transform_test(new_frame, short=args.short)
+            x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
+            # print('Shape of pre-processed image:', x.shape)
+            x = x.as_in_context(ctx)
+            box_ids, scores, bboxes = net(x)
 
-        # x, orig_img = data.transforms.presets.yolo.load_test(frame, short=args.short)
-        # x, orig_img = data.transforms.presets.yolo.transform_test(new_frame, short=args.short)
-        x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
-        # print('Shape of pre-processed image:', x.shape)
-        x = x.as_in_context(ctx)
-        box_ids, scores, bboxes = net(x)
+            # render_as_image(bboxes)
+            # ---
+            # if isinstance(bboxes[0], mx.nd.NDArray):
 
-        # render_as_image(bboxes)
-        # ---
-        # if isinstance(bboxes[0], mx.nd.NDArray):
-
-        #     bboxes_a = bboxes[0].asnumpy()
-        # for i, bbox in enumerate(bboxes_a):
-        #     xmin, ymin, xmax, ymax = [int(x) for x in bbox]
-        #     print(xmin, ymin, xmax, ymax)
-        #     if xmin > -1 :
-        #         cv2.rectangle(orig_img, (xmin, ymin), (xmax, ymax), 122, 2)
-
-
-
-        # for idx in range(len(bboxes.asnumpy())):
-        #     x, y, w, h = cv2.boundingRect(bboxes.asnumpy()[idx])
-        #     mask[y:y+h, x:x+w] = 0
-        #     print("Box {0}: ({1},{2}), ({3},{4}), ({5},{6}), ({7},{8})".format(idx,x,y,x+w,y,x+w,y+h,x,y+h))
-        #     cv2.drawContours(mask, bboxes.asnumpy(), idx, (255, 255, 255), -1)
-        #     r = float(cv2.countNonZero(mask[y:y+h, x:x+w])) / (w * h)
-
-        #----
-
-
-        # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
-        x = forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
-                                        class_names=net.classes,thresh=args.threshold)
-        # x = origin_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
-        #                                 class_names=net.classes,thresh=args.threshold)
-
-        # print('#'*10, type(bboxes), bboxes.shape)
-        # 让窗口可以调整
-        cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-        cv2.imshow('image', orig_img[...,::-1])
-
-        # count += 8
-        # cap.set(1, count)
-
-    # cv2.waitKey(0)
-
-    # cv2.imwrite(frame.split('.')[0] + '_result.jpg', orig_img[...,::-1])
-
-    # cv2.destroyAllWindows()
-
-    # frame = imutils.resize(frame, width=min(800, frame.shape[1]))
-    # (rects, weights) = hog.detectMultiScale(frame, winStride=(8, 8), padding=(8, 8), scale=1.15)
-    # rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
-    # pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
- 
-    # for (x, y, w, h) in pick:
-    #     cv2.rectangle(frame, (x, y), (w, h), (0, 255, 0), 2)
-    #     newpath = os.path.join('myimages/' , str(frame_index) + ".jpg")
-    #     cv2.imwrite(newpath,frame[y:h,x:w])
-
-    # frame_index = frame_index + 1
-    # print('#'*20, frame_index)
-
-    # cv2.imshow("frame",frame)
-
-        if cv2.waitKey(1) == 27:
-                break
+            #     bboxes_a = bboxes[0].asnumpy()
+            # for i, bbox in enumerate(bboxes_a):
+            #     xmin, ymin, xmax, ymax = [int(x) for x in bbox]
+            #     print(xmin, ymin, xmax, ymax)
+            #     if xmin > -1 :
+            #         cv2.rectangle(orig_img, (xmin, ymin), (xmax, ymax), 122, 2)
 
 
 
+            # for idx in range(len(bboxes.asnumpy())):
+            #     x, y, w, h = cv2.boundingRect(bboxes.asnumpy()[idx])
+            #     mask[y:y+h, x:x+w] = 0
+            #     print("Box {0}: ({1},{2}), ({3},{4}), ({5},{6}), ({7},{8})".format(idx,x,y,x+w,y,x+w,y+h,x,y+h))
+            #     cv2.drawContours(mask, bboxes.asnumpy(), idx, (255, 255, 255), -1)
+            #     r = float(cv2.countNonZero(mask[y:y+h, x:x+w])) / (w * h)
+
+            #----
+
+
+            # ax = utils.viz.cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], class_names=net.classes,thresh=args.threshold)
+            x = forked_version_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
+                                            class_names=net.classes,thresh=args.threshold)
+            # x = origin_cv_plot_bbox(orig_img, bboxes[0], scores[0], box_ids[0], 
+            #                                 class_names=net.classes,thresh=args.threshold)
+
+            # print('#'*10, type(bboxes), bboxes.shape)
+            # 让窗口可以调整
+            images_prepares.append(orig_img[...,::-1])
+            print(len(images_prepares), 'prepare')
+            cv2.imwrite('screenshots/' + str(len(images_prepares))+'.jpg',orig_img[...,::-1])
+            # if len(images_prepares) == 46:
+            #     size = (512, 910)
+            #     video_write = cv2.VideoWriter("output_video.avi", cv2.VideoWriter_fourcc('M','J','P','G'), 25, size, False)
+            #     for image in images_prepares:
+            #         print(image.size)
+            #         video_write.write(image)
+            #     print('finished video_write')
+            cv2.namedWindow("image", cv2.WINDOW_NORMAL)
+            cv2.imshow('image', orig_img[...,::-1])
+            # print(type(orig_img[...,::-1]))
+            if cv2.waitKey(1) == 27:
+                    break
+            # count += 8
+            # cap.set(1, count)
+
+        # cv2.waitKey(0)
+
+        # cv2.imwrite(frame.split('.')[0] + '_result.jpg', orig_img[...,::-1])
+
+        # cv2.destroyAllWindows()
+
+        # frame = imutils.resize(frame, width=min(800, frame.shape[1]))
+        # (rects, weights) = hog.detectMultiScale(frame, winStride=(8, 8), padding=(8, 8), scale=1.15)
+        # rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in rects])
+        # pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
+     
+        # for (x, y, w, h) in pick:
+        #     cv2.rectangle(frame, (x, y), (w, h), (0, 255, 0), 2)
+        #     newpath = os.path.join('myimages/' , str(frame_index) + ".jpg")
+        #     cv2.imwrite(newpath,frame[y:h,x:w])
+
+        # frame_index = frame_index + 1
+        # print('#'*20, frame_index)
+
+        # cv2.imshow("frame",frame)
+
+
+
+
+images_prepares = []
 
 def run_single_camera():
+
     # user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
     user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 # admin:yxgl123456@192.168.200.153:554
@@ -426,8 +446,10 @@ def run_single_camera():
 
     [process.start() for process in processes]
     [process.join() for process in processes]
+    
 
 def run_multi_camera():
+
     # user_name, user_pwd = "admin", "password"
     user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
 
@@ -449,6 +471,7 @@ def run_multi_camera():
         
 
 if __name__ == '__main__':
+    # python3 i3rstp_color_video.py --gpu=True --network=yolo3_darknet53_voc
     run_single_camera()
 
     pass
