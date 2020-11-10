@@ -266,7 +266,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             if class_name == 'person':
                 #天蓝色
                 bcolor = (232, 203, 12)
-                if scores.flat[i] > 0.71:
+                if scores.flat[i] > 0.75:
                     if 'NoHat' in default_enter_rule:
                         warning_signal = 'without-hat-in-area'
                         
@@ -278,7 +278,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
 
             elif class_name == 'hat':
                 print(scores.flat[i], '^'*20)
-                if scores.flat[i] > 0.65:
+                if scores.flat[i] > 0.75:
                     if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
                      'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
                         # 黄色
@@ -337,5 +337,5 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             #                 bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
         else:
             print('裁减检测到的情况出现在我们划定的识别区域之外')
-    cv2.imwrite("filename0.png", img)
+    cv2.imwrite("processed.png", img)
     return img, warning_signal
