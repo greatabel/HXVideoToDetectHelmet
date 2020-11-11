@@ -13,7 +13,7 @@ def csv_printer_from_localfile(filename, directory='./'):
             # for idx, val in enumerate(row):
             #     print(idx, val)
         # ["admin", "admin123", "10.248.10.100:554", 1, 'dahua', "华新数创5楼室内0", "80002302|00038910", 'YHat, BHat, NoHat']
-            ilist = [ row[1], row[2], row[3]+":544", 1, "hik", row[6], "80002302|00038910|" + row[7], "RHat|YHat|BHat|NoHat"]
+            ilist = [ row[1], row[2], row[3]+":554", 1, "hik", row[6], "80002302|00038910|" + row[7], "RHat|YHat|BHat|NoHat"]
             print(ilist)
             print(',')
             mylist.append(ilist)
