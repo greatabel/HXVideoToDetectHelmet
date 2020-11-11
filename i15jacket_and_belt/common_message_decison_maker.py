@@ -22,7 +22,7 @@ def load_rtsp_list():
 
 def listener_configurer_jacket():
     # logging.getLogger("pika").propagate = False
-
+    logging.getLogger('matplotlib.font_manager').disabled = True
     root = logging.getLogger()
     h = logging.handlers.RotatingFileHandler('jacket_temp.log', 'a', 3000000, 10)
     f = logging.Formatter('%(asctime)s %(processName)-8s %(name)s %(levelname)-8s %(message)s')
@@ -61,6 +61,7 @@ def listener_process(queue, configurer):
             elif 'pika' not in record.name:
                                 # print('record','*'*20,record.name, record)
                 logger = logging.getLogger(record.name)
+                
                 
                 # logger.handle(record)  # No level or filter logic applied - just do it!
                 warning_processor(logger, record, warning_type)
