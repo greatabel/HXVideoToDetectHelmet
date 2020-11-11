@@ -479,6 +479,7 @@ class SafetyBeltWraper(object):
         return detectionResults
 
     def running(self, log_queue):
+        logging.getLogger('matplotlib.font_manager').disabled = True
         h = logging.handlers.QueueHandler(log_queue)  # Just the one handler needed
         root = logging.getLogger()
         root.addHandler(h)
