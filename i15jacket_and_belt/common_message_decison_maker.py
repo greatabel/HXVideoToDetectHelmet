@@ -61,7 +61,7 @@ def listener_process(queue, configurer):
             elif 'pika' not in record.name:
                                 # print('record','*'*20,record.name, record)
                 logger = logging.getLogger(record.name)
-                
+
                 
                 # logger.handle(record)  # No level or filter logic applied - just do it!
                 warning_processor(logger, record, warning_type)
@@ -98,8 +98,8 @@ def warning_processor(logger, record, warning_type):
     # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
     timelimit = 8
     # time_span_limit 代表在这个时间内只能发一次消息报警
-    time_span_limit = 180
-    if len(queueid_warning_dict[record.name]) >= 8:
+    time_span_limit = 300
+    if len(queueid_warning_dict[record.name]) >= 10:
         sendmsg_flag = i13process_frame.proces_timelist(queueid_warning_dict[record.name], timelimit)
         
         now = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
