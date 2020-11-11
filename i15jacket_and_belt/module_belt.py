@@ -229,11 +229,11 @@ class SaftyBeltDetector():
                     outlines.append(lines[i][j])
         outlines = np.array(outlines)
         #print("======len outlines=",len(outlines))
-        if len(outlines) <= 41 and len(persons) > 0:
+        if len(outlines) <= 41 and len(persons) == 1:
             print("len outlines_bboxes = %d, persons=%d"%(len(outlines), len(persons)))
             plt.clf()
             return True
-        elif len(persons) == 0:
+        elif len(persons) == 0 or len(persons) > 1:
             print("len outlines_bboxes = %d, persons=%d"%(len(outlines), len(persons)))
             plt.clf()
             return False
