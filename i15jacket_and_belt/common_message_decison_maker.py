@@ -104,7 +104,7 @@ def warning_processor(logger, record, warning_type):
 
     # time_span_limit 代表在这个时间内只能发一次消息报警
     time_span_limit = 300
-    if len(queueid_warning_dict[record.name]) >= 10:
+    if len(queueid_warning_dict[record.name]) >= timelimit:
         sendmsg_flag = i13process_frame.proces_timelist(queueid_warning_dict[record.name], timelimit)
         
         now = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))

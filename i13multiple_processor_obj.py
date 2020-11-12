@@ -102,10 +102,10 @@ def warning_processor(logger, record):
     msg = area + ' 发生 ' + helmet_color + '非授权进入区域'
 
     # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
-    timelimit = 8
+    timelimit = 3
     # time_span_limit 代表在这个时间内只能发一次消息报警
     time_span_limit = 180
-    if len(queueid_warning_dict[record.name]) >= 8:
+    if len(queueid_warning_dict[record.name]) >= timelimit:
         sendmsg_flag = i13process_frame.proces_timelist(queueid_warning_dict[record.name], timelimit)
         
         now = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
