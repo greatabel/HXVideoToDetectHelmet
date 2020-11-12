@@ -62,6 +62,9 @@ def image_put(q, queueid):
             # 通过timeF控制多少帧数真正读取1帧到队列中
             timeF = 15
             count = 1 
+            if 'LifeJacket' in default_enter_rule:
+                timeF = 5
+
             while True:
                 if cap.isOpened():
                     status, frame = cap.read()
