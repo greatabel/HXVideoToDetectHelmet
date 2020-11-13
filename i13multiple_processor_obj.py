@@ -309,7 +309,7 @@ def image_get_v0(ch, method, properties, body, processid, detector):
 
         print('-----------------------')
 
-        print(queue_rtsp_dict, queueid, type(queueid))
+        # print(queue_rtsp_dict, queueid, type(queueid))
         # frame, queueid = q.get()
         rect = None 
         if queue_rtsp_dict.get(queueid, None)[7] != None and \
@@ -396,7 +396,7 @@ def run_multi_camera(camera_ip_l):
 
 
     # -------------------- start ai processes
-    num_of_ai_process = 10
+    num_of_ai_process = 8
 
     for i in range(0, num_of_ai_process):
         print('ai process', i)

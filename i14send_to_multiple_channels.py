@@ -78,11 +78,11 @@ def image_put(q, queueid):
 
                             
                             if 'LifeJacket' in default_enter_rule:
-                                sender('localhost', frame, queueid, 'LifeJacket')
+                                sender(i13rabbitmq_config.Where_This_Server_ReadFrom, frame, queueid, 'LifeJacket')
                             if 'SafetyBelt' in default_enter_rule:
-                                sender('localhost', frame, queueid, 'SafetyBelt')
+                                sender(i13rabbitmq_config.Where_This_Server_ReadFrom, frame, queueid, 'SafetyBelt')
                             
-                            sender('localhost', frame, queueid, 'hello')
+                            sender(i13rabbitmq_config.Where_This_Server_ReadFrom, frame, queueid, 'hello')
                         count += 1
         except cv2.error as e:
             print('#'*10, 'cv2 error:', e)

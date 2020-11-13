@@ -17,9 +17,16 @@ import i13rabbitmq_config
 def sender(host, img, queueid=None, queue_name='hello'):
 	print(type(img), queueid,'in sender', queue_name)
 	if queue_name in ('LifeJacket', 'SafetyBelt'):
-		print('*'*20, queue_name)
-	connection = pika.BlockingConnection(pika.ConnectionParameters(
-	        host=host))
+		print('*'*20, queue_name, host)
+	credentials = pika.PlainCredentials('test', 'test')
+	parameters = pika.ConnectionParameters(host,
+                                       5672,
+                                       '/',
+                                       credentials)
+
+	connection = pika.BlockingConnection(parameters)
+	# connection = pika.BlockingConnection(pika.ConnectionParameters(
+	#         host=host))
 	channel = connection.channel()
 
 	channel.queue_declare(

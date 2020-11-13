@@ -1,4 +1,7 @@
 save_dir_name = "v1_debug"
+import i13rabbitmq_config
+
+
 config = {
     #####set lifejacket scenes #####
     "scene_jacket": [
@@ -18,7 +21,8 @@ config = {
     #####Queues#####
     'mq_username': 'test',
     'mq_pswd': 'test',  
-    'mq_server_host': '10.248.68.249',
+    'mq_server_host': i13rabbitmq_config.Where_This_Server_ReadFrom,
+    # 'mq_server_host': '10.248.68.249',
     # 'mq_server_host': '127.0.0.1',
     'mq_server_port': '5672',
     'lifeJacket_q_in': 'LifeJacket',
