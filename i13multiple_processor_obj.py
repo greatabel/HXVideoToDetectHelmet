@@ -248,7 +248,7 @@ class Hat_and_Person_Detector():
 
 def receiver(host, processid, log_queue):
     # at yangxin shuini factory
-    host = '10.248.68.249'
+    # host = '10.248.68.249'
     
     # host = '127.0.0.1'
     credentials = pika.PlainCredentials('test', 'test')
@@ -400,7 +400,8 @@ def run_multi_camera(camera_ip_l):
 
     for i in range(0, num_of_ai_process):
         print('ai process', i)
-        processes.append(mp.Process(target=receiver, args=('localhost', i, log_queue)))
+        processes.append(mp.Process(target=receiver, args=(i13rabbitmq_config.Where_This_Server_ReadFrom,
+                                                           i, log_queue)))
     # -------------------- end   ai processes
 
     for process in processes:

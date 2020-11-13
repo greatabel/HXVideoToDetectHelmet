@@ -15,6 +15,7 @@ import urllib
 import numpy
 # from i13sdk import HKI_base64
 from i13rabbitmq import sender
+import i13rabbitmq_config
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
@@ -131,11 +132,17 @@ def run_multi_camera(camera_ip_l):
     for queue, camera_ip in zip(queues, camera_ip_l):
         # rect = ast.literal_eval(camera_ip[7])
         # print(camera_ip, camera_ip[0], '##', rect, type(rect))
-        processes.append(mp.Process(target=image_put, 
-            args=(queue, camera_ip[0])))
 
-        queue_rtsp_dict[camera_ip[0]] = camera_ip
-        
+        # reader from camera ,according to placeid range setting in i13rabbitmq_confg
+        if int(camera_ip[0]) >= i13rabbitmq_config.AI_SERVER_NUMBER_placeid_start and \
+           int(camera_ip[0]) <= i13rabbitmq_config.AI_SERVER_NUMBER_placeid_end:
+            print(camera_ip[0], ' in append')
+            processes.append(mp.Process(target=image_put, 
+                args=(queue, camera_ip[0])))
+
+            queue_rtsp_dict[camera_ip[0]] = camera_ip
+        else:
+            print(camera_ip[0], '_'*20, ' not allow in this server')
         # processes.append(mp.Process(target=image_get, args=(queue, camera_ip[2])))
 
     [process.start() for process in processes]
