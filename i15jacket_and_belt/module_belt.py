@@ -243,9 +243,10 @@ class SaftyBeltDetector():
         person = []
         for j in range(length2):
             x, y, w, h = cv2.boundingRect(contours_person[j])
+            peron_area = cv2.contourArea(contours_person[j])
             #cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
-            print("#####len contours_person =%d h/w=%f (1.5)"%(len(contours_person[j]), h/w))
-            if len(contours_person[j]) > 100 and h/w > 1.5:
+            print("#####person:area=%d (10000), contours=%d h/w=%f (1.5)"%(peron_area, len(contours_person[j]), h/w))
+            if len(contours_person[j]) > 100 and h/w > 1.5 and peron_area >10000:
                 person.append(contours_person[j]) 
         persons = tuple(person)
         print('#'*10, 'have', len(persons), 'persons')
@@ -392,7 +393,8 @@ class SaftyBeltDetector():
         if cv2.waitKey(1) & 0xFF == (ord('q') or ord('Q')):
             exit(0)
         
-        if self.debug:
+        #if self.debug:
+        if False:
             now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time()))
             plt.title("test")
             plt.xlabel('x')
