@@ -102,7 +102,7 @@ def warning_processor(logger, record):
     msg = area + ' 发生 ' + helmet_color + '非授权进入区域'
 
     # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
-    timelimit = 3
+    timelimit = 2
     # time_span_limit 代表在这个时间内只能发一次消息报警
     time_span_limit = 180
     if len(queueid_warning_dict[record.name]) >= timelimit:
