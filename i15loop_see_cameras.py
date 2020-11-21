@@ -62,8 +62,10 @@ def on_mouse(event,x,y,flags,params):
             endPoint = True
 
 area_list = []
+new_video_urls = []
+
 for rtsp_obj in video_urls:
-    if int(rtsp_obj[0]) > 55:
+    if int(rtsp_obj[0]) in (52, 53, 67, 68, 69):
         # 大华的情况 ：
         if rtsp_obj[5] == 'dahua':
             video_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%s&subtype=0" \
@@ -137,6 +139,7 @@ for rtsp_obj in video_urls:
 
                 # url_rect_dict[rtsp_obj] = results
                 area_list.append(results)
+                new_video_urls.append(rtsp_obj)
                 video_flag = False
 
 cap.release()
@@ -144,7 +147,7 @@ cv2.destroyAllWindows()
 
 rtsp_list  = []
 i = 0
-for rtsp_obj, area in zip(video_urls, area_list):
+for rtsp_obj, area in zip(new_video_urls, area_list):
     rtsp_list.append([i, rtsp_obj[0], rtsp_obj[1], rtsp_obj[2],
                       rtsp_obj[3], rtsp_obj[4],  rtsp_obj[5],  rtsp_obj[6], area, rtsp_obj[7] ])
 
