@@ -63,80 +63,81 @@ def on_mouse(event,x,y,flags,params):
 
 area_list = []
 for rtsp_obj in video_urls:
-    # 大华的情况 ：
-    if rtsp_obj[5] == 'dahua':
-        video_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%s&subtype=0" \
-            % (rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3])
-    # 网络摄像头是海康:
-    elif rtsp_obj[5] == 'hik':
-        video_url = "rtsp://%s:%s@%s/Streaming/Channels/%s" % (rtsp_obj[1], rtsp_obj[2], rtsp_obj[3], rtsp_obj[4])
+    if int(rtsp_obj[0]) > 60:
+        # 大华的情况 ：
+        if rtsp_obj[5] == 'dahua':
+            video_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%s&subtype=0" \
+                % (rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3])
+        # 网络摄像头是海康:
+        elif rtsp_obj[5] == 'hik':
+            video_url = "rtsp://%s:%s@%s/Streaming/Channels/%s" % (rtsp_obj[1], rtsp_obj[2], rtsp_obj[3], rtsp_obj[4])
 
 
-    video_flag = True
-    rect = (0, 0, 0, 0)
-    addr = deal_specialchar_in_url(video_url)
-    cap = cv2.VideoCapture(addr)
-    #cap = cv2.VideoCapture("test2.dav")
-    #cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
+        video_flag = True
+        rect = (0, 0, 0, 0)
+        addr = deal_specialchar_in_url(video_url)
+        cap = cv2.VideoCapture(addr)
+        #cap = cv2.VideoCapture("test2.dav")
+        #cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"H264"))
 
 
 
-    # cap.set(3, 1920)
-    # cap.set(4, 1080)
-    # cap.set(cv2.CAP_PROP_FPS,5)
-    #cap = cv2.VideoCapture(0)
-    waitTime = 50
+        # cap.set(3, 1920)
+        # cap.set(4, 1080)
+        # cap.set(cv2.CAP_PROP_FPS,5)
+        #cap = cv2.VideoCapture(0)
+        waitTime = 50
 
-    #Reading the first frame
-    (grabbed, frame) = cap.read()
-    if frame is None:
-        print('\n### error ###', video_url)
-    while(cap.isOpened() and video_flag): 
-
+        #Reading the first frame
         (grabbed, frame) = cap.read()
-        # print('frame', type(frame))
+        if frame is None:
+            print('\n### error ###', video_url)
+        while(cap.isOpened() and video_flag): 
 
-        new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
+            (grabbed, frame) = cap.read()
+            # print('frame', type(frame))
 
-        x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
-        frameI = orig_img
-        # print('frameI', type(frameI))
-        cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
-        
+            new_frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
 
-        # cv2.namedWindow('frame')
-        cv2.setMouseCallback('frame', on_mouse)    
+            x, orig_img = data.transforms.presets.yolo.transform_test(new_frame,  short=512, max_size=2000)
+            frameI = orig_img
+            # print('frameI', type(frameI))
+            cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
+            
 
-        #drawing rectangle
-        if startPoint == True and endPoint == True:
-            cv2.rectangle(frameI, (rect[0], rect[1]), (rect[2], rect[3]), (255, 0, 255), 2)
-            # cv2.rectangle(frame, (rect[0], rect[1]), (rect[2], rect[3]), (255, 0, 255), 2)
-            print(' 正方形位置:', (rect[0], rect[1]), (rect[2], rect[3]))
-        # cv2.imshow('frame',frame)
-        cv2.imshow('frame', frameI[...,::-1])
+            # cv2.namedWindow('frame')
+            cv2.setMouseCallback('frame', on_mouse)    
 
-        key = cv2.waitKey(waitTime) 
-        # escape 键
-        if key == 27:
-            # break
-            print('setting ', video_url, ' square:', (rect[0], rect[1]), (rect[2], rect[3]))
-            results = [rect[0], rect[1], rect[2], rect[3]]
-            print(type(results), 'results', results, results[0])
-            # 如果点击者先右后左的话 保证左侧的点在前，右侧的点在后
-            if results[0] > results[2]:                
-                print('左右位置互换')
-                results =  [results[2], results[3], results[0], results[1]]
-                print(results)
-            # 如果由下向上的话, 保存成另外2个对角点，方便后续与目标方框比较包含关系
-            if results[1] > results[3]:
-                print('对角线互换')
-                results = [results[0], results[3], results[2], results[1]]
-                print(results)
+            #drawing rectangle
+            if startPoint == True and endPoint == True:
+                cv2.rectangle(frameI, (rect[0], rect[1]), (rect[2], rect[3]), (255, 0, 255), 2)
+                # cv2.rectangle(frame, (rect[0], rect[1]), (rect[2], rect[3]), (255, 0, 255), 2)
+                print(' 正方形位置:', (rect[0], rect[1]), (rect[2], rect[3]))
+            # cv2.imshow('frame',frame)
+            cv2.imshow('frame', frameI[...,::-1])
 
-            # url_rect_dict[rtsp_obj] = results
-            area_list.append(results)
-            video_flag = False
+            key = cv2.waitKey(waitTime) 
+            # escape 键
+            if key == 27:
+                # break
+                print('setting ', video_url, ' square:', (rect[0], rect[1]), (rect[2], rect[3]))
+                results = [rect[0], rect[1], rect[2], rect[3]]
+                print(type(results), 'results', results, results[0])
+                # 如果点击者先右后左的话 保证左侧的点在前，右侧的点在后
+                if results[0] > results[2]:                
+                    print('左右位置互换')
+                    results =  [results[2], results[3], results[0], results[1]]
+                    print(results)
+                # 如果由下向上的话, 保存成另外2个对角点，方便后续与目标方框比较包含关系
+                if results[1] > results[3]:
+                    print('对角线互换')
+                    results = [results[0], results[3], results[2], results[1]]
+                    print(results)
+
+                # url_rect_dict[rtsp_obj] = results
+                area_list.append(results)
+                video_flag = False
 
 cap.release()
 cv2.destroyAllWindows()
