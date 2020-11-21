@@ -69,7 +69,7 @@ for rtsp_obj in video_urls:
             % (rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3])
     # 网络摄像头是海康:
     elif rtsp_obj[5] == 'hik':
-        video_url = "rtsp://%s:%s@%s/Streaming/Channels/%s" % (rtsp_obj[0], rtsp_obj[1], rtsp_obj[2], rtsp_obj[3])
+        video_url = "rtsp://%s:%s@%s/Streaming/Channels/%s" % (rtsp_obj[1], rtsp_obj[2], rtsp_obj[3], rtsp_obj[4])
 
 
     video_flag = True
