@@ -63,7 +63,7 @@ def on_mouse(event,x,y,flags,params):
 
 area_list = []
 for rtsp_obj in video_urls:
-    if int(rtsp_obj[0]) > 60:
+    if int(rtsp_obj[0]) > 55:
         # 大华的情况 ：
         if rtsp_obj[5] == 'dahua':
             video_url = "rtsp://%s:%s@%s/cam/realmonitor?channel=%s&subtype=0" \
