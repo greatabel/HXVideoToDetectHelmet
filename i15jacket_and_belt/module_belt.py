@@ -92,7 +92,30 @@ class Scene(object):
         if not os.path.exists(warn_white_path):
             print("[Warn] %s Dose not exist, use default.jpg instead."%(warn_white_path))
             warn_white_path = os.path.join(bw_image_dir, "default_belt.jpg")
-        self.get_mask_by_black_white_img(bw_image_path=warn_white_path)
+        #self.get_mask_by_black_white_img(bw_image_path=warn_white_path)
+        self.warn_polygons = self.get_polygon_by_black_white_img(warn_white_path)
+        
+    def get_polygon_by_black_white_img(self, bw_image_path):
+        """
+        :param bw_image_path: path to the black/white image indicating zones by white area
+        :return: a list of polygons containing white region of the bw_image
+        """
+        bw_image = cv2.imread(bw_image_path)
+        bw_image = cv2.cvtColor(bw_image, cv2.COLOR_BGR2GRAY)
+        ret, thresh = cv2.threshold(bw_image, thresh=128, maxval=256, type=0)
+        img, contours, hierarchy = cv2.findContours(thresh, mode=1, method=1)
+        zone_polygons = [cv2.approxPolyDP(curve=contour, epsilon=5, closed=True) for contour in contours]
+        return zone_polygons
+
+    def point_zone_test(self, point, buffer=0):
+        """
+        :param point: Point in (x, y) format , test if a point is in safe zone of this scene
+        :return: True if point in the polygon
+        """
+        for zone in self.warn_polygons:
+            if cv2.pointPolygonTest(contour=zone, pt=point, measureDist=True) + buffer > 0:
+                return True
+        return False
 
     def get_cropped_image(self, frame):
         """
@@ -206,7 +229,9 @@ class SaftyBeltDetector():
                         plt.scatter(point[0], -point[1], 25, "red")
                     break
 
-    def intersection_realization(self, gray, frame):
+    def intersection_realization(self, gray, frame, sceneId):
+        scene = self.sm.get_scene(sceneId)
+        cv2.polylines(frame, scene.warn_polygons, True, (0, 255, 255), 2)
         self.width = frame.shape[1]
         self.height = frame.shape[0]
         ret, th_belt = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
@@ -243,6 +268,10 @@ class SaftyBeltDetector():
         person = []
         for j in range(length2):
             x, y, w, h = cv2.boundingRect(contours_person[j])
+            point = (int(x+w/2), int(y+h))
+            b_in_zone = scene.point_zone_test(point)
+            if b_in_zone == False:
+                continue
             peron_area = cv2.contourArea(contours_person[j])
             #cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
             print("#####person:area=%d (10000), contours=%d h/w=%f (1.5)"%(peron_area, len(contours_person[j]), h/w))
@@ -355,7 +384,7 @@ class SaftyBeltDetector():
 
     def prediction(self, frame, sceneId):
         #get crop image
-        scene = self.sm.get_scene(sceneId)
+        #scene = self.sm.get_scene(sceneId)
         img_org = frame.copy()
         #cropped_img = scene.get_cropped_image(frame)
         image =self.preprocess(frame)
@@ -381,7 +410,7 @@ class SaftyBeltDetector():
 
         pred = torch.argmax(output_half[0], 1).squeeze(0).cpu().data.numpy()
         gray_value = np.uint8(pred)
-        flag = self.intersection_realization(gray_value, frame)
+        flag = self.intersection_realization(gray_value, frame, sceneId)
         if flag == False:
             cv2.putText(frame, "NORMAL", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1,  (0, 255, 0), 2)
         else:
