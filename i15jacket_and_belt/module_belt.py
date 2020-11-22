@@ -103,7 +103,7 @@ class Scene(object):
         bw_image = cv2.imread(bw_image_path)
         bw_image = cv2.cvtColor(bw_image, cv2.COLOR_BGR2GRAY)
         ret, thresh = cv2.threshold(bw_image, thresh=128, maxval=256, type=0)
-        img, contours, hierarchy = cv2.findContours(thresh, mode=1, method=1)
+        contours, hierarchy = cv2.findContours(thresh, mode=1, method=1)
         zone_polygons = [cv2.approxPolyDP(curve=contour, epsilon=5, closed=True) for contour in contours]
         return zone_polygons
 
