@@ -42,7 +42,8 @@ if AI_SERVER_NUMBER == "AI_SERVER_1":
 	Where_This_Server_ReadFrom = VM_0_RABBIT_IP
 
 
-print('AI_SERVER_NUMBER_placeid_start=', AI_SERVER_NUMBER_placeid_start,
+print('FactoryName=', FactoryName,
+	  'AI_SERVER_NUMBER_placeid_start=', AI_SERVER_NUMBER_placeid_start,
 	  'AI_SERVER_NUMBER_placeid_end=', AI_SERVER_NUMBER_placeid_end,
 	  'AI_SERVER_RABBIT_IP=', AI_SERVER_RABBIT_IP,
 	  'VM_0=', VM_0_RABBIT_IP,
