@@ -99,7 +99,7 @@ def warning_processor(logger, record):
     elif warning_signal == 'without-hat-in-area':
         helmet_color = '未佩戴头盔'
 
-    msg = area + ' 发生 ' + helmet_color + '非授权进入区域'
+    msg = i13rabbitmq_config.FactoryName + area + ' 发生 ' + helmet_color + '非授权进入区域'
 
     # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
     timelimit = 2
