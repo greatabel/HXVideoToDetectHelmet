@@ -140,7 +140,7 @@ class LifeJacketDetector:
             self.sm.create_scene(sceneId, values)
 
     def write_frame(self, frame_input):
-        save_path = 'image/'
+        save_path = 'image_jacket/'
         is_exist = os.path.exists(save_path)
         if not is_exist:
             os.umask(0)
@@ -159,6 +159,7 @@ class LifeJacketDetector:
         red_upper_2 = scene.red_upper
         blue_lower = scene.blue_lower
         blue_upper = scene.blue_upper
+        img_org = frame.copy()
         #获得码率及尺寸
         size = (frame.shape[1], frame.shape[0])
         # cv2.imwrite('./screenshots/test.jpg' , frame)
@@ -246,6 +247,7 @@ class LifeJacketDetector:
         cv2.polylines(frame_resize, scene.warn_polygons, True, (0, 255, 255), 2)
         if is_warning:
             cv2.putText(frame_resize, "WARNING", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1,  (0, 0, 255), 2)
+            self.write_frame(img_org)
         else:
             cv2.putText(frame_resize, "NORMAL", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
