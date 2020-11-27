@@ -182,8 +182,11 @@ class SaftyBeltDetector():
                 return True
         return False
 
-    def function(self, x, a, b):
+    def function_1(self, x, a, b):
         return a*x + b
+        
+    def function_2(self, x, a, b, c):
+        return a*x*x + b*x + c
 
     def get_cross_point(self, l1, l2):
         """
@@ -200,34 +203,66 @@ class SaftyBeltDetector():
         outlines_y = outlines_bboxes[:, 1]*(-1)
         if self.debug:
             plt.scatter(outlines_x[:], outlines_y[:], 15, "green")
-        a, b = optimize.curve_fit(self.function, outlines_x, outlines_y)[0]
-        x = np.arange(0, self.width, 1)
-        y = a*x + b
-        line_func_param = (a,-1, b)
+        a1, b1 = optimize.curve_fit(self.function_1, outlines_x, outlines_y)[0]
+        a2, b2, c2 = optimize.curve_fit(self.function_2, outlines_x, outlines_y)[0]
+        x1 = np.arange(0, self.width, 1)
+        y1 = a1*x1 + b1
+        x2 = np.arange(0, self.width, 1)
+        y2 = a2*x2*x2 + b2*x2 + c2
         if self.debug:
-            plt.plot(x, y, "blue")
-
+            plt.plot(x1, y1, "blue")
+            plt.plot(x2, y2, "blue")
+        cx = int(np.sum(outlines_x)/outlines_bboxes.shape[0])
+        cy = int(np.sum(outlines_y)/outlines_bboxes.shape[0])
+        line_point_center = (cx,cy)
+        line_point_center = np.array(line_point_center)
+        if self.debug:
+            plt.scatter(cx, cy, 50, "m")
+        dis_max = 1000000
+        j = 0
         for i in range(len(persons)):
-            if persons[i]['b_crossed'] == True:
-                continue
-            person_bboxes  = persons[i]['zone'].reshape(1, persons[i]['zone'].shape[0], persons[i]['zone'].shape[2])
-            person_x = person_bboxes[0, :, 0]
-            person_y = person_bboxes[0, :, 1]*(-1)
-            person_x_min = person_bboxes[0, :, 0].min()
-            person_x_max = person_bboxes[0, :, 0].max()
+            person_bboxes = persons[i]['zone'].reshape(persons[i]['zone'].shape[0], persons[i]['zone'].shape[2])
+            cx_p = int(np.sum(person_bboxes[:, 0])/person_bboxes.shape[0])
+            cy_p = int(np.sum(person_bboxes[:, 1]*(-1))/person_bboxes.shape[0])
             if self.debug:
-                plt.scatter(person_x[:], person_y[:], 15, "green")
-            x = np.arange(person_x_min, person_x_max, 1)
-            y = -(a*x + b)
-            pts = np.vstack([x, y]).T
-            for point in pts:
-                point = tuple(point)
-                if self.point_warn_zone_test(point):
-                    print("##########have cross point: ",point)
-                    persons[i]['b_crossed'] = True
-                    if self.debug:
-                        plt.scatter(point[0], -point[1], 25, "red")
-                    break
+                plt.scatter(cx_p, cy_p, 50, "m")
+            person_point_center = (cx_p,cy_p)
+            person_point_center = np.array(person_point_center)
+            dis = np.sqrt(np.sum(np.square(line_point_center-person_point_center)))
+            if dis <= dis_max:
+                dis_max = dis
+                j = i
+
+        person_bboxes  = persons[j]['zone'].reshape(1, persons[j]['zone'].shape[0], persons[j]['zone'].shape[2])
+        person_x = person_bboxes[0, :, 0]
+        person_y = person_bboxes[0, :, 1]*(-1)
+        person_x_min = person_bboxes[0, :, 0].min()
+        person_x_max = person_bboxes[0, :, 0].max()
+        if self.debug:
+            plt.scatter(person_x[:], person_y[:], 15, "green")
+        x1 = np.arange(person_x_min, person_x_max, 1)
+        y1 = -(a1*x1 + b1)
+        x2 = np.arange(person_x_min, person_x_max, 1)
+        y2 = -(a2*x2*x2 + b2*x2 + c2)
+        pts1 = np.vstack([x1, y1]).T
+        pts2 = np.vstack([x2, y2]).T
+        for point in pts1:
+            point = tuple(point)
+            if self.point_warn_zone_test(point):
+                print("##########have cross point_1: ",point)
+                persons[j]['b_crossed'] = True
+                if self.debug:
+                    plt.scatter(point[0], -point[1], 25, "red")
+                break
+                
+        for point in pts2:
+            point = tuple(point)
+            if self.point_warn_zone_test(point):
+                print("##########have cross point_2: ",point)
+                persons[j]['b_crossed'] = True
+                if self.debug:
+                    plt.scatter(point[0], -point[1], 25, "red")
+                break
 
     def intersection_realization(self, gray, frame, sceneId):
         scene = self.sm.get_scene(sceneId)
@@ -372,12 +407,12 @@ class SaftyBeltDetector():
         return img
 
     def write_frame(self, frame_input):
-        save_path = 'image/'
+        daytime = datetime.datetime.now().strftime('%Y-%m-%d')
+        save_path = 'image_belt/'+daytime
         is_exist = os.path.exists(save_path)
         if not is_exist:
             os.umask(0)
             os.makedirs(save_path)
-        daytime = datetime.datetime.now().strftime('%Y-%m-%d')
         hourtime = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
         file_name = os.path.join(save_path,"%s-%s.jpg" % (daytime,hourtime))
         cv2.imwrite(file_name, frame_input)

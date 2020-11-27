@@ -140,12 +140,12 @@ class LifeJacketDetector:
             self.sm.create_scene(sceneId, values)
 
     def write_frame(self, frame_input):
-        save_path = 'image_jacket/'
+        daytime = datetime.datetime.now().strftime('%Y-%m-%d')
+        save_path = 'image_jacket/'+daytime
         is_exist = os.path.exists(save_path)
         if not is_exist:
             os.umask(0)
             os.makedirs(save_path)
-        daytime = datetime.datetime.now().strftime('%Y-%m-%d')
         hourtime = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
         file_name = os.path.join(save_path,"%s-%s.jpg" % (daytime,hourtime))
         cv2.imwrite(file_name, frame_input)
