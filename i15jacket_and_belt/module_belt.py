@@ -201,6 +201,13 @@ class SaftyBeltDetector():
     def calc_intersection(self, outlines_bboxes, persons):
         outlines_x = outlines_bboxes[:, 0]
         outlines_y = outlines_bboxes[:, 1]*(-1)
+        points_num = len(outlines_x)
+        if points_num < 3:
+            print("!!!!!error:points_num < 3")
+            for i in range(len(persons)):
+                persons[i]['b_crossed'] = True
+            return
+            
         if self.debug:
             plt.scatter(outlines_x[:], outlines_y[:], 15, "green")
         a1, b1 = optimize.curve_fit(self.function_1, outlines_x, outlines_y)[0]
