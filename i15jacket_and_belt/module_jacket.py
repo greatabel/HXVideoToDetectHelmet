@@ -185,7 +185,7 @@ class LifeJacketDetector:
 
         for c in contours:
             area = cv2.contourArea(c)
-            if area > 10000:
+            if 10000 <= area <= 40000:
                 x, y, w, h = cv2.boundingRect(c)
                 h_w_ratio = h/w
                 point = (int(x+w/2), int(y+h))
@@ -220,9 +220,10 @@ class LifeJacketDetector:
                         x1, y1, w1, h1 = cv2.boundingRect(c)
                         h_w_ratio = h1/w1
                         head_ratio = y1/h
-                        if area > 500 and head_ratio > 0.1 and h_w_ratio > 0.3 and h_w_ratio < 3:
-                            if (y1+h1) >= max_r_h:
-                                max_r_h = y1+h1
+                        if (area > 500 and head_ratio > 0.1 and h_w_ratio > 0.3 and h_w_ratio < 3) \
+                               or (head_ratio <= 0.1 and area > 2000):
+                            if y1 >= max_r_h:
+                                max_r_h = y1
                             num_red = num_red+1
                             cv2.rectangle(res, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
 
@@ -230,7 +231,7 @@ class LifeJacketDetector:
                         area = cv2.contourArea(c)
                         x1, y1, w1, h1 = cv2.boundingRect(c)
                         w_h_ratio = w1/h1
-                        if area > 1250 and (y1+h1) <= max_r_h:
+                        if area > 1250 and y1 <= max_r_h:
                             num_blue = num_blue+1
                             cv2.rectangle(res_blue, (x1, y1), (x1 + w1, y1 + h1), (255, 255, 0), 2)
 
