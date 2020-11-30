@@ -8,4 +8,5 @@
 594534185    阳新水泥 ai_server2 jacket/belt        2GPU           10.248.68.59
 
 202417081    myself ubunutu notebook
+660502462    bigdata_01
 
