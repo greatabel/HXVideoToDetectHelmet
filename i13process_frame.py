@@ -75,7 +75,8 @@ def parse_args():
 
     parser.add_argument('--gpu', type=bool, default=False,
                         help='use gpu or cpu.')
-    
+    parser.add_argument('--gpu_num', type=int, default=0,
+                        help='gpu number')
     args = parser.parse_args()
     return args
 

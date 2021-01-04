@@ -131,7 +131,8 @@ class Hat_and_Person_Detector():
         self.args = i13process_frame.parse_args()
         print('是否使用GPU:', self.args.gpu)
         if self.args.gpu:
-            self.ctx = mx.gpu()
+            print('gpu_num:', self.args.gpu_num)
+            self.ctx = mx.gpu(self.args.gpu_num)
         else:
             self.ctx = mx.cpu()
         # ctx = mx.cpu()
