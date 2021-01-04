@@ -30,6 +30,8 @@ rtsp_file_path = 'i13rtsp_list.csv'
 queue_rtsp_dict = {}
 img_name = ''
 
+# MXNet报Running performance tests to find the best convolution algorithm
+os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
 
 def listener_configurer():
     # logging.getLogger("pika").propagate = False
