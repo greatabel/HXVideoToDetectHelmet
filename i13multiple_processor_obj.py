@@ -399,7 +399,7 @@ def run_multi_camera(camera_ip_l):
 
 
     # -------------------- start ai processes
-    num_of_ai_process = 8
+    num_of_ai_process = 9
 
     for i in range(0, num_of_ai_process):
         print('ai process', i)
