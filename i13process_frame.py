@@ -267,7 +267,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             if class_name == 'person':
                 #天蓝色
                 bcolor = (232, 203, 12)
-                if scores.flat[i] > 0.75:
+                if scores.flat[i] > 0.78:
                 # if scores.flat[i] > 0.85:
                     if 'NoHat' in default_enter_rule:
                         warning_signal = 'without-hat-in-area'
