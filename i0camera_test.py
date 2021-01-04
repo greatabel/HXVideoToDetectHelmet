@@ -9,8 +9,6 @@
 import cv2
 # cap = cv2.VideoCapture("rtsp://admin:test1024@10.248.10.111:554/h264/ch33/main/av_stream")
 # cap = cv2.VideoCapture("rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/1")
-# cap = cv2.VideoCapture("rtsp://admin:hx12356@10.248.10.100:554:554/Streaming/Channels/1")
-# cap = cv2.VideoCapture("rtsp://admin:abcd1234@10.250.4.149:554/Streaming/Channels/1")
 
 cap = cv2.VideoCapture("rtsp://admin:huaxin12345@10.248.10.111:554/h264/ch33/main/av_stream")
 # cap = cv2.VideoCapture("rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov")

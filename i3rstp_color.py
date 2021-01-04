@@ -417,7 +417,9 @@ def image_get(q, window_name):
 
 def run_single_camera():
     # user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
-    user_name, user_pwd, camera_ip = "admin", "admin123", "10.248.10.100:554"
+    user_name, user_pwd, camera_ip = "admin", "hx123456", "192.168.1.194:554"
+    # python3 i3rstp_color.py --gpu=True --network=yolo3_mobilenet0.25_voc
+
 # admin:yxgl123456@192.168.200.153:554
     mp.set_start_method(method='spawn')  # init
     queue = mp.Queue(maxsize=2)

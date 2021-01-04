@@ -140,12 +140,12 @@ class LifeJacketDetector:
             self.sm.create_scene(sceneId, values)
 
     def write_frame(self, frame_input):
-        save_path = 'image/'
+        daytime = datetime.datetime.now().strftime('%Y-%m-%d')
+        save_path = 'image_jacket/'+daytime
         is_exist = os.path.exists(save_path)
         if not is_exist:
             os.umask(0)
             os.makedirs(save_path)
-        daytime = datetime.datetime.now().strftime('%Y-%m-%d')
         hourtime = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
         file_name = os.path.join(save_path,"%s-%s.jpg" % (daytime,hourtime))
         cv2.imwrite(file_name, frame_input)
@@ -159,6 +159,7 @@ class LifeJacketDetector:
         red_upper_2 = scene.red_upper
         blue_lower = scene.blue_lower
         blue_upper = scene.blue_upper
+        img_org = frame.copy()
         #获得码率及尺寸
         size = (frame.shape[1], frame.shape[0])
         # cv2.imwrite('./screenshots/test.jpg' , frame)
@@ -184,7 +185,7 @@ class LifeJacketDetector:
 
         for c in contours:
             area = cv2.contourArea(c)
-            if area > 10000:
+            if 10000 <= area <= 40000:
                 x, y, w, h = cv2.boundingRect(c)
                 h_w_ratio = h/w
                 point = (int(x+w/2), int(y+h))
@@ -219,9 +220,10 @@ class LifeJacketDetector:
                         x1, y1, w1, h1 = cv2.boundingRect(c)
                         h_w_ratio = h1/w1
                         head_ratio = y1/h
-                        if area > 500 and head_ratio > 0.1 and h_w_ratio > 0.3 and h_w_ratio < 3:
-                            if (y1+h1) >= max_r_h:
-                                max_r_h = y1+h1
+                        if (area > 500 and head_ratio > 0.1 and h_w_ratio > 0.3 and h_w_ratio < 3) \
+                               or (head_ratio <= 0.1 and area > 2000):
+                            if y1 >= max_r_h:
+                                max_r_h = y1
                             num_red = num_red+1
                             cv2.rectangle(res, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
 
@@ -229,7 +231,7 @@ class LifeJacketDetector:
                         area = cv2.contourArea(c)
                         x1, y1, w1, h1 = cv2.boundingRect(c)
                         w_h_ratio = w1/h1
-                        if area > 1250 and (y1+h1) <= max_r_h:
+                        if area > 1250 and y1 <= max_r_h:
                             num_blue = num_blue+1
                             cv2.rectangle(res_blue, (x1, y1), (x1 + w1, y1 + h1), (255, 255, 0), 2)
 
@@ -246,6 +248,7 @@ class LifeJacketDetector:
         cv2.polylines(frame_resize, scene.warn_polygons, True, (0, 255, 255), 2)
         if is_warning:
             cv2.putText(frame_resize, "WARNING", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1,  (0, 0, 255), 2)
+            self.write_frame(img_org)
         else:
             cv2.putText(frame_resize, "NORMAL", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
@@ -361,7 +364,7 @@ class LifeJacketWraper(object):
             # Prediction
             is_alarm, myframe = self.detector.prediction(img_opencv, sceneId)
             print('is_alarm=', is_alarm, type(myframe))
-            if  not is_alarm:
+            if  is_alarm:
                 self.eventsByScene[sceneId]['eventId'] = picId + "|" + str(self.alertType)
                 self.eventsByScene[sceneId]['eventPics'].append({'picId': picId, 'alertObjects': {}})
                 response_dict = {

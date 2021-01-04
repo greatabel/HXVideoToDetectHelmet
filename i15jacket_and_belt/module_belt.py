@@ -10,6 +10,7 @@ import os
 import sys
 import torch
 from torchvision import transforms
+from sklearn.cluster import KMeans
 from PIL import Image
 import cv2
 import numpy as np
@@ -23,7 +24,7 @@ import argparse
 import pika
 import base64
 import json
-
+import datetime
 import logging
 import logging.handlers
 
@@ -91,7 +92,30 @@ class Scene(object):
         if not os.path.exists(warn_white_path):
             print("[Warn] %s Dose not exist, use default.jpg instead."%(warn_white_path))
             warn_white_path = os.path.join(bw_image_dir, "default_belt.jpg")
-        self.get_mask_by_black_white_img(bw_image_path=warn_white_path)
+        #self.get_mask_by_black_white_img(bw_image_path=warn_white_path)
+        self.warn_polygons = self.get_polygon_by_black_white_img(warn_white_path)
+        
+    def get_polygon_by_black_white_img(self, bw_image_path):
+        """
+        :param bw_image_path: path to the black/white image indicating zones by white area
+        :return: a list of polygons containing white region of the bw_image
+        """
+        bw_image = cv2.imread(bw_image_path)
+        bw_image = cv2.cvtColor(bw_image, cv2.COLOR_BGR2GRAY)
+        ret, thresh = cv2.threshold(bw_image, thresh=128, maxval=256, type=0)
+        contours, hierarchy = cv2.findContours(thresh, mode=1, method=1)
+        zone_polygons = [cv2.approxPolyDP(curve=contour, epsilon=5, closed=True) for contour in contours]
+        return zone_polygons
+
+    def point_zone_test(self, point, buffer=0):
+        """
+        :param point: Point in (x, y) format , test if a point is in safe zone of this scene
+        :return: True if point in the polygon
+        """
+        for zone in self.warn_polygons:
+            if cv2.pointPolygonTest(contour=zone, pt=point, measureDist=True) + buffer > 0:
+                return True
+        return False
 
     def get_cropped_image(self, frame):
         """
@@ -158,8 +182,11 @@ class SaftyBeltDetector():
                 return True
         return False
 
-    def function(self, x, a, b):
+    def function_1(self, x, a, b):
         return a*x + b
+        
+    def function_2(self, x, a, b, c):
+        return a*x*x + b*x + c
 
     def get_cross_point(self, l1, l2):
         """
@@ -170,11 +197,85 @@ class SaftyBeltDetector():
         x = (l1[1] * l2[2] - l2[1] * l1[2])*1.0 / d  #x = (b0*c1-b1*c0)/d
         y = (l1[2] * l2[0] - l2[2] * l1[0])*1.0 / d  #y = (a1*c0-a0*c1)/d
         return (x,y)
+        
+    def calc_intersection(self, outlines_bboxes, persons):
+        outlines_x = outlines_bboxes[:, 0]
+        outlines_y = outlines_bboxes[:, 1]*(-1)
+        points_num = len(outlines_x)
+        if points_num < 3:
+            print("!!!!!error:points_num < 3")
+            for i in range(len(persons)):
+                persons[i]['b_crossed'] = True
+            return
+            
+        if self.debug:
+            plt.scatter(outlines_x[:], outlines_y[:], 15, "green")
+        a1, b1 = optimize.curve_fit(self.function_1, outlines_x, outlines_y)[0]
+        a2, b2, c2 = optimize.curve_fit(self.function_2, outlines_x, outlines_y)[0]
+        x1 = np.arange(0, self.width, 1)
+        y1 = a1*x1 + b1
+        x2 = np.arange(0, self.width, 1)
+        y2 = a2*x2*x2 + b2*x2 + c2
+        if self.debug:
+            plt.plot(x1, y1, "blue")
+            plt.plot(x2, y2, "blue")
+        cx = int(np.sum(outlines_x)/outlines_bboxes.shape[0])
+        cy = int(np.sum(outlines_y)/outlines_bboxes.shape[0])
+        line_point_center = (cx,cy)
+        line_point_center = np.array(line_point_center)
+        if self.debug:
+            plt.scatter(cx, cy, 50, "m")
+        dis_max = 1000000
+        j = 0
+        for i in range(len(persons)):
+            person_bboxes = persons[i]['zone'].reshape(persons[i]['zone'].shape[0], persons[i]['zone'].shape[2])
+            cx_p = int(np.sum(person_bboxes[:, 0])/person_bboxes.shape[0])
+            cy_p = int(np.sum(person_bboxes[:, 1]*(-1))/person_bboxes.shape[0])
+            if self.debug:
+                plt.scatter(cx_p, cy_p, 50, "m")
+            person_point_center = (cx_p,cy_p)
+            person_point_center = np.array(person_point_center)
+            dis = np.sqrt(np.sum(np.square(line_point_center-person_point_center)))
+            if dis <= dis_max:
+                dis_max = dis
+                j = i
+
+        person_bboxes  = persons[j]['zone'].reshape(1, persons[j]['zone'].shape[0], persons[j]['zone'].shape[2])
+        person_x = person_bboxes[0, :, 0]
+        person_y = person_bboxes[0, :, 1]*(-1)
+        person_x_min = person_bboxes[0, :, 0].min()
+        person_x_max = person_bboxes[0, :, 0].max()
+        if self.debug:
+            plt.scatter(person_x[:], person_y[:], 15, "green")
+        x1 = np.arange(person_x_min, person_x_max, 1)
+        y1 = -(a1*x1 + b1)
+        x2 = np.arange(person_x_min, person_x_max, 1)
+        y2 = -(a2*x2*x2 + b2*x2 + c2)
+        pts1 = np.vstack([x1, y1]).T
+        pts2 = np.vstack([x2, y2]).T
+        for point in pts1:
+            point = tuple(point)
+            if self.point_warn_zone_test(point):
+                print("##########have cross point_1: ",point)
+                persons[j]['b_crossed'] = True
+                if self.debug:
+                    plt.scatter(point[0], -point[1], 25, "red")
+                break
+                
+        for point in pts2:
+            point = tuple(point)
+            if self.point_warn_zone_test(point):
+                print("##########have cross point_2: ",point)
+                persons[j]['b_crossed'] = True
+                if self.debug:
+                    plt.scatter(point[0], -point[1], 25, "red")
+                break
 
     def intersection_realization(self, gray, frame, sceneId):
-        width = frame.shape[1]
-        height = frame.shape[0]
-        now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time())) 
+        scene = self.sm.get_scene(sceneId)
+        cv2.polylines(frame, scene.warn_polygons, True, (0, 255, 255), 2)
+        self.width = frame.shape[1]
+        self.height = frame.shape[0]
         ret, th_belt = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
         gray[gray == 2] = 0
         ret, th_person = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY) 
@@ -199,23 +300,28 @@ class SaftyBeltDetector():
         contours_belt_total = 0
         for i in range(length1):
             if len(contours_belt[i]) > 40:
+                print("#####len contours_belt =", len(contours_belt[i]))
                 line.append(contours_belt[i])
                 contours_belt_total = contours_belt_total+len(contours_belt[i])
-        lines = tuple(line) 
+        lines = tuple(line)
 
         #person generate based on limitation factor
         length2 = len(contours_person)
-        
         person = []
         for j in range(length2):
-
-            if len(contours_person[j]) > 100 :
-
+            x, y, w, h = cv2.boundingRect(contours_person[j])
+            point = (int(x+w/2), int(y+h))
+            b_in_zone = scene.point_zone_test(point)
+            if b_in_zone == False:
+                continue
+            peron_area = cv2.contourArea(contours_person[j])
+            #cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
+            print("#####person:area=%d (10000), contours=%d h/w=%f (1.5)"%(peron_area, len(contours_person[j]), h/w))
+            if len(contours_person[j]) > 100 and h/w > 1.5 and peron_area >10000:
                 person.append(contours_person[j]) 
-
         persons = tuple(person)
+        print('#'*10, 'have', len(persons), 'persons')
         self.person_polygons = [ cv2.convexHull(person) for person in persons]
-        print(self.person_polygons , '@'*5)
         if self.debug:
             cv2.drawContours(frame, self.person_polygons, -1, (0, 0, 255), 2)
 
@@ -228,7 +334,6 @@ class SaftyBeltDetector():
                 else:
                     outlines.append(lines[i][j])
         outlines = np.array(outlines)
-        #print("======len outlines=",len(outlines))
         if len(outlines) <= 41 and len(persons) > 0:
             print("len outlines_bboxes = %d, persons=%d"%(len(outlines), len(persons)))
             plt.clf()
@@ -237,103 +342,61 @@ class SaftyBeltDetector():
             print("len outlines_bboxes = %d, persons=%d"%(len(outlines), len(persons)))
             plt.clf()
             return False
+            
+        outlines_bboxes  = outlines.reshape(1, outlines.shape[0], outlines.shape[2]) #n*1*2 => 1*n*2
+        
+        kmeans_outlines = []
+        if len(persons) > 1:
+            start = time.time()
+            kmeans=KMeans(n_clusters=len(persons))
+            kmeans.fit(np.squeeze(outlines_bboxes,0))
+            end = time.time()
+            print("kmeans time cost=%f ms"%((end-start)*1000))
+            X = outlines_bboxes[0, :, 0]
+            Y = outlines_bboxes[0, :, 1]
+            outline = []
+            for i in range(len(persons)):
+                for j,value in enumerate(kmeans.labels_):
+                    if value == i:
+                        outline.append([X[j],Y[j]])
+                kmeans_outlines.append(outline)
+                outline = []
         else:
-            print('here-->')
-        if self.debug:
-            hull = cv2.convexHull(outlines)
-            cv2.drawContours(frame, [hull], -1, (255, 0, 0), 2)
+            kmeans_outlines = outlines_bboxes
 
-        outlines_bboxes  = outlines.reshape(1, outlines.shape[0], outlines.shape[2])
-        outlines_x = outlines_bboxes[0, :, 0]
-        outlines_y = outlines_bboxes[0, :, 1]*(-1)
-        if self.debug:
-            plt.scatter(outlines_x[:], outlines_y[:], 15, "green")
-        a, b = optimize.curve_fit(self.function, outlines_x, outlines_y)[0]
-        x = np.arange(0, width, 1)
-        y = a*x + b
-        line_func_param = (a,-1, b)
-        if self.debug:
-            plt.plot(x, y, "blue")
-
-        have_cross_point = False
+        persons_map = {}
         for i in range(len(persons)):
-            if have_cross_point:
-                break
-            person_bboxes  = persons[i].reshape(1, persons[i].shape[0], persons[i].shape[2])
-            person_x = person_bboxes[0, :, 0]
-            person_y = person_bboxes[0, :, 1]*(-1)
-            person_x_min = person_bboxes[0, :, 0].min()
-            person_x_max = person_bboxes[0, :, 0].max()
+            persons_map[i] = {'b_crossed':False, 'zone':persons[i]}
+            
+        for i in range(len(kmeans_outlines)):
+            outlines = np.array(kmeans_outlines[i])
+            outlines_hull = outlines.reshape(outlines.shape[0], 1, outlines.shape[1])
+            x, y, w, h = cv2.boundingRect(outlines_hull) 
+            #cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 255, 0), 2)
+            person_area = 0
+            if w/h > 1:
+                hull_line = cv2.convexHull(outlines_hull)
+                for j in range(len(self.person_polygons)):
+                    hull_persons = np.array(self.person_polygons[j])
+                    person_area = cv2.contourArea(hull_persons)+person_area
+                line_area = cv2.contourArea(hull_line)
+                if line_area > person_area:
+                    print("!!!!!![warning]:line_area=%d > person_area=%d"%(line_area, person_area))
+                    plt.clf()
+                    return False
             if self.debug:
-                plt.scatter(person_x[:], person_y[:], 15, "green")
-            x = np.arange(person_x_min, person_x_max, 1)
-            y = -(a*x + b)
-            pts = np.vstack([x, y]).T
-            for point in pts:
-                point = tuple(point)
-                if self.point_warn_zone_test(point):
-                    print("have cross point: ",point)
-                    have_cross_point = True
-                    if self.debug:
-                        plt.scatter(point[0], -point[1], 25, "red")
-                    break
-        if have_cross_point == False:
-            print("not have cross point")
-            plt.clf()
-            return True
-        if self.debug:
-            plt.title("test")
-            plt.xlabel('x')
-            plt.ylabel('y')
-            plt.xlim(0,width)
-            plt.ylim(-height,0)
-            global num
-            pic_name = "./screenshots/"+str(sceneId)+"_"+now+"_"+str(num)+".png"
-            plt.savefig(pic_name)
-            #plt.show() 
-            plt.clf()
-
-        if len(persons) > 0 and len(lines) > 0:
-            lines = np.concatenate(lines, axis=0)
-            persons = np.concatenate(persons,axis=0)
-
-            hull1 = cv2.convexHull(lines)
-            hull2 = cv2.convexHull(persons)
-
-            if self.debug:
-                pic_name = "./screenshots/"+str(sceneId)+"_"+now+"_"+str(num)+".jpg"
-                cv2.imwrite(pic_name,frame )
-                num = num+1
-
-            line_bboxes  = hull1.reshape(1, hull1.shape[0], hull1.shape[2])
-            person_bboxes  = hull2.reshape(1, hull2.shape[0], hull2.shape[2])#(1,x,y,2),x w  y h
-
-            line_top = line_bboxes[0, :, 1].min() 
-            person_top = person_bboxes[0, :, 1].min()
-
-            im1 = np.zeros(gray.shape, dtype = "uint8")
-            im2 =np.zeros(gray.shape, dtype = "uint8")
-     
-            line_mask = cv2.fillPoly(im1, line_bboxes, 255)
-            person_mask = cv2.fillPoly(im2, person_bboxes,255)
-
-            masked_and_person_line = cv2.bitwise_and(line_mask, person_mask)#用mask把相同的区域填充进去,也就是0，也就是黑
-            and_area_person_line =np.sum(np.float32(np.greater(masked_and_person_line,0)))
-            person_area =np.sum(np.float32(np.greater(person_mask,0)))
-            IOU1 = and_area_person_line/person_area
-            flag =(line_top < person_top)
-
-            if IOU1 >= 0 and contours_belt_total >50 and flag:
-                print("###IOU1=%f, contours_belt_total=%d, flag=%d"%(IOU1,contours_belt_total,flag))
-                return False
-            else:
-                #print("###IOU1=%f, contours_belt_total=%d, flag=%d"%(IOU1,contours_belt_total,flag))
+                #colors = [np.random.randint(0, 255) for _ in range(3)]
+                hull = cv2.convexHull(outlines_hull)
+                cv2.drawContours(frame, [hull], -1, (255, 0, 0), 2)
+                
+            self.calc_intersection(outlines, persons_map)
+            
+        print(" ")
+        for i in range(len(persons_map)):
+            if persons_map[i]['b_crossed'] == False:
                 return True
-        elif len(persons) > 0 and len(lines) == 0:
-            #print("###len(persons)=%d, len(lines)=%d"%(len(persons),len(lines)))
-            return True
-        elif len(persons) == 0:
-            return False
+                
+        return False
 
     def preprocess(self, frame):
         transform = transforms.Compose([
@@ -351,19 +414,20 @@ class SaftyBeltDetector():
         return img
 
     def write_frame(self, frame_input):
-        save_path = 'image/'
+        daytime = datetime.datetime.now().strftime('%Y-%m-%d')
+        save_path = 'image_belt/'+daytime
         is_exist = os.path.exists(save_path)
         if not is_exist:
             os.umask(0)
             os.makedirs(save_path)
-        daytime = datetime.datetime.now().strftime('%Y-%m-%d')
         hourtime = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
         file_name = os.path.join(save_path,"%s-%s.jpg" % (daytime,hourtime))
         cv2.imwrite(file_name, frame_input)
 
     def prediction(self, frame, sceneId):
         #get crop image
-        scene = self.sm.get_scene(sceneId)
+        #scene = self.sm.get_scene(sceneId)
+        img_org = frame.copy()
         #cropped_img = scene.get_cropped_image(frame)
         image =self.preprocess(frame)
         #image = image.to(self.device)
@@ -393,13 +457,29 @@ class SaftyBeltDetector():
             cv2.putText(frame, "NORMAL", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1,  (0, 255, 0), 2)
         else:
             cv2.putText(frame, "WARNING", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            #self.write_frame(frame)
+            self.write_frame(img_org)
         #self.video_write.write(frame)
         imshow_name = "belt"+str(sceneId)
         cv2.imshow(imshow_name, frame)
         if cv2.waitKey(1) & 0xFF == (ord('q') or ord('Q')):
             exit(0)
         
+        #if self.debug:
+        if False:
+            now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time()))
+            plt.title("test")
+            plt.xlabel('x')
+            plt.ylabel('y')
+            plt.xlim(0,self.width)
+            plt.ylim(-self.height,0)
+            global num
+            pic_name = "./screenshots/"+str(sceneId)+"_"+now+"_"+str(num)+".png"
+            plt.savefig(pic_name)
+            #plt.show() 
+            plt.clf()
+            img_name = "./screenshots/"+str(sceneId)+"_"+now+"_"+str(num)+".jpg"
+            cv2.imwrite(img_name,frame)
+            num = num+1
         return flag, frame
 
 class SafetyBeltWraper(object):
@@ -479,6 +559,7 @@ class SafetyBeltWraper(object):
         return detectionResults
 
     def running(self, log_queue):
+        logging.getLogger('matplotlib.font_manager').disabled = True
         h = logging.handlers.QueueHandler(log_queue)  # Just the one handler needed
         root = logging.getLogger()
         root.addHandler(h)

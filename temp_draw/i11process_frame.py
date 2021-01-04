@@ -185,11 +185,8 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
         # ---- 裁减检测到的情况出现在我们划定的识别区域 ----
         if hx_rect is None or (hx_rect[0] < xmin and hx_rect[1] < ymin
             and hx_rect[2] > xmax and hx_rect[3] > ymax):
-
-            img_float32 = np.float32(img)
-            lab_image = cv2.cvtColor(img_float32, cv2.COLOR_BGR2RGB)
-            crop_img = lab_image[ymin:ymax-int(int((ymax-ymin)/2)), xmin+int((xmax-xmin)/4):xmax-int((xmax-xmin)/4)]
-            # crop_img = img[ymin:ymax-int(int((ymax-ymin)/2)), xmin+int((xmax-xmin)/4):xmax-int((xmax-xmin)/4)]
+        
+            crop_img = img[ymin:ymax-int(int((ymax-ymin)/2)), xmin+int((xmax-xmin)/4):xmax-int((xmax-xmin)/4)]
             # crop_img = img[ymin:ymax, xmin:xmax]
 
 
@@ -265,26 +262,18 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
             # if scores.flat[i] > 0.65:
             if class_name == 'person':
                 #天蓝色
-                bcolor = (232, 203, 12)
-                if scores.flat[i] > 0.75:
-                # if scores.flat[i] > 0.85:
+                bcolor = (12, 203, 232)
+                if scores.flat[i] > 0.71:
                     if 'NoHat' in default_enter_rule:
                         warning_signal = 'without-hat-in-area'
-                        
-                        cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
-                        y = ymin - 15 if ymin - 15 > 15 else ymin + 15
-                        cv2.putText(img, '{:s} {:s}'.format(class_name, score),
-                            (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
-                            bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
 
             elif class_name == 'hat':
                 print(scores.flat[i], '^'*20)
-                if scores.flat[i] > 0.75:
-                # if scores.flat[i] > 0.85:
+                if scores.flat[i] > 0.65:
                     if colorname in ('olivedrab', 'yellow', 'sienna','goldenrod', 'gold','palegoldenrod',
                      'darkgoldenrod','greenyellow','khaki','darkkhaki','blanchedalmond', 'wheat'):               
                         # 黄色
-                        bcolor = (0, 255, 255)
+                        bcolor = (255,255,0)
                         # 警告音 
                         # duration = 0.5  # seconds
                         # freq = 660  # Hz
@@ -298,7 +287,7 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
 
                     elif colorname in ('saddlebrown', 'red', 'maroon','darkred','indianred','firebrick','brown','crimson'):
                         # 红色
-                        bcolor =  (0, 0, 255)
+                        bcolor = (255, 0, 0)
                         # 警告音 
                         # duration = 1  # seconds
                         # freq = 440  # Hz
@@ -306,12 +295,6 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                         # logger.log(logging.CRITICAL, 'red-hat-in-area')
                         if 'RHat' in default_enter_rule:
                             warning_signal = 'red-hat-in-area'
-
-                    cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
-                    y = ymin - 15 if ymin - 15 > 15 else ymin + 15
-                    cv2.putText(img, '{:s} {:s}'.format(class_name, score),
-                        (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
-                        bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
                     # print('#'*20)
 
                 # elif colorname == 'darkolivegreen':
@@ -327,17 +310,15 @@ def forked_version_cv_plot_bbox(img, bboxes, scores=None, labels=None, thresh=0.
                 #             bcolor = (255,255,0)
                 #         if (dominant_color[0] > 80 and dominant_color[1] >= 50):
                 #             # as red
-                #             bcolor = (255,0,0)
-            print('2'*30, bcolor)                                 
-            # cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
+                #             bcolor = (255,0,0)                                 
+            cv2.rectangle(img, (xmin, ymin), (xmax, ymax), bcolor, 2)
 
-            # if class_name or score:
-
-            #     y = ymin - 15 if ymin - 15 > 15 else ymin + 15
-            #     cv2.putText(img, '{:s} {:s}'.format(class_name, score),
-            #                 (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
-            #                 bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
+            if class_name or score:
+                y = ymin - 15 if ymin - 15 > 15 else ymin + 15
+                cv2.putText(img, '{:s} {:s}'.format(class_name, score),
+                            (xmin, y), cv2.FONT_HERSHEY_SIMPLEX, min(scale/2, 2),
+                            bcolor, min(int(scale), 5), lineType=cv2.LINE_AA)
         else:
             print('裁减检测到的情况出现在我们划定的识别区域之外')
-    cv2.imwrite("processed.png", img)
+
     return img, warning_signal

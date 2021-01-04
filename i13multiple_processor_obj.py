@@ -99,13 +99,13 @@ def warning_processor(logger, record):
     elif warning_signal == 'without-hat-in-area':
         helmet_color = '未佩戴头盔'
 
-    msg = area + ' 发生 ' + helmet_color + '非授权进入区域'
+    msg = i13rabbitmq_config.FactoryName + area + ' 发生 ' + helmet_color + '非授权进入区域'
 
     # timelimit 为在限制区域时间存在达到多少秒后，才会发送消息报警
-    timelimit = 8
+    timelimit = 2
     # time_span_limit 代表在这个时间内只能发一次消息报警
     time_span_limit = 180
-    if len(queueid_warning_dict[record.name]) >= 8:
+    if len(queueid_warning_dict[record.name]) >= timelimit:
         sendmsg_flag = i13process_frame.proces_timelist(queueid_warning_dict[record.name], timelimit)
         
         now = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
@@ -248,7 +248,7 @@ class Hat_and_Person_Detector():
 
 def receiver(host, processid, log_queue):
     # at yangxin shuini factory
-    host = '10.248.68.249'
+    # host = '10.248.68.249'
     
     # host = '127.0.0.1'
     credentials = pika.PlainCredentials('test', 'test')
@@ -309,7 +309,7 @@ def image_get_v0(ch, method, properties, body, processid, detector):
 
         print('-----------------------')
 
-        print(queue_rtsp_dict, queueid, type(queueid))
+        # print(queue_rtsp_dict, queueid, type(queueid))
         # frame, queueid = q.get()
         rect = None 
         if queue_rtsp_dict.get(queueid, None)[7] != None and \
@@ -396,11 +396,12 @@ def run_multi_camera(camera_ip_l):
 
 
     # -------------------- start ai processes
-    num_of_ai_process = 10
+    num_of_ai_process = 8
 
     for i in range(0, num_of_ai_process):
         print('ai process', i)
-        processes.append(mp.Process(target=receiver, args=('localhost', i, log_queue)))
+        processes.append(mp.Process(target=receiver, args=(i13rabbitmq_config.Where_This_Server_ReadFrom,
+                                                           i, log_queue)))
     # -------------------- end   ai processes
 
     for process in processes:

@@ -15,6 +15,7 @@ import urllib
 import numpy
 # from i13sdk import HKI_base64
 from i13rabbitmq import sender
+import i13rabbitmq_config
 #https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 
 
@@ -62,6 +63,9 @@ def image_put(q, queueid):
             # 通过timeF控制多少帧数真正读取1帧到队列中
             timeF = 15
             count = 1 
+            if 'LifeJacket' in default_enter_rule:
+                timeF = 3
+
             while True:
                 if cap.isOpened():
                     status, frame = cap.read()
@@ -74,11 +78,11 @@ def image_put(q, queueid):
 
                             
                             if 'LifeJacket' in default_enter_rule:
-                                sender('localhost', frame, queueid, 'LifeJacket')
+                                sender(i13rabbitmq_config.Where_This_Server_ReadFrom, frame, queueid, 'LifeJacket')
                             if 'SafetyBelt' in default_enter_rule:
-                                sender('localhost', frame, queueid, 'SafetyBelt')
+                                sender(i13rabbitmq_config.Where_This_Server_ReadFrom, frame, queueid, 'SafetyBelt')
                             
-                            sender('localhost', frame, queueid, 'hello')
+                            sender(i13rabbitmq_config.Where_This_Server_ReadFrom, frame, queueid, 'hello')
                         count += 1
         except cv2.error as e:
             print('#'*10, 'cv2 error:', e)
@@ -128,11 +132,17 @@ def run_multi_camera(camera_ip_l):
     for queue, camera_ip in zip(queues, camera_ip_l):
         # rect = ast.literal_eval(camera_ip[7])
         # print(camera_ip, camera_ip[0], '##', rect, type(rect))
-        processes.append(mp.Process(target=image_put, 
-            args=(queue, camera_ip[0])))
 
-        queue_rtsp_dict[camera_ip[0]] = camera_ip
-        
+        # reader from camera ,according to placeid range setting in i13rabbitmq_confg
+        if int(camera_ip[0]) >= i13rabbitmq_config.AI_SERVER_NUMBER_placeid_start and \
+           int(camera_ip[0]) <= i13rabbitmq_config.AI_SERVER_NUMBER_placeid_end:
+            print(camera_ip[0], ' in append')
+            processes.append(mp.Process(target=image_put, 
+                args=(queue, camera_ip[0])))
+
+            queue_rtsp_dict[camera_ip[0]] = camera_ip
+        else:
+            print(camera_ip[0], '_'*20, ' not allow in this server')
         # processes.append(mp.Process(target=image_get, args=(queue, camera_ip[2])))
 
     [process.start() for process in processes]
