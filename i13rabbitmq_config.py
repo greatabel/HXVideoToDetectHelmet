@@ -13,12 +13,19 @@ AI_SERVER_0 is the 1gpu server only hamlet
 VM_0 is the virtual machine , no gpu
 
 '''
+# placeid_bound_dict = {
+# 	'AI_SERVER_2': (0, 20),
+# 	'AI_SERVER_1': (21, 61),
+# 	'AI_SERVER_0': (62, 75),
+# 	'VM_0': (21, 61),
+# }
 placeid_bound_dict = {
-	'AI_SERVER_2': (0, 20),
-	'AI_SERVER_1': (21, 61),
-	'AI_SERVER_0': (62, 75),
-	'VM_0': (21, 61),
+	'AI_SERVER_2': (0, 42),
+	'AI_SERVER_1': (43, 94),
+	'AI_SERVER_0': (95, 122),
+	'VM_0': (43, 94),
 }
+
 AI_SERVER_NUMBER = environ.get('AI_SERVER_NAME')
 AI_SERVER_NUMBER_placeid_start = placeid_bound_dict[AI_SERVER_NUMBER][0]
 AI_SERVER_NUMBER_placeid_end = placeid_bound_dict[AI_SERVER_NUMBER][1]
