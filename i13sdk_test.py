@@ -35,4 +35,4 @@ if __name__ == '__main__':
     # source /etc/profile
 
     # camera ip:
-    HKI_base64('10.248.10.43','admin','huaxin12345')
+    HKI_base64('192.168.1.238','admin','hx123456')
