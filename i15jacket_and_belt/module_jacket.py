@@ -214,32 +214,40 @@ class LifeJacketDetector:
                     num_red = 0
                     num_blue = 0
                     max_r_h = 0
-                    max_b_h = 0
+                    count_red = 0
+                    count_blue = 0
                     for c in cnts:
                         area = cv2.contourArea(c)
                         x1, y1, w1, h1 = cv2.boundingRect(c)
                         h_w_ratio = h1/w1
                         head_ratio = y1/h
+                        if area > 500:
+                            count_red = count_red+1
                         if (area > 500 and head_ratio > 0.1 and h_w_ratio > 0.3 and h_w_ratio < 3) \
                                or (head_ratio <= 0.1 and area > 2000):
-                            if y1 >= max_r_h:
-                                max_r_h = y1
+                            if (y1+h1) >= max_r_h:
+                                max_r_h = y1+h1
                             num_red = num_red+1
                             cv2.rectangle(res, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
 
                     for c in cnts_blue:
                         area = cv2.contourArea(c)
                         x1, y1, w1, h1 = cv2.boundingRect(c)
-                        w_h_ratio = w1/h1
-                        if area > 1250 and y1 <= max_r_h:
+                        h_w_ratio = h1/w1
+                        if area > 500:
+                            count_blue = count_blue+1
+                        if area > 1250 and (y1+h1) <= max_r_h and h_w_ratio < 1:
                             num_blue = num_blue+1
                             cv2.rectangle(res_blue, (x1, y1), (x1 + w1, y1 + h1), (255, 255, 0), 2)
 
                     if num_red>=1 and num_blue==0:
                         cv2.rectangle(frame_resize, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     else:
-                        is_warning = True
-                        cv2.rectangle(frame_resize, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                        if count_red == 0 and count_blue == 0:
+                            is_warning = False
+                        else:
+                            is_warning = True
+                            cv2.rectangle(frame_resize, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     #cv2.imshow("crop_hsv",crop_hsv)
                     #cv2.imshow("mask",mask)
                     #cv2.imshow("res",res)
