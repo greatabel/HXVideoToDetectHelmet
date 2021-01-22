@@ -147,7 +147,7 @@ class Scene(object):
 
 class SaftyBeltDetector():
     def __init__(self, gpu_id=0):
-        self.debug = True
+        self.debug = False
         self.num_classes = 3
         self.person_polygons = None
         gpu_id = "cuda:" + str(gpu_id)
@@ -177,10 +177,12 @@ class SaftyBeltDetector():
         :param point: Point in (x, y) format , test if a point is in safe zone of this scene
         :return: True if point in the polygon
         """
+        dis = 0
         for zone in self.person_polygons:
-            if cv2.pointPolygonTest(contour=zone, pt=point, measureDist=True) + buffer > 0:
-                return True
-        return False
+            dis = cv2.pointPolygonTest(contour=zone, pt=point, measureDist=True) + buffer
+            if dis > 0:
+                return (True, dis)
+        return (False, dis)
 
     def function_1(self, x, a, b):
         return a*x + b
@@ -255,7 +257,8 @@ class SaftyBeltDetector():
         pts2 = np.vstack([x2, y2]).T
         for point in pts1:
             point = tuple(point)
-            if self.point_warn_zone_test(point):
+            res = self.point_warn_zone_test(point)
+            if res[0] or abs(res[1]) <=30:
                 print("##########have cross point_1: ",point)
                 persons[j]['b_crossed'] = True
                 if self.debug:
@@ -264,7 +267,7 @@ class SaftyBeltDetector():
                 
         for point in pts2:
             point = tuple(point)
-            if self.point_warn_zone_test(point):
+            if self.point_warn_zone_test(point)[0]:
                 print("##########have cross point_2: ",point)
                 persons[j]['b_crossed'] = True
                 if self.debug:
@@ -273,7 +276,8 @@ class SaftyBeltDetector():
 
     def intersection_realization(self, gray, frame, sceneId):
         scene = self.sm.get_scene(sceneId)
-        cv2.polylines(frame, scene.warn_polygons, True, (0, 255, 255), 2)
+        if self.debug:
+            cv2.polylines(frame, scene.warn_polygons, True, (0, 255, 255), 2)
         self.width = frame.shape[1]
         self.height = frame.shape[0]
         ret, th_belt = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
@@ -329,7 +333,7 @@ class SaftyBeltDetector():
         for i in range(len(lines)):
             for j in range(len(lines[i])):
                 point = (lines[i][j][0][0],lines[i][j][0][1])
-                if self.point_warn_zone_test(point):
+                if self.point_warn_zone_test(point)[0]:
                     continue
                 else:
                     outlines.append(lines[i][j])
@@ -454,18 +458,19 @@ class SaftyBeltDetector():
         gray_value = np.uint8(pred)
         flag = self.intersection_realization(gray_value, frame, sceneId)
         if flag == False:
-            cv2.putText(frame, "NORMAL", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1,  (0, 255, 0), 2)
+            if self.debug:
+                cv2.putText(frame, "NORMAL", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1,  (0, 255, 0), 2)
         else:
-            cv2.putText(frame, "WARNING", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            if self.debug:
+                cv2.putText(frame, "WARNING", (5,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             self.write_frame(img_org)
         #self.video_write.write(frame)
         imshow_name = "belt"+str(sceneId)
-        cv2.imshow(imshow_name, frame)
+        #cv2.imshow(imshow_name, frame)
         if cv2.waitKey(1) & 0xFF == (ord('q') or ord('Q')):
             exit(0)
         
-        #if self.debug:
-        if False:
+        if self.debug:
             now = time.strftime("%Y-%m-%d-%H_%M_%S",time.localtime(time.time()))
             plt.title("test")
             plt.xlabel('x')
