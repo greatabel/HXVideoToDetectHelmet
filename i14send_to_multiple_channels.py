@@ -64,7 +64,7 @@ def image_put(q, queueid):
             timeF = 15
             count = 1 
             if 'LifeJacket' in default_enter_rule:
-                timeF = 3
+                timeF = 1
 
             while True:
                 if cap.isOpened():
