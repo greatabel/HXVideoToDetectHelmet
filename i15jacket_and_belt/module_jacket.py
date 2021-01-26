@@ -234,7 +234,7 @@ class LifeJacketDetector:
                         area = cv2.contourArea(c)
                         x1, y1, w1, h1 = cv2.boundingRect(c)
                         h_w_ratio = h1/w1
-                        if area > 500:
+                        if area > 1250:
                             count_blue = count_blue+1
                         if area > 1250 and (y1+h1) <= max_r_h and h_w_ratio < 1:
                             num_blue = num_blue+1
