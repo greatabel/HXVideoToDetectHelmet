@@ -7,6 +7,17 @@
 #
 #
 import cv2
+
+def deal_specialchar_in_url(istr):
+    s = istr.find('//')
+    e = istr.find('@')
+    # print(s, e)
+    subs = istr[s+2: e]
+    name, ps = subs.split(':')
+    encoded_name_ps = urllib.parse.quote_plus(name)+ ":" + urllib.parse.quote_plus(ps)
+    result = 'rtsp://' + encoded_name_ps + istr[e:]
+    # print(result)
+    return result
 # cap = cv2.VideoCapture("rtsp://admin:test1024@10.248.10.111:554/h264/ch33/main/av_stream")
 # cap = cv2.VideoCapture("rtsp://admin:huaxin12345@10.248.10.43:554/Streaming/Channels/1")
 
@@ -17,7 +28,9 @@ import cv2
 cap = cv2.VideoCapture("rtsp://admin:hx123456@192.168.1.238:554/Streaming/Channels/1")
 
 # 阳新骨料
-# cap = cv2.VideoCapture("rtsp://admin:yxgl$666@192.168.201.40:554/Streaming/Channels/1")
+guliao_url = "rtsp://admin:yxgl$666@192.168.201.40:554/Streaming/Channels/1"
+guliao_url_I = deal_specialchar_in_url(guliao_url)
+cap = cv2.VideoCapture(guliao_url_I)
 
 # cap = cv2.VideoCapture(url)
 
