@@ -33,11 +33,9 @@ def deal_specialchar_in_url(istr):
 
 
 video_urls = [
-    "rtsp://admin:yxgl$666@192.168.200.210:554/Streaming/Channels/1",
-    "rtsp://admin:yxgl$666@192.168.200.211:554/Streaming/Channels/1",
-    "rtsp://admin:yxgl$666@192.168.200.232:554/Streaming/Channels/1",
-
-    "rtsp://admin:yxgl$666@192.168.200.233:554/Streaming/Channels/1",
+    "rtsp://admin:yxgl$666@192.168.201.40:554/Streaming/Channels/1",
+    "rtsp://admin:yxgl$666@192.168.201.39:554/Streaming/Channels/1"
+    
 
 ]
 

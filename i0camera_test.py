@@ -12,7 +12,13 @@ import cv2
 
 # luxi 's vdi can visit url, leiziheng supplied, but not everywhere
 # url = 'rtsp://admin:abcd1234@10.250.4.149:554/Streaming/Channels/101'
+
+# 阳新水泥
 cap = cv2.VideoCapture("rtsp://admin:hx123456@192.168.1.238:554/Streaming/Channels/1")
+
+# 阳新骨料
+# cap = cv2.VideoCapture("rtsp://admin:yxgl$666@192.168.201.40:554/Streaming/Channels/1")
+
 # cap = cv2.VideoCapture(url)
 
 # cap = cv2.VideoCapture("rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov")
