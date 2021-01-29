@@ -8,6 +8,8 @@
 #
 import cv2
 
+import urllib
+
 def deal_specialchar_in_url(istr):
     s = istr.find('//')
     e = istr.find('@')
